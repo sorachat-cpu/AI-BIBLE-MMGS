@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Closing slide, 1080x1350. Carries the ask and the contact, nothing else.
+     Same centre axis as the rest of the deck. The contact block is the one element that
+     must survive a screenshot, so it stays the highest-contrast thing on the slide. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350">
+  <defs>
+    <linearGradient id="cta" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0%" stop-color="{{bg_from}}"/>
+      <stop offset="100%" stop-color="{{bg_to}}"/>
+    </linearGradient>
+  </defs>
+  <rect width="1080" height="1350" fill="url(#cta)"/>
+
+  <!-- Theme ornament (nature theme only; empty for the rest), kept behind all copy. -->
+  {{decor}}
+
+  <!-- Brand watermark, oversized and faint, behind every element. -->
+  {{brand_mark}}
+
+  <g transform="translate({{kicker_x}}, 168)">
+    <rect x="0" y="0" width="{{kicker_w}}" height="64" rx="32" fill="{{accent}}"/>
+    <text x="{{kicker_mid}}" y="43" text-anchor="middle" font-family="{{font}}" font-size="29"
+          font-weight="700" fill="{{bg_from}}" letter-spacing="1.5">{{kicker}}</text>
+  </g>
+
+  <text x="540" y="452" text-anchor="middle" font-family="{{font}}" font-size="82" font-weight="800" fill="{{title_color}}">{{headline1}}</text>
+  <text x="540" y="554" text-anchor="middle" font-family="{{font}}" font-size="82" font-weight="800" fill="{{accent}}">{{headline2}}</text>
+
+  <text x="540" y="686" text-anchor="middle" font-family="{{font}}" font-size="46" font-weight="500" fill="{{body_color}}">{{body1}}</text>
+  <text x="540" y="756" text-anchor="middle" font-family="{{font}}" font-size="46" font-weight="500" fill="{{body_color}}">{{body2}}</text>
+
+  <g transform="translate(88, 876)">
+    <rect x="0" y="0" width="904" height="184" rx="26" fill="{{accent}}"/>
+    <text x="452" y="74" text-anchor="middle" font-family="{{font}}" font-size="34" font-weight="600" fill="{{bg_from}}" opacity="0.82">{{contact_label}}</text>
+    <text x="452" y="138" text-anchor="middle" font-family="{{font}}" font-size="52" font-weight="800" fill="{{bg_from}}">{{contact}}</text>
+  </g>
+
+  <text x="540" y="1136" text-anchor="middle" font-family="{{font}}" font-size="30" fill="{{muted_color}}">{{disclaimer}}</text>
+
+  {{dots}}
+</svg>

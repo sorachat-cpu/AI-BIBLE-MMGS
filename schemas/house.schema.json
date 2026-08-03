@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "HOUSE_OUT",
+  "description": "Output contract of House Engine (10_HOUSE_ENGINE.md). Consumed by Video Engine and Render Engine.",
+  "type": "object",
+  "required": ["property_id", "house_image_url", "source_type", "style_tag", "generation_metadata"],
+  "properties": {
+    "property_id": { "type": "string", "pattern": "^PROP-TH-[0-9]{4,6}$" },
+    "house_image_url": { "type": "string", "format": "uri" },
+    "source_type": {
+      "type": "string",
+      "enum": ["LIBRARY_REUSE", "AI_GENERATED"],
+      "description": "LIBRARY_REUSE confirmed in spec examples; AI_GENERATED is the implied counterpart for the newly-generated path (not explicitly named in source doc -- flagged gap, confirm naming before wiring real code)."
+    },
+    "style_tag": {
+      "type": "string",
+      "enum": ["MODERN_NORDIC", "MINIMALIST", "LUXURY_CLASSIC", "CONTEMPORARY", "LOFT"]
+    },
+    "generation_metadata": {
+      "type": "object",
+      "required": ["provider", "cost_usd", "prompt"],
+      "properties": {
+        "provider": {
+          "type": "string",
+          "enum": ["FLUX_1_DEV", "FLUX_1_SCHNELL", "MIDJOURNEY_V7", "SDXL", "KLING_IMAGE"],
+          "description": "KLING_IMAGE is not in 16_PROVIDER_INTERFACE.md's registry -- added 2026-07-29 because Kling's /v1/images/generations covers House Engine on credit that already exists, avoiding a second image-provider account. Add it to the provider registry in Phase 0."
+        },
+        "cost_usd": { "type": "number", "minimum": 0 },
+        "prompt": { "type": "string", "description": "Must never contain price, phone number, or broker contact details." },
+        "seed": { "type": "integer", "description": "Store the generation seed for reproducibility -- required by Best Practices even though absent from the example JSON." }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "x-error-codes": {
+    "ERR_HOU_01": "Image generation API timeout/rejected -- switch to backup provider (e.g. Flux 1 Dev fails -> try SDXL or Midjourney)",
+    "ERR_HOU_02": "Library empty for that style AND generation also fails -- pull a Default Concept Image for that architectural style"
+  },
+  "x-hard-rules": [
+    "Always check house_library before invoking any paid generation API (Library-First).",
+    "Never include price or broker contact details in the image-generation prompt.",
+    "Keep images neutral -- no cars, people, for-sale signs.",
+    "Randomize and store the seed alongside the image for reproducibility."
+  ]
+}

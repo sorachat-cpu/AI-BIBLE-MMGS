@@ -1,0 +1,88 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GOOGLE_OUT",
+  "description": "Output contract of Google Engine (08_GOOGLE_ENGINE.md). Not in the original 6-file schemas/ list from 02_ARCHITECTURE.md -- added here for the same validation rigor as the other engines once real code was written.",
+  "type": "object",
+  "required": ["property_id", "geo_location", "static_map_url", "street_view_url", "cache_hit"],
+  "properties": {
+    "property_id": { "type": "string", "pattern": "^PROP-TH-[0-9]{4,6}$" },
+    "geo_location": {
+      "type": "object",
+      "required": ["lat", "lng", "formatted_address"],
+      "properties": {
+        "lat": { "type": "number", "minimum": -90, "maximum": 90 },
+        "lng": { "type": "number", "minimum": -180, "maximum": 180 },
+        "formatted_address": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "static_map_url": { "type": "string", "format": "uri" },
+    "street_view_url": { "type": "string", "format": "uri" },
+    "pin_map_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Roadmap view with the marker drawn, used as the opening frame of the storyboard so the video starts on a recognisable pinned-map shot."
+    },
+    "cache_hit": { "type": "boolean" },
+    "input_kind": {
+      "type": "string",
+      "enum": ["coords", "address"],
+      "description": "Whether the caller supplied a map link / coordinate pair (used as-is, free and exact) or a text address (geocoded, billable)."
+    },
+    "nearby": {
+      "type": "object",
+      "description": "Points of interest around the property. Optional -- a Places failure must not invalidate the location result.",
+      "properties": {
+        "radius_m": { "type": "number" },
+        "groups": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["category", "label", "nearest_m", "places"],
+            "properties": {
+              "category": { "type": "string", "enum": ["hospital", "temple", "market", "attraction", "school", "shopping", "convenience"] },
+              "label": { "type": "string" },
+              "icon": { "type": "string" },
+              "nearest_m": { "type": "number" },
+              "places": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["name", "distance_m"],
+                  "properties": {
+                    "name": { "type": "string" },
+                    "category": { "type": "string" },
+                    "category_label": { "type": "string" },
+                    "icon": { "type": "string" },
+                    "distance_m": { "type": ["number", "null"] },
+                    "distance_text": { "type": ["string", "null"] },
+                    "rating": { "type": ["number", "null"] },
+                    "lat": { "type": ["number", "null"] },
+                    "lng": { "type": ["number", "null"] }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "highlight_lines": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Ready-to-use factual selling lines, e.g. \"ใกล้โรงพยาบาล 1.2 กม.\" -- safe for highlight_features (no price, no contact, no hype)."
+        },
+        "errors": { "type": "array", "items": { "type": "object" } }
+      }
+    }
+  },
+  "additionalProperties": false,
+  "x-error-codes": {
+    "ERR_GOOG_01": "Ambiguous address -- retry with coarser input, else fall back to the province's default coordinates",
+    "ERR_GOOG_02": "API rate limit (403/429) -- substitute a generic placeholder image, do not block the workflow"
+  },
+  "x-hard-rules": [
+    "Never hallucinate lat/lng -- must come from a real Geocoding API response.",
+    "Reject coordinates outside plausible bounds for the input country/region.",
+    "Sign public static map URLs (requires a separate URL-signing secret, not yet configured -- see code comment).",
+    "Cache-first: never re-geocode the same property_id -- Phase 1 DB/Redis not built yet, so cache_hit is always false for now."
+  ]
+}

@@ -1,0 +1,81 @@
+{
+  "items": {
+    "PROP-TH-01029_1785262399630_16_9.mp4": {
+      "aspect": "16:9",
+      "property_id": "PROP-TH-01029",
+      "duration_seconds": 14.04,
+      "posted_count": 0,
+      "last_posted_at": null,
+      "title": null,
+      "tags": [],
+      "retired": false,
+      "note": null
+    },
+    "PROP-TH-01029_1785262399630_9_16.mp4": {
+      "aspect": "9:16",
+      "property_id": "PROP-TH-01029",
+      "duration_seconds": 14.04,
+      "posted_count": 0,
+      "last_posted_at": null,
+      "title": null,
+      "tags": [],
+      "retired": false,
+      "note": null
+    },
+    "PROP-TH-01029_1785263214739_9_16.mp4": {
+      "aspect": "9:16",
+      "property_id": "PROP-TH-01029",
+      "duration_seconds": 10.04,
+      "posted_count": 0,
+      "last_posted_at": null,
+      "title": null,
+      "tags": [],
+      "retired": false,
+      "note": null
+    },
+    "PROP-TH-01029_1785290419207_9_16.mp4": {
+      "aspect": "9:16",
+      "property_id": "PROP-TH-01029",
+      "duration_seconds": 10.04,
+      "posted_count": 0,
+      "last_posted_at": null,
+      "title": null,
+      "tags": [],
+      "retired": false,
+      "note": null
+    },
+    "PROP-TH-01029_1785290487170_9_16.mp4": {
+      "aspect": "9:16",
+      "property_id": "PROP-TH-01029",
+      "duration_seconds": 10.04,
+      "posted_count": 0,
+      "last_posted_at": null,
+      "title": null,
+      "tags": [],
+      "retired": false,
+      "note": null
+    },
+    "PROP-TH-01029_1785323433501_9_16.mp4": {
+      "aspect": "9:16",
+      "property_id": "PROP-TH-01029",
+      "duration_seconds": 20.02,
+      "posted_count": 0,
+      "last_posted_at": null,
+      "title": null,
+      "tags": [],
+      "retired": false,
+      "note": null
+    },
+    "PROP-TH-01029_1785323475587_9_16.mp4": {
+      "aspect": "9:16",
+      "property_id": "PROP-TH-01029",
+      "duration_seconds": 20.02,
+      "posted_count": 1,
+      "last_posted_at": "2026-08-01T10:41:34.076Z",
+      "title": null,
+      "tags": [],
+      "retired": false,
+      "note": null
+    }
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PROPERTY_OUT",
+  "description": "Output contract of Property Engine (07_PROPERTY_ENGINE.md). Consumed by Google Engine, House Engine, Render Engine.",
+  "type": "object",
+  "required": ["property_id", "title", "price_thb", "style_tag", "raw_address", "highlight_features"],
+  "properties": {
+    "property_id": {
+      "type": "string",
+      "pattern": "^PROP-TH-[0-9]{4,6}$",
+      "description": "Canonical property identifier, join key across every engine payload."
+    },
+    "title": {
+      "type": "string",
+      "description": "Cleaned title. Promotional hyperbole, phone numbers, and Line IDs must already be stripped."
+    },
+    "price_thb": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "description": "Plain number, no comma separators. Null if price could not be parsed (do not guess)."
+    },
+    "style_tag": {
+      "type": "string",
+      "enum": ["MODERN_NORDIC", "MINIMALIST", "LUXURY_CLASSIC", "CONTEMPORARY", "LOFT"],
+      "default": "CONTEMPORARY",
+      "description": "Must match this enum exactly. Default to CONTEMPORARY when style cannot be determined -- never invent a new style name."
+    },
+    "raw_address": {
+      "type": ["string", "null"],
+      "description": "Address exactly as written in the source listing. Must not be geocoded or inferred here -- that is Google Engine's job."
+    },
+    "highlight_features": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 0,
+      "maxItems": 5,
+      "description": "3-5 factual selling points. No pricing info, no contact info, no promotional language."
+    }
+  },
+  "additionalProperties": false,
+  "x-error-codes": {
+    "ERR_PROP_01": "Invalid Price Format -- stop processing, status FAILED, escalate to human-in-the-loop",
+    "ERR_PROP_INPUT": "raw_input_text missing / too short / >5000 chars",
+    "ERR_PROP_PARSE": "LLM response was not valid JSON",
+    "ERR_PROP_VAL_01": "title empty",
+    "ERR_PROP_VAL_02": "price_thb not number/null"
+  },
+  "x-hard-rules": [
+    "No Hallucination -- never invent data not present in source text.",
+    "Exact Matching -- style_tag must be one of the enum values, never a new label.",
+    "Strip promotional hyperbole and personal contact info before this record leaves the engine.",
+    "Never let phone numbers/Line IDs leak into title or highlight_features."
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MMGS_Global_State_Payload",
+  "type": "object",
+  "required": [
+    "transaction_id",
+    "property_id",
+    "status",
+    "cost_summary",
+    "engines_data"
+  ],
+  "properties": {
+    "transaction_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "รหัสธุรกรรมเฉพาะของการทำงานรอบนี้"
+    },
+    "property_id": {
+      "type": "string",
+      "description": "รหัสอ้างอิงอสังหาริมทรัพย์ในฐานข้อมูลหลัก"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["PENDING", "PROCESSING", "COMPLETED", "FAILED"]
+    },
+    "cost_summary": {
+      "type": "object",
+      "required": ["total_cost_usd", "currency"],
+      "properties": {
+        "total_cost_usd": { "type": "number" },
+        "currency": { "type": "string", "default": "USD" }
+      }
+    },
+    "engines_data": {
+      "type": "object",
+      "properties": {
+        "property_engine": { "type": "object" },
+        "google_engine": { "type": "object" },
+        "asset_engine": { "type": "object" },
+        "house_engine": { "type": "object" },
+        "video_engine": { "type": "object" },
+        "render_engine": { "type": "object" }
+      }
+    }
+  }
+}
+
+[INIT] 
+   │
+   ▼
+[PROPERTY_RESOLVED] ──► (ถ้ามีพิกัดแล้ว) ──► [ASSET_ANALYZED]
+   │                                            │
+   ▼ (ถ้ายังไม่มีพิกัดแผนที่)                     │
+[GOOGLE_ENRICHED] ──────────────────────────────┘
+   │
+   ▼
+[HOUSE_READY] (ดึงข้อมูลจาก Library หรือสร้างใหม่)
+   │
+   ▼
+[VIDEO_GENERATED] (Gen ภาพเคลื่อนไหวเปล่าแบบไร้ตัวอักษร)
+   │
+   ▼
+[RENDER_COMPLETED] (รวมวิดีโอ + ออดิโอ + ตัวอักษร)
+   │
+   ▼
+[PUBLISHED / ARCHIVED]

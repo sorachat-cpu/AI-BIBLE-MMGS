@@ -1,0 +1,81 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "RENDER_OUT",
+  "description": "Output contract of Render Engine (12_RENDER_ENGINE.md). Consumed by Publish Engine. Input side also documented here since it is the widest fan-in point in the pipeline (Video + Google + Overlay + Property + Audio).",
+  "type": "object",
+  "definitions": {
+    "render_input": {
+      "type": "object",
+      "required": ["property_id", "b_roll_clips", "overlay_specs"],
+      "properties": {
+        "property_id": { "type": "string", "pattern": "^PROP-TH-[0-9]{4,6}$" },
+        "b_roll_clips": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["clip_id", "video_url", "duration_seconds"],
+            "properties": {
+              "clip_id": { "type": "string" },
+              "video_url": { "type": "string", "format": "uri" },
+              "duration_seconds": { "type": "number" }
+            }
+          }
+        },
+        "map_asset": {
+          "type": "object",
+          "properties": {
+            "image_url": { "type": "string", "format": "uri" },
+            "duration_seconds": { "type": "number" }
+          }
+        },
+        "overlay_specs": {
+          "type": "object",
+          "required": ["title_text", "price_text", "contact_phone", "qr_url", "theme_color"],
+          "properties": {
+            "title_text": { "type": "string" },
+            "price_text": { "type": "string" },
+            "contact_phone": { "type": "string" },
+            "qr_url": { "type": "string", "format": "uri" },
+            "theme_color": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" }
+          }
+        },
+        "audio_specs": {
+          "type": "object",
+          "properties": {
+            "voiceover_url": { "type": "string", "format": "uri" },
+            "music_url": { "type": "string", "format": "uri" }
+          }
+        }
+      }
+    }
+  },
+  "required": ["property_id", "final_video_url", "render_specs"],
+  "properties": {
+    "property_id": { "type": "string", "pattern": "^PROP-TH-[0-9]{4,6}$" },
+    "final_video_url": { "type": "string", "format": "uri" },
+    "render_specs": {
+      "type": "object",
+      "required": ["resolution", "fps", "bitrate_kbps", "duration_seconds"],
+      "properties": {
+        "resolution": { "type": "string", "enum": ["1080x1920", "1920x1080", "1080x1080", "720x1280"] },
+        "fps": { "type": "integer", "enum": [24, 30, 60] },
+        "bitrate_kbps": { "type": "integer", "minimum": 1000 },
+        "duration_seconds": { "type": "number", "minimum": 0 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "x-error-codes": {
+    "ERR_RND_01": "Asset download failure -- retry up to 3x, then reject to Orchestrator",
+    "ERR_RND_02": "FFmpeg crash/OOM -- auto-downgrade to 720p/30fps and re-run",
+    "ERR_RND_GRAPHIC": "Overlay/QR graphic generation failed",
+    "FALLBACK_SD_RENDER": "Downgrade-to-720p fallback path"
+  },
+  "x-hard-rules": [
+    "Must never call a generative AI API (Kling/Runway/Flux) from within Render Engine.",
+    "Never silently fix spelling/price data -- signal back to Property Engine instead.",
+    "Always delete temp files after each render job.",
+    "Price/contact edits must only change overlay_specs and recomposite -- never trigger AI video regeneration."
+  ]
+}

@@ -1,0 +1,1021 @@
+{
+  "items": [
+    {
+      "id": "2026-08-01T09:30",
+      "slot_id": "2026-08-01T09:30",
+      "date": "2026-08-01",
+      "time": "09:30",
+      "slot_name": "เช้า · โพสต์ขายที่ดินลงกลุ่ม (ทุกวัน)",
+      "platforms": [
+        "MANUAL_KIT"
+      ],
+      "content_type": "listing",
+      "source": "listing",
+      "status": "DRAFT",
+      "results": [],
+      "note": "",
+      "created_at": "2026-08-01T14:44:58.824Z",
+      "updated_at": "2026-08-01T14:44:58.824Z",
+      "posted_at": null,
+      "property_id": "LAND-051A3687",
+      "listing_id": "LAND-051A3687",
+      "video_file": null,
+      "image_files": [],
+      "photo_url": "https://scontent.fbkk12-1.fna.fbcdn.net/v/t39.30808-6/721382436_122116887500736301_6997697491884331669_n.jpg?stp=dst-jpg_p720x720_tt6&_nc_cat=108&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=833d8c&_nc_eui2=AeF_IVWP9QUW2ucJXY9aXI1vJRMcgNCRRO8lExyA0JFE7-P5MppzwPDqQ7JD22XtXUsn4TZXQ6S5dwSuGdD16ao9&_nc_ohc=h8I4jSE1dpcQ7kNvwFo1SkD&_nc_oc=AdpCOQFVzmqiqcKJbBsLWq2_xXx9dlysqtP7E0map2mE_y3NDCS3KutZ-gsyqn2EOn8&_nc_zt=23&_nc_ht=scontent.fbkk12-1.fna&edm=AKIiGfEEAAAA&_nc_gid=7iHju1WCjw_p3joAD4hFTA&_nc_tpa=Q5bMBQGNeZrBf25gerbjBQjJXwZkCsYn4GKWM5tH1n5W_jelrd5C9Iv089VzwE_kPSgRbezK7-xXpHs17w&oh=00_AQGd_CDz3X3MPezKPin71sjBgFXpXHTtiTOIpsLAMOPCPg&oe=6A73DA0C",
+      "post": {
+        "title": "ที่ดิน 5 ไร่ 3 งาน พร้อมสิ่งปลูกสร้าง เมืองนครนายก",
+        "price_thb": 50000000,
+        "location": "ต.พรหมมณี อ.เมืองนครนายก จ.นครนายก",
+        "highlight_features": [
+          "พร้อมอาคารและสิ่งปลูกสร้างเดิม",
+          "พื้นที่ขนาดใหญ่"
+        ],
+        "contact_method": "094-887-4343",
+        "maps_url": null,
+        "text_only": true
+      },
+      "caption": "📍 ขายที่ดิน 5 ไร่ 3 งาน ต.พรหมมณี อ.เมืองนครนายก จ.นครนายก\n💰 50 ล้านบาท (ต่อรองได้)\n\n• พร้อมอาคารและสิ่งปลูกสร้างเดิม\n• พื้นที่ขนาดใหญ่\n\nสนใจทัก 094-887-4343"
+    },
+    {
+      "id": "2026-08-01T19:00",
+      "slot_id": "2026-08-01T19:00",
+      "date": "2026-08-01",
+      "time": "19:00",
+      "slot_name": "เย็น · คลิปสั้นแนวตั้ง (ทุกวัน)",
+      "platforms": [
+        "FACEBOOK_REELS",
+        "TIKTOK",
+        "YOUTUBE_SHORTS"
+      ],
+      "content_type": "video",
+      "source": "stock",
+      "status": "DRAFT",
+      "results": [
+        {
+          "platform": "FACEBOOK_REELS",
+          "ok": true,
+          "post_id": null,
+          "publish_url": null,
+          "published_at": "2026-08-01T15:21:02.149Z",
+          "scheduled_for": null,
+          "caption_used": "ที่ดินสวยทำเลดีที่นครนายก พร้อมโฉนดจดทะเบียน ปลอดภัยและพร้อมโอนได้ทันที 🏡 เจ้าของขายเองตรงๆ ไม่มีคนกลาง ราคาถูกและเชื่อถือได้ \n\nสนใจติดต่อเพจนี้หรือ LINE @244raxjb มาดูพื้นที่และอภิปรายรายละเอียดได้เลย 📲\n\n#ที่ดินนครนายก #ขายที่ดิน #เจ้าของขายเอง #โฉนดพร้อมโอน #ที่ดินเชียงใหม่ #สินค้าอ動産 #ลงทุนที่ดิน",
+          "caption_chars": 300,
+          "dry_run": true,
+          "attempts": 1,
+          "error_code": null,
+          "error_message": null,
+          "kit_dir": null
+        },
+        {
+          "platform": "TIKTOK",
+          "ok": false,
+          "post_id": null,
+          "publish_url": null,
+          "published_at": null,
+          "scheduled_for": null,
+          "caption_used": "ที่ดินสวยทำเลดีที่นครนายก พร้อมโฉนดจดทะเบียน ปลอดภัยและพร้อมโอนได้ทันที 🏡 เจ้าของขายเองตรงๆ ไม่มีคนกลาง ราคาถูกและเชื่อถือได้ \n\nสนใจติดต่อเพจนี้หรือ LINE @244raxjb มาดูพื้นที่และอภิปรายรายละเอียดได้เลย 📲\n\n#ที่ดินนครนายก #ขายที่ดิน #เจ้าของขายเอง #โฉนดพร้อมโอน #ที่ดินเชียงใหม่ #สินค้าอ動産 #ลงทุนที่ดิน",
+          "caption_chars": 300,
+          "dry_run": true,
+          "attempts": 0,
+          "error_code": "ERR_PUB_03",
+          "error_message": "ยังไม่ได้ตั้งค่า: ขาด TIKTOK_ACCESS_TOKEN",
+          "kit_dir": null
+        },
+        {
+          "platform": "YOUTUBE_SHORTS",
+          "ok": false,
+          "post_id": null,
+          "publish_url": null,
+          "published_at": null,
+          "scheduled_for": null,
+          "caption_used": "ที่ดินสวยทำเลดีที่นครนายก พร้อมโฉนดจดทะเบียน ปลอดภัยและพร้อมโอนได้ทันที 🏡 #ที่ดินนครนายก #ขายที่ดิน",
+          "caption_chars": 99,
+          "dry_run": true,
+          "attempts": 0,
+          "error_code": "ERR_PUB_03",
+          "error_message": "ยังไม่ได้ตั้งค่า: ขาด YOUTUBE_CLIENT_ID, YOUTUBE_CLIENT_SECRET, YOUTUBE_REFRESH_TOKEN",
+          "kit_dir": null
+        }
+      ],
+      "note": "",
+      "created_at": "2026-08-01T14:45:03.330Z",
+      "updated_at": "2026-08-02T04:41:00.962Z",
+      "posted_at": null,
+      "property_id": "PROP-TH-01029",
+      "video_file": "PROP-TH-01029_1785323433501_9_16.mp4",
+      "image_files": [],
+      "stock_id": "PROP-TH-01029_1785323433501_9_16.mp4",
+      "aspect": "9:16",
+      "post": {
+        "title": "ที่ดินสวย ทำเลดี",
+        "price_thb": null,
+        "location": "นครนายก",
+        "highlight_features": [
+          "เจ้าของขายเอง",
+          "โฉนดพร้อมโอน"
+        ],
+        "contact_method": "ทักแชทเพจ หรือ LINE @244raxjb",
+        "style_tag": "CONTEMPORARY"
+      },
+      "caption": "ที่ดินสวยทำเลดีที่นครนายก พร้อมโฉนดจดทะเบียน ปลอดภัยและพร้อมโอนได้ทันที 🏡 เจ้าของขายเองตรงๆ ไม่มีคนกลาง และเชื่อถือได้\n\nสนใจติดต่อเพจนี้หรือ LINE @244raxjb มาดูพื้นที่และอภิปรายรายละเอียดได้เลย 📲\n\n#ที่ดินนครนายก #ขายที่ดิน #เจ้าของขายเอง #โฉนดพร้อมโอน #ลงทุนที่ดิน",
+      "last_publish_status": "DRY_RUN"
+    },
+    {
+      "id": "2026-08-02T09:30",
+      "slot_id": "2026-08-02T09:30",
+      "date": "2026-08-02",
+      "time": "09:30",
+      "slot_name": "เช้า · โพสต์ขายที่ดินลงกลุ่ม (ทุกวัน)",
+      "platforms": [
+        "MANUAL_KIT"
+      ],
+      "content_type": "listing",
+      "source": "listing",
+      "status": "DRAFT",
+      "results": [],
+      "note": "",
+      "created_at": "2026-08-01T14:45:03.331Z",
+      "updated_at": "2026-08-01T14:45:03.331Z",
+      "posted_at": null,
+      "property_id": "LAND-06A8B922",
+      "listing_id": "LAND-06A8B922",
+      "video_file": null,
+      "image_files": [],
+      "photo_url": "https://scontent.fbkk12-1.fna.fbcdn.net/v/t39.30808-6/749286885_122121779054736301_3119740695271126955_n.jpg?stp=dst-jpg_s960x960_tt6&_nc_cat=109&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=f727a1&_nc_eui2=AeGf53SgJB9DQlScvlUki1aTORBD3nVggpU5EEPedWCCldWOjCbXxp-hzKGYkuvzHk9KSoMjtZkxuxhHcHs7TEN5&_nc_ohc=7QkAIh46kZgQ7kNvwFgHkL4&_nc_oc=AdrqFaibIAjcujfrOFSpeeZcFUPAW-49IA011jOXfDp41_0arDF_8_99_pyfhvQuuzE&_nc_zt=23&_nc_ht=scontent.fbkk12-1.fna&edm=AKIiGfEEAAAA&_nc_gid=7iHju1WCjw_p3joAD4hFTA&_nc_tpa=Q5bMBQGt34bKgspCuo0q8C55EtXrsR3BCFAyQ0Zrn56rWpaYdZ-uZHB8_B98BLtnjREI5F5jUcHb4tD1_Q&oh=00_AQEomyhkVseoQAC_t86v9YKZLZxQBPvpi2-EdrxhLTGyxQ&oe=6A73EE8F",
+      "post": {
+        "title": "ที่ดิน 21 ไร่ 2 งาน เขาเพิ่ม บ้านนา นครนายก",
+        "price_thb": 21200000,
+        "location": "บ้านนา นครนายก",
+        "highlight_features": [
+          "โฉนดครุฑแดง",
+          "ติดคลอง ติดถนนคอนกรีต",
+          "ใกล้ถนนใหญ่บ้านนา-แก่งคอย"
+        ],
+        "contact_method": "094-887-4343",
+        "maps_url": null,
+        "text_only": true
+      },
+      "caption": "📍 ขายที่ดิน 21 ไร่ 2 งาน 61 ตารางวา บ้านนา นครนายก\n💰 1 ล้าน ต่อไร่ (เจ้าของขายเอง)\n\n• โฉนดครุฑแดง\n• ติดคลอง ติดถนนคอนกรีต\n\nสนใจทัก 094-887-4343"
+    },
+    {
+      "id": "2026-08-02T19:00",
+      "slot_id": "2026-08-02T19:00",
+      "date": "2026-08-02",
+      "time": "19:00",
+      "slot_name": "เย็น · คลิปสั้นแนวตั้ง (ทุกวัน)",
+      "platforms": [
+        "FACEBOOK_REELS",
+        "TIKTOK",
+        "YOUTUBE_SHORTS"
+      ],
+      "content_type": "video",
+      "source": "stock",
+      "status": "DRAFT",
+      "results": [],
+      "note": "",
+      "created_at": "2026-08-01T14:45:06.391Z",
+      "updated_at": "2026-08-02T04:41:00.963Z",
+      "posted_at": null,
+      "property_id": "PROP-TH-01029",
+      "video_file": "PROP-TH-01029_1785290487170_9_16.mp4",
+      "image_files": [],
+      "stock_id": "PROP-TH-01029_1785290487170_9_16.mp4",
+      "aspect": "9:16",
+      "post": {
+        "title": "ที่ดินสวย ทำเลดี",
+        "price_thb": null,
+        "location": "นครนายก",
+        "highlight_features": [
+          "เจ้าของขายเอง",
+          "โฉนดพร้อมโอน"
+        ],
+        "contact_method": "ทักแชทเพจ หรือ LINE @244raxjb",
+        "style_tag": "CONTEMPORARY"
+      },
+      "caption": "ที่ดินสวย ทำเลดี ในจังหวัดนครนายก 🏡 เจ้าของขายเอง ราคาอยู่ในระดับสมเด็จ โฉนดพร้อมโอน ไม่มีปัญหาเรื่องเอกสาร ✨ สนใจสามารถทักแชทเพจหรือติดต่อ LINE @244raxjb เพื่อทำความเข้าใจรายละเอียดเพิ่มเติม 💬\n\n#ที่ดินนครนายก #ที่ดินขายเอง #เจ้าของขายเอง #โฉนดพร้อมโอน #ที่ดินแปลงสวย #ลงทุนที่ดิน"
+    },
+    {
+      "id": "2026-08-03T09:30",
+      "slot_id": "2026-08-03T09:30",
+      "date": "2026-08-03",
+      "time": "09:30",
+      "slot_name": "เช้า · โพสต์ขายที่ดินลงกลุ่ม (ทุกวัน)",
+      "platforms": [
+        "MANUAL_KIT"
+      ],
+      "content_type": "listing",
+      "source": "listing",
+      "status": "DRAFT",
+      "results": [],
+      "note": "",
+      "created_at": "2026-08-01T14:45:06.391Z",
+      "updated_at": "2026-08-01T14:45:06.391Z",
+      "posted_at": null,
+      "property_id": "LAND-0930677E",
+      "listing_id": "LAND-0930677E",
+      "video_file": null,
+      "image_files": [],
+      "photo_url": "https://scontent.fbkk8-2.fna.fbcdn.net/v/t39.30808-6/759320450_122123385242736301_7714945181678066045_n.jpg?_nc_cat=103&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=f727a1&_nc_eui2=AeHb5HcyEazX3XYZ79OzQbbvkAtizDRPC0-QC2LMNE8LT64U457uDCDmnCpuDfTzKI0K1aHDeuefa2-aJIF2pSz_&_nc_ohc=d64V93v9ZHgQ7kNvwGuTUSA&_nc_oc=AdrTogfbPZ7H60CcUI-br5mEW3OdE_21D7ysJzt8W4zp-BIoi0I0OuDtsBK5kYOwAhQ&_nc_zt=23&_nc_ht=scontent.fbkk8-2.fna&edm=AKIiGfEEAAAA&_nc_gid=7iHju1WCjw_p3joAD4hFTA&_nc_tpa=Q5bMBQHRCg6610zN-MhwxnHNYvfqkR2BRs3d4ASCx-H-PnvFGxrO2gwQRVB1fusBDBdyNUqUsFmktgR2Cg&oh=00_AQHqCmA6dNVr1qkY3oHXXEBNHtl7FkOPVYr1dlTDHgZevQ&oe=6A73C5E3",
+      "post": {
+        "title": "ที่ดิน 200 ตรว. ศรีนาวา เมืองนครนายก",
+        "price_thb": 700000,
+        "location": "ศรีนาวา เมืองนครนายก",
+        "highlight_features": [
+          "น้ำไฟพร้อมถึงหน้าแปลง",
+          "โฉนดครุฑแดง",
+          "ใกล้ครัวขโมง 700 เมตร"
+        ],
+        "contact_method": "094-887-4343",
+        "maps_url": null,
+        "text_only": true
+      },
+      "caption": "📍 ขายที่ดิน 200 ตรว. ศรีนาวา เมืองนครนายก\n💰 7 แสนบาท\n\n• น้ำไฟพร้อมถึงหน้าแปลง\n• โฉนดครุฑแดง\n\nสนใจทัก 094-887-4343"
+    },
+    {
+      "id": "2026-08-03T12:00",
+      "slot_id": "2026-08-03T12:00",
+      "date": "2026-08-03",
+      "time": "12:00",
+      "slot_name": "เที่ยง · คอนเทนต์ความรู้ (carousel)",
+      "platforms": [
+        "FACEBOOK_PAGE"
+      ],
+      "content_type": "carousel",
+      "source": "carousel",
+      "status": "POSTED",
+      "results": [
+        {
+          "platform": "FACEBOOK_PAGE",
+          "ok": true,
+          "post_id": "1050500211482963_122124136790736301",
+          "publish_url": "https://www.facebook.com/122123974208736301/posts/122124136790736301",
+          "published_at": "2026-08-02T15:05:33.149Z",
+          "scheduled_for": null,
+          "caption_used": "เอกสารสิทธิ์ที่ดิน 5 แบบ ต่างกันยังไง 📄\n\nดูผิดใบเดียว อาจได้ที่ที่โอนไม่ได้\nเลื่อนดูให้ครบก่อนตัดสินใจซื้อนะครับ\n\n#ที่ดินนครนายก #ซื้อที่ดิน #ความรู้ที่ดิน #ที่ดินเจ้าของขายเอง",
+          "caption_chars": 176,
+          "dry_run": false,
+          "attempts": 1,
+          "error_code": null,
+          "error_message": null,
+          "kit_dir": null
+        }
+      ],
+      "note": "",
+      "created_at": "2026-08-01T14:45:06.615Z",
+      "updated_at": "2026-08-02T15:05:33.172Z",
+      "posted_at": "2026-08-02T15:05:33.172Z",
+      "property_id": "TOPIC-DEED-TYPES",
+      "topic_id": "deed-types",
+      "video_file": null,
+      "image_files": [
+        "carousels/deed-types/01.png",
+        "carousels/deed-types/02.png",
+        "carousels/deed-types/03.png",
+        "carousels/deed-types/04.png",
+        "carousels/deed-types/05.png",
+        "carousels/deed-types/06.png",
+        "carousels/deed-types/07.png"
+      ],
+      "post": {
+        "title": "เอกสารสิทธิ์ที่ดิน 5 แบบ ต่างกันยังไง",
+        "highlight_features": [],
+        "contact_method": "ทักแชทเพจ หรือ LINE @244raxjb"
+      },
+      "caption": "เอกสารสิทธิ์ที่ดิน 5 แบบ ต่างกันยังไง 📄\n\nดูผิดใบเดียว อาจได้ที่ที่โอนไม่ได้\nเลื่อนดูให้ครบก่อนตัดสินใจซื้อนะครับ\n\n#ที่ดินนครนายก #ซื้อที่ดิน #ความรู้ที่ดิน #ที่ดินเจ้าของขายเอง",
+      "last_publish_status": "SUCCESS"
+    },
+    {
+      "id": "2026-08-03T19:00",
+      "slot_id": "2026-08-03T19:00",
+      "date": "2026-08-03",
+      "time": "19:00",
+      "slot_name": "เย็น · คลิปสั้นแนวตั้ง (ทุกวัน)",
+      "platforms": [
+        "FACEBOOK_REELS",
+        "TIKTOK",
+        "YOUTUBE_SHORTS"
+      ],
+      "content_type": "video",
+      "source": "stock",
+      "status": "DRAFT",
+      "results": [],
+      "note": "",
+      "created_at": "2026-08-01T14:45:10.035Z",
+      "updated_at": "2026-08-01T14:45:10.035Z",
+      "posted_at": null,
+      "property_id": "PROP-TH-01029",
+      "video_file": "PROP-TH-01029_1785290419207_9_16.mp4",
+      "image_files": [],
+      "stock_id": "PROP-TH-01029_1785290419207_9_16.mp4",
+      "aspect": "9:16",
+      "post": {
+        "title": "ที่ดินสวย ทำเลดี",
+        "price_thb": null,
+        "location": "นครนายก",
+        "highlight_features": [
+          "เจ้าของขายเอง",
+          "โฉนดพร้อมโอน"
+        ],
+        "contact_method": "ทักแชทเพจ หรือ LINE @244raxjb",
+        "style_tag": "CONTEMPORARY"
+      },
+      "caption": "ที่ดินสวย ทำเลดี 🏡 จังหวัดนครนายก เจ้าของขายเอง โฉนดพร้อมโอน ไม่ต้องผ่านนายหน้า ราคาเหมาะสมมากๆ ถ้าสนใจอยากรู้ข้อมูลเพิ่มเติม สามารถทักแชทเพจนี้ได้เลย หรือติดต่อ LINE @244raxjb 📲 เรายินดีให้ข้อมูลโดยไม่มีค่าใช้จ่าย\n\n#ที่ดินนครนายก #ที่ดินสวย #เจ้าของขายเอง #โฉนดพร้อมโอน #ซื้อขายที่ดิน #สินทรัพย์ที่ดีเหมาะสม #ลงทุนที่ดิน"
+    },
+    {
+      "id": "2026-08-04T09:30",
+      "slot_id": "2026-08-04T09:30",
+      "date": "2026-08-04",
+      "time": "09:30",
+      "slot_name": "เช้า · โพสต์ขายที่ดินลงกลุ่ม (ทุกวัน)",
+      "platforms": [
+        "MANUAL_KIT"
+      ],
+      "content_type": "listing",
+      "source": "listing",
+      "status": "DRAFT",
+      "results": [],
+      "note": "",
+      "created_at": "2026-08-01T14:45:10.035Z",
+      "updated_at": "2026-08-01T14:45:10.035Z",
+      "posted_at": null,
+      "property_id": "LAND-0B047BA7",
+      "listing_id": "LAND-0B047BA7",
+      "video_file": null,
+      "image_files": [],
+      "photo_url": "https://scontent.fbkk8-4.fna.fbcdn.net/v/t39.30808-6/744663559_122121073832736301_2936544034162691727_n.jpg?_nc_cat=101&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=f727a1&_nc_eui2=AeEKCqkWnu5qol1lygco9XnI4jm_6B2YB5riOb_oHZgHmui7azh43thcMNmhftNRJYZpcGqM-3qKxDIuu79K8QAg&_nc_ohc=6TOcc-j6XVQQ7kNvwHRGIt7&_nc_oc=Adq-QwObtXR1bLBaL5XB50DAKM-MCnf9_FMjta5XFQexXJXYQWXPoIY5NGMgOZJ8QGU&_nc_zt=23&_nc_ht=scontent.fbkk8-4.fna&edm=AKIiGfEEAAAA&_nc_gid=7iHju1WCjw_p3joAD4hFTA&_nc_tpa=Q5bMBQEfpwi33PLEcjRpk97k4-vNc3oENpwTlcqnq7r43IQ1Dz2N8BtFZJYx2qMu-yMC7A1E_T5KXkscpA&oh=00_AQEAyOGlTNThre_sns2m4HDtwg0okMh2EWja6uUgXD6JiA&oe=6A73E1CD",
+      "post": {
+        "title": "ที่ดิน 0-2-09 ไร่ ปากช่อง นครราชสีมา",
+        "price_thb": 2270000,
+        "location": "ปากช่อง นครราชสีมา",
+        "highlight_features": [
+          "ถนนลาดยางกว้าง 6 เมตร",
+          "น้ำ–ไฟ พร้อมใช้งาน",
+          "โฉนดครุฑแดง พร้อมโอน"
+        ],
+        "contact_method": "094-8874343",
+        "maps_url": null,
+        "text_only": true
+      },
+      "caption": "📍 ขายที่ดิน 0-2-09 ไร่ ปากช่อง นครราชสีมา\n💰 2.37 ล้านบาท ลดทันที 100,000 บาท\n\n• ถนนลาดยางกว้าง 6 เมตร\n• น้ำ–ไฟ พร้อมใช้งาน\n\nสนใจทัก 094-8874343"
+    },
+    {
+      "id": "2026-08-04T19:00",
+      "slot_id": "2026-08-04T19:00",
+      "date": "2026-08-04",
+      "time": "19:00",
+      "slot_name": "เย็น · คลิปสั้นแนวตั้ง (ทุกวัน)",
+      "platforms": [
+        "FACEBOOK_REELS",
+        "TIKTOK",
+        "YOUTUBE_SHORTS"
+      ],
+      "content_type": "video",
+      "source": "stock",
+      "status": "DRAFT",
+      "results": [],
+      "note": "",
+      "created_at": "2026-08-01T14:45:12.984Z",
+      "updated_at": "2026-08-02T04:41:00.963Z",
+      "posted_at": null,
+      "property_id": "PROP-TH-01029",
+      "video_file": "PROP-TH-01029_1785263214739_9_16.mp4",
+      "image_files": [],
+      "stock_id": "PROP-TH-01029_1785263214739_9_16.mp4",
+      "aspect": "9:16",
+      "post": {
+        "title": "ที่ดินสวย ทำเลดี",
+        "price_thb": null,
+        "location": "นครนายก",
+        "highlight_features": [
+          "เจ้าของขายเอง",
+          "โฉนดพร้อมโอน"
+        ],
+        "contact_method": "ทักแชทเพจ หรือ LINE @244raxjb",
+        "style_tag": "CONTEMPORARY"
+      },
+      "caption": "ที่ดินสวย ทำเลดี 🏡 อยู่ในนครนายก เจ้าของขายเองโดยตรง โฉนดพร้อมโอนทันที ไม่มีปัญหา ราคาสอบถามได้ตามจริง 📍\n\nสนใจทราบรายละเอียดเพิ่มเติมได้เลยค่ะ ทักแชทเพจหรือติดต่อ LINE @244raxjb เพื่อนำเที่ยวชม 💬\n\n#ที่ดินนครนายก #ที่ดินขายดี #เจ้าของขายเอง #โฉนดพร้อมโอน #ทำเลดี #ที่ดิน #อสังหาริมทรัพย์"
+    },
+    {
+      "id": "2026-08-05T09:30",
+      "slot_id": "2026-08-05T09:30",
+      "date": "2026-08-05",
+      "time": "09:30",
+      "slot_name": "เช้า · โพสต์ขายที่ดินลงกลุ่ม (ทุกวัน)",
+      "platforms": [
+        "MANUAL_KIT"
+      ],
+      "content_type": "listing",
+      "source": "listing",
+      "status": "DRAFT",
+      "results": [],
+      "note": "",
+      "created_at": "2026-08-01T14:45:12.984Z",
+      "updated_at": "2026-08-01T14:45:12.984Z",
+      "posted_at": null,
+      "property_id": "LAND-0DB25132",
+      "listing_id": "LAND-0DB25132",
+      "video_file": null,
+      "image_files": [],
+      "photo_url": "https://scontent.fbkk9-3.fna.fbcdn.net/v/t39.30808-6/744915304_122121078248736301_7356340256202183117_n.jpg?stp=dst-jpg_p720x720_tt6&_nc_cat=103&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=f727a1&_nc_eui2=AeGJTRj0zddzmHv4HofR4KmYsLG44ozr-F2wsbjijOv4XZRfQTHN-BVsNdWXGa5YLAJnrEfaNcRFZdpqV_uxo7PI&_nc_ohc=vc-_qofCTvMQ7kNvwE7YmUT&_nc_oc=AdqF_f-zEt8R9CImJyPk7PQmnM7FgcRokuC3mydYE0mM2uK6TjvBY5hSkhEPvWxINA8&_nc_zt=23&_nc_ht=scontent.fbkk9-3.fna&edm=AKIiGfEEAAAA&_nc_gid=7iHju1WCjw_p3joAD4hFTA&_nc_tpa=Q5bMBQHawa7C3xeefuScTTFmF_MZ-3VdBR7iLxks7GTO32cyUU2i791nl1n7RS4A4H50OdpRuNHT-APsRQ&oh=00_AQEDJx1fw4hsE5JFpgqyjAQ6q57thpJCaqJVd0UIerYmXA&oe=6A73BF36",
+      "post": {
+        "title": "ที่ดินวิวเขา ใกล้ My Ozone Khao Yai",
+        "price_thb": 1780000,
+        "location": "เขาใหญ่",
+        "highlight_features": [
+          "ถนนคอนกรีต 6 เมตร",
+          "น้ำ-ไฟพร้อม",
+          "ติดถนนสาธารณะ 8 เมตร"
+        ],
+        "contact_method": "094-887-4343",
+        "maps_url": null,
+        "text_only": true
+      },
+      "caption": "📍 ขายที่ดิน 200 ตร.ว. เขาใหญ่\n💰 เริ่มต้น 1.78 ล้านบาท\n\n• ถนนคอนกรีต 6 เมตร\n• น้ำ-ไฟพร้อม\n\nสนใจทัก 094-887-4343"
+    },
+    {
+      "id": "2026-08-05T12:00",
+      "slot_id": "2026-08-05T12:00",
+      "date": "2026-08-05",
+      "time": "12:00",
+      "slot_name": "เที่ยง · คอนเทนต์ความรู้ (carousel)",
+      "platforms": [
+        "FACEBOOK_PAGE"
+      ],
+      "content_type": "carousel",
+      "source": "carousel",
+      "status": "DRAFT",
+      "results": [],
+      "note": "",
+      "created_at": "2026-08-01T14:45:13.247Z",
+      "updated_at": "2026-08-02T04:42:23.933Z",
+      "posted_at": null,
+      "property_id": "TOPIC-BEFORE-YOU-BUY",
+      "topic_id": "before-you-buy",
+      "video_file": null,
+      "image_files": [
+        "carousels/before-you-buy/01.png",
+        "carousels/before-you-buy/02.png",
+        "carousels/before-you-buy/03.png",
+        "carousels/before-you-buy/04.png",
+        "carousels/before-you-buy/05.png",
+        "carousels/before-you-buy/06.png",
+        "carousels/before-you-buy/07.png",
+        "carousels/before-you-buy/08.png"
+      ],
+      "post": {
+        "title": "6 ข้อต้องเช็ค ก่อนวางมัดจำ ที่ดิน",
+        "highlight_features": [],
+        "contact_method": "ทักแชทเพจ หรือ LINE @244raxjb"
+      },
+      "caption": "6 ข้อต้องเช็คก่อนวางมัดจำที่ดิน ✅\n\nข้อ 5 คนมองข้ามบ่อยที่สุด\nแต่เป็นข้อที่เสียเงินเยอะสุดถ้าพลาด\n\n#ที่ดินนครนายก #ซื้อที่ดิน #ความรู้ที่ดิน #ที่ดินเจ้าของขายเอง",
+      "last_publish_status": null
+    },
+    {
+      "id": "2026-08-05T19:00",
+      "slot_id": "2026-08-05T19:00",
+      "date": "2026-08-05",
+      "time": "19:00",
+      "slot_name": "เย็น · คลิปสั้นแนวตั้ง (ทุกวัน)",
+      "platforms": [
+        "FACEBOOK_REELS",
+        "TIKTOK",
+        "YOUTUBE_SHORTS"
+      ],
+      "content_type": "video",
+      "source": "stock",
+      "status": "DRAFT",
+      "results": [],
+      "note": "",
+      "created_at": "2026-08-01T14:45:15.813Z",
+      "updated_at": "2026-08-01T14:45:15.813Z",
+      "posted_at": null,
+      "property_id": "PROP-TH-01029",
+      "video_file": "PROP-TH-01029_1785262399630_9_16.mp4",
+      "image_files": [],
+      "stock_id": "PROP-TH-01029_1785262399630_9_16.mp4",
+      "aspect": "9:16",
+      "post": {
+        "title": "ที่ดินสวย ทำเลดี",
+        "price_thb": null,
+        "location": "นครนายก",
+        "highlight_features": [
+          "เจ้าของขายเอง",
+          "โฉนดพร้อมโอน"
+        ],
+        "contact_method": "ทักแชทเพจ หรือ LINE @244raxjb",
+        "style_tag": "CONTEMPORARY"
+      },
+      "caption": "ที่ดินสวย ทำเลดี ✨ อยู่ที่นครนายก เจ้าของขายเอง โฉนดพร้อมโอน ราคาสอบถามได้เลย\n\nหากสนใจสอบถามรายละเอียดเพิ่มเติม สามารถทักแชทเพจนี้ หรือติดต่อ LINE @244raxjb ได้เลยค่ะ 📲\n\n#ที่ดินนครนายก #ที่ดินสวย #เจ้าของขายเอง #โฉนดพร้อมโอน #ที่ดินทำเลดี #อสังหาริมทรัพย์ #นครนายก"
+    },
+    {
+      "id": "2026-08-06T09:30",
+      "slot_id": "2026-08-06T09:30",
+      "date": "2026-08-06",
+      "time": "09:30",
+      "slot_name": "เช้า · โพสต์ขายที่ดินลงกลุ่ม (ทุกวัน)",
+      "platforms": [
+        "MANUAL_KIT"
+      ],
+      "content_type": "listing",
+      "source": "listing",
+      "status": "DRAFT",
+      "results": [],
+      "note": "",
+      "created_at": "2026-08-01T14:45:15.813Z",
+      "updated_at": "2026-08-01T14:45:15.813Z",
+      "posted_at": null,
+      "property_id": "LAND-0DE75C9F",
+      "listing_id": "LAND-0DE75C9F",
+      "video_file": null,
+      "image_files": [],
+      "photo_url": "https://scontent.fbkk8-2.fna.fbcdn.net/v/t39.30808-6/680442697_122107630562736301_713493031354062297_n.jpg?stp=dst-jpg_p720x720_tt6&_nc_cat=111&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=f727a1&_nc_eui2=AeEj-9k4rJs-PZKfv00zRG_TCgxNw_hGCH0KDE3D-EYIfRjmNYRqsyYH8FfXbZV0CW4zZyB1cLFu1jIq13Nj6MxU&_nc_ohc=0_fft-Yz6qsQ7kNvwEyaX2J&_nc_oc=Adqb0l3f4VeSlY0hFph52Xlwdrc4qZx8sLI3SHzZKwvzd4_Ezt2StMTtb5A8e8BSBdw&_nc_zt=23&_nc_ht=scontent.fbkk8-2.fna&edm=AKIiGfEEAAAA&_nc_gid=7iHju1WCjw_p3joAD4hFTA&_nc_tpa=Q5bMBQFgsq9zFVNCgnBq5n284aWvjAFXjFFCtdkOzJzj-A2aGhNVVAoOm968SX5ziAi92Ehl-plmIBAT5g&oh=00_AQEkxZN-16g02vYw9nZ_ZEMns6e0yQAXYEPYR8xK-Hxvcw&oe=6A73F0B2",
+      "post": {
+        "title": "ที่ดินแบ่งล็อค เขาพระ นครนายก",
+        "price_thb": 390000,
+        "location": "เขาพระ เมือง นครนายก",
+        "highlight_features": [
+          "วิวเขาล้อมรอบ",
+          "บรรยากาศส่วนตัว"
+        ],
+        "contact_method": "096-945-3731",
+        "maps_url": null,
+        "text_only": true
+      },
+      "caption": "📍 ขายที่ดิน 50 ตร.วา เขาพระ เมือง นครนายก\n💰 50 ตร.วา 390,000 บาท\n\n• วิวเขาล้อมรอบ\n• บรรยากาศส่วนตัว\n\nสนใจทัก 096-945-3731"
+    },
+    {
+      "id": "2026-08-06T19:00",
+      "slot_id": "2026-08-06T19:00",
+      "date": "2026-08-06",
+      "time": "19:00",
+      "slot_name": "เย็น · คลิปสั้นแนวตั้ง (ทุกวัน)",
+      "platforms": [
+        "FACEBOOK_REELS",
+        "TIKTOK",
+        "YOUTUBE_SHORTS"
+      ],
+      "content_type": "video",
+      "source": "stock",
+      "status": "DRAFT",
+      "results": [],
+      "note": "",
+      "created_at": "2026-08-01T14:45:18.577Z",
+      "updated_at": "2026-08-01T14:45:18.577Z",
+      "posted_at": null,
+      "property_id": "PROP-TH-01029",
+      "video_file": "PROP-TH-01029_1785323475587_9_16.mp4",
+      "image_files": [],
+      "stock_id": "PROP-TH-01029_1785323475587_9_16.mp4",
+      "aspect": "9:16",
+      "post": {
+        "title": "ที่ดินสวย ทำเลดี",
+        "price_thb": null,
+        "location": "นครนายก",
+        "highlight_features": [
+          "เจ้าของขายเอง",
+          "โฉนดพร้อมโอน"
+        ],
+        "contact_method": "ทักแชทเพจ หรือ LINE @244raxjb",
+        "style_tag": "CONTEMPORARY"
+      },
+      "caption": "ที่ดินสวยทำเลดี จังหวัรนครนายก 🏡 เจ้าของขายเองโดยตรง โฉนดพร้อมโอนทันที ราคาสอบถามได้เลย สนใจติดต่อเราได้ที่ทักแชทเพจหรือ LINE @244raxjb นะค่ะ 📲 ไม่มีค่าใช้งานจ้า\n\n#ที่ดินนครนายก #ที่ดินทำเลดี #โฉนดพร้อมโอน #เจ้าของขายเอง #ที่ดินสวย #ลงทุนที่ดิน #อสังหาริมทรัพย์นครนายก"
+    },
+    {
+      "id": "2026-08-07T09:30",
+      "slot_id": "2026-08-07T09:30",
+      "date": "2026-08-07",
+      "time": "09:30",
+      "slot_name": "เช้า · โพสต์ขายที่ดินลงกลุ่ม (ทุกวัน)",
+      "platforms": [
+        "MANUAL_KIT"
+      ],
+      "content_type": "listing",
+      "source": "listing",
+      "status": "DRAFT",
+      "results": [],
+      "note": "",
+      "created_at": "2026-08-01T14:45:18.577Z",
+      "updated_at": "2026-08-01T14:45:18.577Z",
+      "posted_at": null,
+      "property_id": "LAND-112347A8",
+      "listing_id": "LAND-112347A8",
+      "video_file": null,
+      "image_files": [],
+      "photo_url": "https://scontent.fbkk8-1.fna.fbcdn.net/v/t39.30808-6/750216815_122121789878736301_7580576566756565460_n.jpg?stp=dst-jpg_s960x960_tt6&_nc_cat=107&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=f727a1&_nc_eui2=AeH0aCC6_5W2eqYdtx872wJHrX_oynxPYHqtf-jKfE9getYS_x-RP-DWQacNAhheEU5CkSY4IWHAeu7cYACRYZot&_nc_ohc=F-9exFqHRqgQ7kNvwHkHSaT&_nc_oc=AdqpMjcMZaBq-alwK6YXCovYemtwP11olHPIal-yBJPtCzyntTsbb0_4EffQkZSyLmQ&_nc_zt=23&_nc_ht=scontent.fbkk8-1.fna&edm=AKIiGfEEAAAA&_nc_gid=7iHju1WCjw_p3joAD4hFTA&_nc_tpa=Q5bMBQHMrV9io24egdxmB65y-uAkP-mHZI7euy3djYeJ4d174FvL3yHGNz7aqybF57FeafuhKKJC7kBoxA&oh=00_AQESBFvl-XGPJwiKZBwW4hH9nCmSit4Bne_6C-jUiRMVWg&oe=6A73C722",
+      "post": {
+        "title": "ที่ดิน 2 ไร่ เขาพระ นครนายก พร้อมบ้าน",
+        "price_thb": 6500000,
+        "location": "เขาพระ เมืองนครนายก",
+        "highlight_features": [
+          "ติดถนนลาดยาง",
+          "โฉนดครุฑแดงพร้อมโอนกรรมสิทธิ์",
+          "บ้าน 1 หลังพร้อมต้นไม้ผลไม้กว่า 100 ต้น"
+        ],
+        "contact_method": "094-887-4343 คุณพลอย, 096-321-6888 คุณซุง",
+        "maps_url": null,
+        "text_only": true
+      },
+      "caption": "📍 ขายที่ดิน 2 ไร่ เขาพระ เมืองนครนายก\n💰 6.5 ล้าน\n\n• ติดถนนลาดยาง\n• โฉนดครุฑแดงพร้อมโอนกรรมสิทธิ์\n\nสนใจทัก 094-887-4343 คุณพลอย, 096-321-6888 คุณซุง"
+    },
+    {
+      "id": "2026-08-07T12:00",
+      "slot_id": "2026-08-07T12:00",
+      "date": "2026-08-07",
+      "time": "12:00",
+      "slot_name": "เที่ยง · คอนเทนต์ความรู้ (carousel)",
+      "platforms": [
+        "FACEBOOK_PAGE"
+      ],
+      "content_type": "carousel",
+      "source": "carousel",
+      "status": "DRAFT",
+      "results": [],
+      "note": "",
+      "created_at": "2026-08-01T14:45:18.708Z",
+      "updated_at": "2026-08-02T04:41:00.963Z",
+      "posted_at": null,
+      "property_id": "TOPIC-LANDLOCKED",
+      "topic_id": "landlocked",
+      "video_file": null,
+      "image_files": [
+        "carousels/landlocked/01.png",
+        "carousels/landlocked/02.png",
+        "carousels/landlocked/03.png",
+        "carousels/landlocked/04.png",
+        "carousels/landlocked/05.png",
+        "carousels/landlocked/06.png",
+        "carousels/landlocked/07.png"
+      ],
+      "post": {
+        "title": "ที่ดินตาบอด คืออะไร ซื้อได้ไหม",
+        "highlight_features": [],
+        "contact_method": "ทักแชทเพจ หรือ LINE @244raxjb"
+      },
+      "caption": "ที่ดินตาบอดคืออะไร ซื้อได้ไหม 🚧\n\nที่ผิดปกติ มักมีเหตุผล\nอ่านให้ครบก่อนโอนเงินมัดจำ\n\n#ที่ดินนครนายก #ซื้อที่ดิน #ความรู้ที่ดิน #ที่ดินเจ้าของขายเอง"
+    },
+    {
+      "id": "2026-08-08T09:30",
+      "slot_id": "2026-08-08T09:30",
+      "date": "2026-08-08",
+      "time": "09:30",
+      "slot_name": "เช้า · โพสต์ขายที่ดินลงกลุ่ม (ทุกวัน)",
+      "platforms": [
+        "MANUAL_KIT"
+      ],
+      "content_type": "listing",
+      "source": "listing",
+      "status": "DRAFT",
+      "results": [],
+      "note": "",
+      "created_at": "2026-08-01T14:45:18.708Z",
+      "updated_at": "2026-08-01T14:45:18.708Z",
+      "posted_at": null,
+      "property_id": "LAND-1507A4B7",
+      "listing_id": "LAND-1507A4B7",
+      "video_file": null,
+      "image_files": [],
+      "photo_url": "https://scontent.fbkk12-6.fna.fbcdn.net/v/t39.30808-6/741236038_122120249684736301_7453214033635191850_n.jpg?stp=dst-jpg_s960x960_tt6&_nc_cat=108&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=f727a1&_nc_eui2=AeFy35YXs_FBgsU5E5LZILYQPRaUmpALcuw9FpSakAty7CqzKNXGcIhE0iErPpaHP6AtdzaDArPJ-w3AmtmI5MVs&_nc_ohc=YV7ax-3Iq8AQ7kNvwEusvNp&_nc_oc=AdqBpNtIlzfPfpo72q_uaZNGrTA5DB3f2j3ZqkLcUGzsFBVZtB2ifveCJ9nS0pmQlTo&_nc_zt=23&_nc_ht=scontent.fbkk12-6.fna&edm=AKIiGfEEAAAA&_nc_gid=7iHju1WCjw_p3joAD4hFTA&_nc_tpa=Q5bMBQHnRAN8X-wzQ-mEh9QZg0IRxyDGIq3nBisnF7OXM2l8J4g2Ma-XYJWW4f-oMPKZPPoqSKPYVu3xPg&oh=00_AQGo30MrVQe5NUAfNz3XS79Zjsff3ThfvjrasbuDd2I0IA&oe=6A73BFD4",
+      "post": {
+        "title": "ที่ดิน 4 ไร่ 2 งาน ปากพลี นครนายก",
+        "price_thb": 2500000,
+        "location": "ปากพลี นครนายก",
+        "highlight_features": [
+          "มีบ่อน้ำไว้ใช้",
+          "น้ำไฟจัดการให้ฟรี",
+          "ส่วนตัวมากไม่วุ่นวาย"
+        ],
+        "contact_method": "094-887-4343",
+        "maps_url": null,
+        "text_only": true
+      },
+      "caption": "📍 ขายที่ดิน 4 ไร่ 2 งาน ปากพลี นครนายก\n💰 2.5 ล้าน (เจ้าของขายเอง)\n\n• มีบ่อน้ำไว้ใช้\n• น้ำไฟจัดการให้ฟรี\n\nสนใจทัก 094-887-4343"
+    },
+    {
+      "id": "2026-08-09T09:30",
+      "slot_id": "2026-08-09T09:30",
+      "date": "2026-08-09",
+      "time": "09:30",
+      "slot_name": "เช้า · โพสต์ขายที่ดินลงกลุ่ม (ทุกวัน)",
+      "platforms": [
+        "MANUAL_KIT"
+      ],
+      "content_type": "listing",
+      "source": "listing",
+      "status": "DRAFT",
+      "results": [],
+      "note": "",
+      "created_at": "2026-08-01T14:45:18.708Z",
+      "updated_at": "2026-08-01T14:45:18.708Z",
+      "posted_at": null,
+      "property_id": "LAND-1A6806D6",
+      "listing_id": "LAND-1A6806D6",
+      "video_file": null,
+      "image_files": [],
+      "photo_url": "https://scontent.fbkk9-2.fna.fbcdn.net/v/t39.30808-6/680291923_122107588010736301_670742529000918416_n.jpg?stp=dst-jpg_p720x720_tt6&_nc_cat=111&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=f727a1&_nc_eui2=AeEAJzFBmXHG4-Yn3cNF7UbSOjcme33fOu06NyZ7fd867RkKjeizCleRQd6sxgioHLhs61-JKkN0-fLVRuciJgvf&_nc_ohc=DV-rDKx-UOUQ7kNvwG1AoUc&_nc_oc=Adqi5i5TmUUKJBDd5v8YOXKQNYqd9tPHE2i7HNYXGsrk8LSoT6q19mhKeIaud-fUPpE&_nc_zt=23&_nc_ht=scontent.fbkk9-2.fna&edm=AKIiGfEEAAAA&_nc_gid=7iHju1WCjw_p3joAD4hFTA&_nc_tpa=Q5bMBQFI79XkvzJQ_pU9uilnUI6nutN77oH4BKOlqnlUS6ttgeWqIpKXTYpdfqNKaLU4_01d1AeChQd3UA&oh=00_AQGii2yC1SSrwK86EmuuJ1VKn7qoytKw5NAdVMNjGOPhvg&oe=6A73D35B",
+      "post": {
+        "title": "ที่ดิน 1 ไร่ ศรีนาวา เมืองนครนายก",
+        "price_thb": 950000,
+        "location": "ศรีนาวา เมือง นครนายก",
+        "highlight_features": [
+          "วิวเขาล้อม",
+          "ใกล้ชุมชน เดินทางสะดวก"
+        ],
+        "contact_method": "096-945-3731 / mrsungz",
+        "maps_url": null,
+        "text_only": true
+      },
+      "caption": "📍 ขายที่ดิน 1 ไร่ ศรีนาวา เมือง นครนายก\n💰 950,000 บาท\n\n• วิวเขาล้อม\n• ใกล้ชุมชน เดินทางสะดวก\n\nสนใจทัก 096-945-3731 / mrsungz"
+    },
+    {
+      "id": "2026-08-10T09:30",
+      "slot_id": "2026-08-10T09:30",
+      "date": "2026-08-10",
+      "time": "09:30",
+      "slot_name": "เช้า · โพสต์ขายที่ดินลงกลุ่ม (ทุกวัน)",
+      "platforms": [
+        "MANUAL_KIT"
+      ],
+      "content_type": "listing",
+      "source": "listing",
+      "status": "DRAFT",
+      "results": [],
+      "note": "",
+      "created_at": "2026-08-01T14:45:18.708Z",
+      "updated_at": "2026-08-01T14:45:18.708Z",
+      "posted_at": null,
+      "property_id": "LAND-1C0AB6CB",
+      "listing_id": "LAND-1C0AB6CB",
+      "video_file": null,
+      "image_files": [],
+      "photo_url": "https://scontent.fbkk8-4.fna.fbcdn.net/v/t39.30808-6/675595084_122103276164736301_7599113875251000221_n.jpg?stp=dst-jpg_s960x960_tt6&_nc_cat=105&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=833d8c&_nc_eui2=AeFlrQcbCZ7RQi5sgXRqvPYjrSuhy0HOlmytK6HLQc6WbIAUYA3uX033RHbqN7FGVVDtlj9ZKNp3jM4BrcRY2obe&_nc_ohc=5SWqUmQ3pIUQ7kNvwEgchGn&_nc_oc=AdqFxvpzXNNoUUVKxIBZHhMGSepYzPrzBUTcuDTl0PTzyNoI_Gn1S6tvbCvpgL-aLA8&_nc_zt=23&_nc_ht=scontent.fbkk8-4.fna&edm=AKIiGfEEAAAA&_nc_gid=7iHju1WCjw_p3joAD4hFTA&_nc_tpa=Q5bMBQG_557-o4WMgf4jV18GvTwJXSjGbF_e51AD0KyRXewyAmm-U6mKLJGNlzf7fuIgTXq8VOVM8BG-1Q&oh=00_AQFIjLR3aWoD828Ix488dZCdmkE5lpE3e-pUko-s1--hoA&oe=6A73EBB7",
+      "post": {
+        "title": "ที่ดิน 3 งาน 91 ตร.วา ศรีนาวา นครนายก",
+        "price_thb": 990000,
+        "location": "ศรีนาวา เมือง นครนายก",
+        "highlight_features": [
+          "ติดถนนลาดยาง เข้า–ออกง่าย",
+          "อยู่ในชุมชน ใกล้ตลาด CJ 7-11",
+          "มีต้นมะม่วง เคลียร์วิวเขา"
+        ],
+        "contact_method": "096-945-3731 / Line: mrsungz",
+        "maps_url": null,
+        "text_only": true
+      },
+      "caption": "📍 ขายที่ดิน 3 งาน 91 ตร.วา ศรีนาวา เมือง นครนายก\n💰 990,000 บาท\n\n• ติดถนนลาดยาง เข้า–ออกง่าย\n• อยู่ในชุมชน ใกล้ตลาด CJ 7-11\n\nสนใจทัก 096-945-3731 / Line: mrsungz"
+    },
+    {
+      "id": "2026-08-10T12:00",
+      "slot_id": "2026-08-10T12:00",
+      "date": "2026-08-10",
+      "time": "12:00",
+      "slot_name": "เที่ยง · คอนเทนต์ความรู้ (carousel)",
+      "platforms": [
+        "FACEBOOK_PAGE"
+      ],
+      "content_type": "carousel",
+      "source": "carousel",
+      "status": "DRAFT",
+      "results": [],
+      "note": "",
+      "created_at": "2026-08-01T14:45:18.816Z",
+      "updated_at": "2026-08-01T14:45:18.816Z",
+      "posted_at": null,
+      "property_id": "TOPIC-TRANSFER-COSTS",
+      "topic_id": "transfer-costs",
+      "video_file": null,
+      "image_files": [
+        "carousels/transfer-costs/01.png",
+        "carousels/transfer-costs/02.png",
+        "carousels/transfer-costs/03.png",
+        "carousels/transfer-costs/04.png",
+        "carousels/transfer-costs/05.png",
+        "carousels/transfer-costs/06.png",
+        "carousels/transfer-costs/07.png"
+      ],
+      "post": {
+        "title": "วันโอนที่ดิน ต้องจ่ายอะไร บ้าง",
+        "highlight_features": [],
+        "contact_method": "ทักแชทเพจ หรือ LINE @244raxjb"
+      },
+      "caption": "วันโอนที่ดิน ต้องจ่ายอะไรบ้าง 💵\n\nเตรียมเงินไม่พอ = เลื่อนวันโอน\nสรุปให้ครบใน 5 สไลด์\n\n* อัตราปรับได้ตามมาตรการรัฐ เช็คกับสำนักงานที่ดินอีกครั้งนะครับ\n\n#ที่ดินนครนายก #ซื้อที่ดิน #ความรู้ที่ดิน #ที่ดินเจ้าของขายเอง"
+    },
+    {
+      "id": "2026-08-11T09:30",
+      "slot_id": "2026-08-11T09:30",
+      "date": "2026-08-11",
+      "time": "09:30",
+      "slot_name": "เช้า · โพสต์ขายที่ดินลงกลุ่ม (ทุกวัน)",
+      "platforms": [
+        "MANUAL_KIT"
+      ],
+      "content_type": "listing",
+      "source": "listing",
+      "status": "DRAFT",
+      "results": [],
+      "note": "",
+      "created_at": "2026-08-01T14:45:18.816Z",
+      "updated_at": "2026-08-01T14:45:18.816Z",
+      "posted_at": null,
+      "property_id": "LAND-1C677084",
+      "listing_id": "LAND-1C677084",
+      "video_file": null,
+      "image_files": [],
+      "photo_url": "https://scontent.fbkk12-5.fna.fbcdn.net/v/t39.30808-6/749269466_122121780176736301_4083001915316962068_n.jpg?stp=dst-jpg_s960x960_tt6&_nc_cat=110&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=f727a1&_nc_eui2=AeGXOL63j9XNTKLr8aSNcqRLcaASor8hRchxoBKivyFFyCpsOLhzLpWKsr3LdgmA398pFOtXrZeF2PZK5GUOjRnX&_nc_ohc=Yuz6BJmEkPwQ7kNvwHJ3pZP&_nc_oc=AdrQG6da0acDIExv7IWVtlGQx07w-EZSkj53EBLcPVpn1vLnzkqjOBV_5pc68kXx8qc&_nc_zt=23&_nc_ht=scontent.fbkk12-5.fna&edm=AKIiGfEEAAAA&_nc_gid=7iHju1WCjw_p3joAD4hFTA&_nc_tpa=Q5bMBQEYkvEqj8TcUDrb7m6e0_oi6zw-x2k0AZu8rqKv_EsHdcKFika3rIPNppmiW6mingGIVujdxZUiKQ&oh=00_AQFisfQXUzreTzWE_TKqJWpMahzANJtvQLFbrIup8qjixg&oe=6A73BCA3",
+      "post": {
+        "title": "ที่ดินติดแก่งน้ำไหลแม่น้ำนครนายก 1 ไร่ 2 งาน",
+        "price_thb": 5000000,
+        "location": "สาริกา เมือง นครนายก",
+        "highlight_features": [
+          "ติดแก่งน้ำไหลแม่น้ำนครนายก",
+          "ไฟฟ้าพร้อม",
+          "มีต้นไม้ใหญ่ร่มรื่น"
+        ],
+        "contact_method": "094-887-4343",
+        "maps_url": null,
+        "text_only": true
+      },
+      "caption": "📍 ขายที่ดิน 1 ไร่ 2 งาน สาริกา เมือง นครนายก\n💰 ยกแปลง 5 ล้านบาท\n\n• ติดแก่งน้ำไหลแม่น้ำนครนายก\n• ไฟฟ้าพร้อม\n\nสนใจทัก 094-887-4343"
+    },
+    {
+      "id": "2026-08-12T09:30",
+      "slot_id": "2026-08-12T09:30",
+      "date": "2026-08-12",
+      "time": "09:30",
+      "slot_name": "เช้า · โพสต์ขายที่ดินลงกลุ่ม (ทุกวัน)",
+      "platforms": [
+        "MANUAL_KIT"
+      ],
+      "content_type": "listing",
+      "source": "listing",
+      "status": "DRAFT",
+      "results": [],
+      "note": "",
+      "created_at": "2026-08-01T14:45:18.816Z",
+      "updated_at": "2026-08-01T14:45:18.816Z",
+      "posted_at": null,
+      "property_id": "LAND-253F77C7",
+      "listing_id": "LAND-253F77C7",
+      "video_file": null,
+      "image_files": [],
+      "photo_url": "https://scontent.fbkk8-3.fna.fbcdn.net/v/t39.30808-6/680448542_122107638998736301_713098870952212812_n.jpg?stp=dst-jpg_p720x720_tt6&_nc_cat=104&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=833d8c&_nc_eui2=AeFIqJL--9finLWhwnAtIG1KLrerQ1ldr8Iut6tDWV2vwvk6fVFEfqKSGgWGzQ0XCSsC5K9z8jceu6JcyN768HZE&_nc_ohc=W_V1wurIKjwQ7kNvwFaCVbs&_nc_oc=AdoC--oMqPbzd-acAnZfCGQ0gN7hMjNahrwg85ICxRg-f412c_IoCAthgvSNrruLPc8&_nc_zt=23&_nc_ht=scontent.fbkk8-3.fna&edm=AKIiGfEEAAAA&_nc_gid=7iHju1WCjw_p3joAD4hFTA&_nc_tpa=Q5bMBQHR8luuG9jMQffPPswCHg5nnFKmeJRCK3Ry5xdT-UDjXIOoJgDFLVsjD7dainA_SEm37Y5bo2N7DQ&oh=00_AQFLXO5Nga2QySSw9RF7m-9cFIeDv15hxMvXqIsdcBMMsA&oe=6A73EF10",
+      "post": {
+        "title": "ที่ดินติดถนนลาดยาง ศรีนาวา 50 ตร.วา",
+        "price_thb": 250000,
+        "location": "ศรีนาวา เมือง นครนายก",
+        "highlight_features": [
+          "ติดถนนลาดยาง",
+          "น้ำ–ไฟหน้าแปลง",
+          "อยู่ในชุมชน"
+        ],
+        "contact_method": "096-321-6888",
+        "maps_url": null,
+        "text_only": true
+      },
+      "caption": "📍 ขายที่ดิน 50 ตร.วา ศรีนาวา เมือง นครนายก\n💰 250,000 บาท\n\n• ติดถนนลาดยาง\n• น้ำ–ไฟหน้าแปลง\n\nสนใจทัก 096-321-6888"
+    },
+    {
+      "id": "2026-08-12T12:00",
+      "slot_id": "2026-08-12T12:00",
+      "date": "2026-08-12",
+      "time": "12:00",
+      "slot_name": "เที่ยง · คอนเทนต์ความรู้ (carousel)",
+      "platforms": [
+        "FACEBOOK_PAGE"
+      ],
+      "content_type": "carousel",
+      "source": "carousel",
+      "status": "DRAFT",
+      "results": [],
+      "note": "",
+      "created_at": "2026-08-01T14:45:18.956Z",
+      "updated_at": "2026-08-01T14:45:18.956Z",
+      "posted_at": null,
+      "property_id": "TOPIC-CITY-PLAN-COLOURS",
+      "topic_id": "city-plan-colours",
+      "video_file": null,
+      "image_files": [
+        "carousels/city-plan-colours/01.png",
+        "carousels/city-plan-colours/02.png",
+        "carousels/city-plan-colours/03.png",
+        "carousels/city-plan-colours/04.png",
+        "carousels/city-plan-colours/05.png",
+        "carousels/city-plan-colours/06.png",
+        "carousels/city-plan-colours/07.png"
+      ],
+      "post": {
+        "title": "ผังเมืองสีอะไร สร้างอะไร ได้บ้าง",
+        "highlight_features": [],
+        "contact_method": "ทักแชทเพจ หรือ LINE @244raxjb"
+      },
+      "caption": "ผังเมืองสีอะไร สร้างอะไรได้บ้าง 🗺️\n\nซื้อที่ผิดสี = สร้างอย่างที่คิดไม่ได้\nเช็คฟรีที่โยธาธิการจังหวัด\n\n* แต่ละจังหวัดกำหนดต่างกัน ยืนยันอีกครั้งก่อนซื้อนะครับ\n\n#ที่ดินนครนายก #ซื้อที่ดิน #ความรู้ที่ดิน #ที่ดินเจ้าของขายเอง"
+    },
+    {
+      "id": "2026-08-13T09:30",
+      "slot_id": "2026-08-13T09:30",
+      "date": "2026-08-13",
+      "time": "09:30",
+      "slot_name": "เช้า · โพสต์ขายที่ดินลงกลุ่ม (ทุกวัน)",
+      "platforms": [
+        "MANUAL_KIT"
+      ],
+      "content_type": "listing",
+      "source": "listing",
+      "status": "DRAFT",
+      "results": [],
+      "note": "",
+      "created_at": "2026-08-01T14:45:18.956Z",
+      "updated_at": "2026-08-01T14:45:18.956Z",
+      "posted_at": null,
+      "property_id": "LAND-256A8ECA",
+      "listing_id": "LAND-256A8ECA",
+      "video_file": null,
+      "image_files": [],
+      "photo_url": "https://scontent.fbkk13-3.fna.fbcdn.net/v/t39.30808-6/743699315_122121053630736301_869891903480095393_n.jpg?stp=dst-jpg_s960x960_tt6&_nc_cat=100&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=f727a1&_nc_eui2=AeGMR_S5U4BA2-faa5z6hfcCjeYfIHwiwGmN5h8gfCLAabjI6EgOff3VWgHwa_SDzQNEfZxXAauqNHMnZWBq_uLQ&_nc_ohc=53JHS4TF9mMQ7kNvwENGWCb&_nc_oc=AdoKR2k1BaSm0TMrbllMATJWqE1NMQEXENPhEVdAo3WsG-KA0f7_yIEbjY_KKByOyJA&_nc_zt=23&_nc_ht=scontent.fbkk13-3.fna&edm=AKIiGfEEAAAA&_nc_gid=7iHju1WCjw_p3joAD4hFTA&_nc_tpa=Q5bMBQFKngoAqbNEENEy3TlQorvSnAAR9z8de0WpBEadeHobwLOapMW8UwC5BjoXrSQ11FRqRKzN8jycXg&oh=00_AQH_EY-gJkVsP3IiWc8-IMMYs0IpglDUGeLDZdBzGEr6iA&oe=6A73DB6D",
+      "post": {
+        "title": "ที่ดิน 100 ตร.ว. ต.พรมมณี เมือง นครนายก",
+        "price_thb": 390000,
+        "location": "เมือง นครนายก",
+        "highlight_features": [
+          "ใกล้ปั้มพีที เส้นสุวรรณศร"
+        ],
+        "contact_method": "094-887-4343 / 096-321-6888",
+        "maps_url": null,
+        "text_only": true
+      },
+      "caption": "📍 ขายที่ดิน 100ตรว. เมือง นครนายก\n💰 3.9แสน\n\n• ใกล้ปั้มพีที เส้นสุวรรณศร\n\nสนใจทัก 094-887-4343 / 096-321-6888"
+    },
+    {
+      "id": "2026-08-14T09:30",
+      "slot_id": "2026-08-14T09:30",
+      "date": "2026-08-14",
+      "time": "09:30",
+      "slot_name": "เช้า · โพสต์ขายที่ดินลงกลุ่ม (ทุกวัน)",
+      "platforms": [
+        "MANUAL_KIT"
+      ],
+      "content_type": "listing",
+      "source": "listing",
+      "status": "DRAFT",
+      "results": [],
+      "note": "",
+      "created_at": "2026-08-01T14:45:18.956Z",
+      "updated_at": "2026-08-01T14:45:18.956Z",
+      "posted_at": null,
+      "property_id": "LAND-2D71B5FB",
+      "listing_id": "LAND-2D71B5FB",
+      "video_file": null,
+      "image_files": [],
+      "photo_url": "https://scontent.fbkk9-3.fna.fbcdn.net/v/t39.30808-6/742096287_122120244020736301_8200025826853295090_n.jpg?stp=dst-jpg_s960x960_tt6&_nc_cat=109&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=f727a1&_nc_eui2=AeFpm7h1QZgTQi8Gdly_d6KieKpBtLAKJ_Z4qkG0sAon9jiVBYhGxO1Y7yQINMGsX-blkERNbwoh1ZveASjtH9Eg&_nc_ohc=zQ--RGFCoxkQ7kNvwHlLGAt&_nc_oc=AdoTz3b8ie6eaEueUxMCN49ZzP1PGvaG6t8yvy_iuNc6daUCnSFUcD_Cs0kqqfDJ_rA&_nc_zt=23&_nc_ht=scontent.fbkk9-3.fna&edm=AKIiGfEEAAAA&_nc_gid=7iHju1WCjw_p3joAD4hFTA&_nc_tpa=Q5bMBQErYEmmZI7AM5dAPBbLNtuWUQjZ772v4YFC49FoNpsc_i8FhWhBtjo48gu2e4m5nAPsVCzVqgZJrA&oh=00_AQEvB73alf0Acxcn5DRi9LYJjX_-2SyjkMTIXwq5JqENMA&oe=6A73EEA3",
+      "post": {
+        "title": "บ้านพร้อมสวน 1 ไร่ พรหมณี นครนายก",
+        "price_thb": 2500000,
+        "location": "ต.พรหมณี อ.เมือง จ.นครนายก",
+        "highlight_features": [
+          "ติดถนนสาธารณประโยชน์",
+          "มีน้ำประปา ไฟฟ้าพร้อม",
+          "น้ำไม่ท่วม"
+        ],
+        "contact_method": "094-887-4343",
+        "maps_url": null,
+        "text_only": true
+      },
+      "caption": "📍 ขายที่ดิน 1 ไร่ ต.พรหมณี อ.เมือง จ.นครนายก\n💰 2,500,000 บาท\n\n• ติดถนนสาธารณประโยชน์\n• มีน้ำประปา ไฟฟ้าพร้อม\n\nสนใจทัก 094-887-4343"
+    },
+    {
+      "id": "2026-08-14T12:00",
+      "slot_id": "2026-08-14T12:00",
+      "date": "2026-08-14",
+      "time": "12:00",
+      "slot_name": "เที่ยง · คอนเทนต์ความรู้ (carousel)",
+      "platforms": [
+        "FACEBOOK_PAGE"
+      ],
+      "content_type": "carousel",
+      "source": "carousel",
+      "status": "DRAFT",
+      "results": [],
+      "note": "",
+      "created_at": "2026-08-01T14:45:19.082Z",
+      "updated_at": "2026-08-01T14:45:19.082Z",
+      "posted_at": null,
+      "property_id": "TOPIC-LAND-FILLING",
+      "topic_id": "land-filling",
+      "video_file": null,
+      "image_files": [
+        "carousels/land-filling/01.png",
+        "carousels/land-filling/02.png",
+        "carousels/land-filling/03.png",
+        "carousels/land-filling/04.png",
+        "carousels/land-filling/05.png",
+        "carousels/land-filling/06.png",
+        "carousels/land-filling/07.png"
+      ],
+      "post": {
+        "title": "ถมที่ดิน คิดยังไง ให้ไม่บานปลาย",
+        "highlight_features": [],
+        "contact_method": "ทักแชทเพจ หรือ LINE @244raxjb"
+      },
+      "caption": "ถมที่ดินคิดยังไง ให้ไม่บานปลาย 🚜\n\nคิดคิวดินเป็น ต่อรองผู้รับเหมาได้\nสไลด์ที่ 4 คนรีบสร้างมักพลาด\n\n#ที่ดินนครนายก #ซื้อที่ดิน #ความรู้ที่ดิน #ที่ดินเจ้าของขายเอง"
+    }
+  ]
+}

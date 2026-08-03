@@ -1,0 +1,89 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AnalyticsEventInput",
+  "description": "Cost/analytics event contract (15_ANALYTICS_ENGINE.md + Cost Calculator content actually stored in 19_N8N_GUIDE.md). Every provider call across every engine must emit one of these.",
+  "type": "object",
+  "required": ["event_id", "event_type", "transaction_id", "property_id", "created_at"],
+  "properties": {
+    "event_id": { "type": "string", "format": "uuid" },
+    "event_type": {
+      "type": "string",
+      "enum": ["COST_EVENT", "PUBLISH_EVENT", "PERFORMANCE_EVENT", "ERROR_EVENT"]
+    },
+    "transaction_id": { "type": "string", "format": "uuid" },
+    "property_id": { "type": "string", "pattern": "^PROP-TH-[0-9]{4,6}$" },
+    "engine_name": {
+      "type": "string",
+      "enum": ["PROPERTY_ENGINE", "GOOGLE_ENGINE", "ASSET_ENGINE", "HOUSE_ENGINE", "VIDEO_ENGINE", "RENDER_ENGINE", "OVERLAY_ENGINE", "PUBLISH_ENGINE", "ANALYTICS_ENGINE"]
+    },
+    "provider_name": {
+      "type": "string",
+      "enum": [
+        "CLAUDE_HAIKU", "CLAUDE_SONNET", "GEMINI_FLASH",
+        "FLUX_1_DEV", "FLUX_1_SCHNELL", "MIDJOURNEY_V7", "SDXL",
+        "KLING_V2", "LUMA_DREAM", "MINIMAX_VIDEO", "HIGGSFIELD", "RUNWAY_GEN3", "VEO_2",
+        "FISH_AUDIO", "ELEVENLABS_TURBO", "OPENAI_TTS",
+        "GOOGLE_GEOCODING", "GOOGLE_STATIC_MAPS", "GOOGLE_STREET_VIEW",
+        "HOUSE_LIBRARY", "VIDEO_LIBRARY", "GOOGLE_CACHE"
+      ]
+    },
+    "platform": {
+      "type": "string",
+      "enum": ["TIKTOK", "YOUTUBE_SHORTS", "FACEBOOK_REELS", "INSTAGRAM_REELS", "UNKNOWN"]
+    },
+    "cost_usd": { "type": "number", "minimum": 0 },
+    "metrics": { "type": "object" },
+    "created_at": { "type": "string", "format": "date-time" }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "TransactionCostSummary": {
+      "type": "object",
+      "required": ["transaction_id", "property_id", "total_cost_usd", "engine_breakdown", "provider_breakdown", "cost_status"],
+      "properties": {
+        "transaction_id": { "type": "string", "format": "uuid" },
+        "property_id": { "type": "string" },
+        "total_cost_usd": { "type": "number" },
+        "engine_breakdown": { "type": "array", "items": { "type": "object", "properties": { "engine_name": { "type": "string" }, "cost_usd": { "type": "number" } } } },
+        "provider_breakdown": { "type": "array", "items": { "type": "object", "properties": { "provider_name": { "type": "string" }, "cost_usd": { "type": "number" } } } },
+        "cost_status": { "type": "string", "enum": ["UNDER_BUDGET", "NEAR_LIMIT", "OVER_BUDGET"] }
+      }
+    },
+    "ProviderScorecard": {
+      "type": "object",
+      "required": ["provider_name", "provider_type", "average_cost_usd", "success_rate", "average_latency_ms", "quality_score", "availability_status", "recommendation"],
+      "properties": {
+        "provider_name": { "type": "string" },
+        "provider_type": { "type": "string", "enum": ["LLM", "IMAGE_GENERATION", "VIDEO_GENERATION", "TTS", "MAPS", "RENDER"] },
+        "average_cost_usd": { "type": "number" },
+        "success_rate": { "type": "number", "minimum": 0, "maximum": 1 },
+        "average_latency_ms": { "type": "number" },
+        "quality_score": { "type": "number", "minimum": 0, "maximum": 100 },
+        "availability_status": { "type": "string", "enum": ["ONLINE", "DEGRADED", "OFFLINE", "QUOTA_EXCEEDED"] },
+        "recommendation": { "type": "string", "enum": ["PREFERRED", "ALLOW", "AVOID", "DISABLED"] }
+      }
+    }
+  },
+  "x-budget-thresholds": {
+    "per_video": { "GREEN": 0.20, "YELLOW": 0.25, "RED": 0.30 },
+    "per_day": { "GREEN": 5.00, "YELLOW": 8.00, "RED": 10.00 },
+    "per_month": { "GREEN": 100.00, "YELLOW": 150.00, "RED": 200.00 }
+  },
+  "x-hard-cap-per-video-usd": 0.30,
+  "x-error-codes": {
+    "ERR_ANA_01": "Missing Cost Event -- mark COST_INCOMPLETE, estimate from provider default price table, never halt main workflow",
+    "ERR_ANA_02": "Platform Metrics API failure -- retry at 15min/1hr/6hr then mark UNAVAILABLE_TEMPORARY",
+    "ERR_ANA_03": "Provider score outlier (>5x average) -- exclude from running average, flag for manual review",
+    "ERR_COST_NO_PROVIDER_AVAILABLE": "No candidate provider passes availability/budget/recommendation filters",
+    "ERR_BUDGET": "Projected total cost exceeds the $0.30 hard cap"
+  },
+  "x-hard-rules": [
+    "Never call a provider without creating a Cost Event.",
+    "Never select a provider without cost/status/success_rate/fallback data.",
+    "Never hardcode provider prices outside the Provider Config/Interface.",
+    "Never fold reuse-asset cost into generation cost -- log cost_usd = 0 for cache/library hits.",
+    "Never delete failed events from the analytics log.",
+    "Always separate estimated_cost_usd from actual_cost_usd.",
+    "Orchestrator must check budget before every Video Engine call."
+  ]
+}

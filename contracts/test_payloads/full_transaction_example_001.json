@@ -1,0 +1,73 @@
+{
+  "_comment": "End-to-end example transaction assembled from field examples scattered across 03_SYSTEM_RULES.md, 04_WORKFLOW.md, 07-15_*.md and the n8n guide content actually stored in 18_CLAUDE_RULES.md. Use this to sanity-check schemas/*.schema.json and any Provider Interface / n8n implementation against a realistic full run. Not sourced from 06_JSON_CONTRACT.md -- that file is corrupted (see 20_ROADMAP.md section 1).",
+  "transaction_id": "8f83c8d3-578b-49ef-b328-3e47dc476902",
+  "property_id": "PROP-TH-01029",
+  "status": "COMPLETED",
+  "budget": {
+    "total_allocated_usd": 0.30,
+    "breakdown": { "google": 0.015, "asset": 0.010, "house": 0.050, "video": 0.200, "buffer": 0.025 }
+  },
+  "cost_summary": {
+    "total_cost_usd": 0.176,
+    "currency": "USD",
+    "cost_status": "UNDER_BUDGET"
+  },
+  "engines_data": {
+    "property_engine": {
+      "property_id": "PROP-TH-01029",
+      "title": "บ้านเดี่ยวหรู 2 ชั้น วิวภูเขา เขาใหญ่",
+      "price_thb": 12500000,
+      "style_tag": "MODERN_NORDIC",
+      "raw_address": "ตำบลหมูสี อำเภอปากช่อง จังหวัดนครราชสีมา",
+      "highlight_features": ["บ้านเดี่ยว 2 ชั้น", "วิวภูเขาเขาใหญ่", "พื้นที่ 100 ตารางวา"]
+    },
+    "google_engine": {
+      "property_id": "PROP-TH-01029",
+      "geo_location": { "lat": 14.5124, "lng": 101.4234, "formatted_address": "Mu Si, Pak Chong District, Nakhon Ratchasima, Thailand" },
+      "static_map_url": "https://maps.googleapis.com/maps/api/staticmap?center=14.5124,101.4234&zoom=16&size=1080x1080&maptype=satellite&key=REDACTED",
+      "street_view_url": "https://maps.googleapis.com/maps/api/streetview?size=1080x1080&location=14.5124,101.4234&key=REDACTED",
+      "cache_hit": false
+    },
+    "asset_engine": {
+      "property_id": "PROP-TH-01029",
+      "categorized_assets": [
+        { "asset_id": "ast_7a1c9e2f", "url": "https://cdn.mmgs.io/properties/PROP-TH-01029/assets/land_01.jpg", "category": "LAND_VIEW", "safety_status": "SAFE" }
+      ]
+    },
+    "house_engine": {
+      "property_id": "PROP-TH-01029",
+      "house_image_url": "https://cdn.mmgs.io/house_library/modern_nordic_2story_100w_02.png",
+      "source_type": "LIBRARY_REUSE",
+      "style_tag": "MODERN_NORDIC",
+      "generation_metadata": { "provider": "FLUX_1_DEV", "cost_usd": 0.0000, "prompt": "Photorealistic exterior of a modern Nordic 2-story single family house..." }
+    },
+    "video_engine": {
+      "property_id": "PROP-TH-01029",
+      "camera_config": { "motion_type": "PAN_RIGHT", "pan_speed": 0.5 },
+      "b_roll_clips": [
+        { "clip_id": "vid_d98f7c6b", "video_url": "https://cdn.mmgs.io/video_library/modern_nordic_pan_right_01.mp4", "duration_seconds": 4.0, "camera_motion": "PAN_RIGHT" }
+      ]
+    },
+    "overlay_engine": {
+      "property_id": "PROP-TH-01029",
+      "aspect_ratio": "9:16",
+      "overlay_layers": [
+        { "layer_name": "header_title", "image_url": "https://cdn.mmgs.io/overlays/PROP-TH-01029_header.png", "position": { "x": 0, "y": 150, "z_index": 10 } },
+        { "layer_name": "price_badge", "image_url": "https://cdn.mmgs.io/overlays/PROP-TH-01029_price.png", "position": { "x": 0, "y": 1200, "z_index": 11 } },
+        { "layer_name": "qr_contact", "image_url": "https://cdn.mmgs.io/overlays/PROP-TH-01029_qr.png", "position": { "x": 800, "y": 1650, "z_index": 12 } }
+      ]
+    },
+    "render_engine": {
+      "property_id": "PROP-TH-01029",
+      "final_video_url": "https://cdn.mmgs.io/renders/PROP-TH-01029_final_9_16.mp4",
+      "render_specs": { "resolution": "1080x1920", "fps": 30, "bitrate_kbps": 8000, "duration_seconds": 6.0 }
+    },
+    "publish_engine": {
+      "property_id": "PROP-TH-01029",
+      "status": "SUCCESS",
+      "published_destinations": [
+        { "platform": "TIKTOK", "post_id": "7182938491029384", "publish_url": "https://www.tiktok.com/@broker/video/7182938491029384", "published_at": "2026-07-28T10:15:30Z" }
+      ]
+    }
+  }
+}

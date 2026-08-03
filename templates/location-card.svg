@@ -1,0 +1,36 @@
+<!--
+  Location info card : overlays the middle of the clip (WF5-fix §2.1).
+
+  Edit this file to change the layout, colours or wording. Nothing here is hard-coded in
+  JS. Placeholders are filled by src/lib/svg-card.mjs:
+    {{W}} {{H}}          canvas size, injected to match the video
+    {{HEADLINE}}         e.g. "ที่ดินทำเลดี"
+    {{SUBHEADLINE}}      e.g. "เดินทางสะดวก ใกล้แหล่งสำคัญ"
+    {{ROWS}}             generated <g> rows, one per nearby place
+    {{FOOTER}}           closing note
+  Rendered to a transparent PNG, then composited by FFmpeg with enable='between(t,a,b)'.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="{{W}}" height="{{H}}" viewBox="0 0 {{W}} {{H}}">
+  <defs>
+    <linearGradient id="cardbg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0C161F" stop-opacity="0.94"/>
+      <stop offset="100%" stop-color="#111D28" stop-opacity="0.94"/>
+    </linearGradient>
+  </defs>
+
+  <g transform="translate({{PAD}},{{TOP}})">
+    <rect x="0" y="0" width="{{CARD_W}}" height="{{CARD_H}}" rx="{{RADIUS}}" fill="url(#cardbg)"/>
+    <rect x="0" y="0" width="{{ACCENT_BAR}}" height="{{CARD_H}}" rx="{{RADIUS}}" fill="#E0A05C"/>
+    <rect x="{{ACCENT_BAR}}" y="0" width="{{ACCENT_BAR}}" height="{{CARD_H}}" fill="url(#cardbg)"/>
+
+    <text x="{{TEXT_X}}" y="{{HEAD_Y}}" font-family="Sathu" font-size="{{HEAD_SIZE}}"
+          font-weight="bold" fill="#FFFFFF">{{HEADLINE}}</text>
+    <text x="{{TEXT_X}}" y="{{SUB_Y}}" font-family="Sathu" font-size="{{SUB_SIZE}}"
+          fill="#93A7B7">{{SUBHEADLINE}}</text>
+
+    {{ROWS}}
+
+    <text x="{{TEXT_X}}" y="{{FOOTER_Y}}" font-family="Sathu" font-size="{{SUB_SIZE}}"
+          fill="#E0A05C">{{FOOTER}}</text>
+  </g>
+</svg>

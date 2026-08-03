@@ -1,0 +1,18 @@
+# ความลับ — ห้ามเข้า git เด็ดขาด
+.env
+.env.local
+*.pem
+*.key
+
+# dependencies
+node_modules/
+
+# ไฟล์ที่ระบบสร้างขึ้นเอง (วิดีโอ/รูปที่ render แล้ว)
+output/
+
+# macOS
+.DS_Store
+
+# logs
+*.log
+logs/

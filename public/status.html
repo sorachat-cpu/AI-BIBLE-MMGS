@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>สถานะระบบ · MMGS</title>
+<style>
+  /* Same tokens as publish.html so the two pages read as one product. */
+  :root {
+    --bg: #eff2f6; --surface: #ffffff; --surface-2: #f7f9fb; --border: #dce3ea;
+    --border-strong: #bcc7d3; --text: #111b25; --text-2: #4c5b6a; --text-3: #7c8b9a;
+    --accent: #a9661f; --accent-2: #c78436; --accent-soft: #fbf1e3;
+    --ok: #16714a; --ok-soft: #e1f1e8; --err: #9d2b22; --err-soft: #fbe5e2;
+    --warn: #8a5a10; --warn-soft: #fbf0dd;
+    --shadow: 0 1px 2px rgba(17,27,37,.05), 0 8px 24px -12px rgba(17,27,37,.18);
+    --mono: ui-monospace, "SF Mono", Menlo, monospace;
+    --sans: "Sukhumvit Set", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    color-scheme: light;
+  }
+  :root:not([data-theme="light"]) {
+    --bg: #0a121a; --surface: #111d27; --surface-2: #16232e; --border: #21313e;
+    --border-strong: #354959; --text: #e2eaf1; --text-2: #9cafbf; --text-3: #6a7f92;
+    --accent: #dda062; --accent-2: #e8b57f; --accent-soft: #2a1c0e;
+    --ok: #4ac68a; --ok-soft: #0e2a1d; --err: #e5786b; --err-soft: #2d1411;
+    --warn: #e0b060; --warn-soft: #2b2010;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 28px -14px rgba(0,0,0,.7);
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: var(--sans); font-size: 15px; line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  main { max-width: 1000px; margin: 0 auto; padding: 28px 20px 64px; }
+  a { color: var(--accent); }
+
+  header.top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; margin-bottom: 22px; }
+  h1 { font-size: 24px; margin: 0 0 4px; letter-spacing: -.01em; }
+  h2 { font-size: 15px; margin: 0 0 12px; letter-spacing: .02em; text-transform: uppercase; color: var(--text-3); }
+  .sub { color: var(--text-3); font-size: 13.5px; margin: 0; }
+
+  button {
+    font-family: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer;
+    padding: 8px 15px; border-radius: 9px; border: 1px solid var(--border-strong);
+    background: var(--surface); color: var(--text);
+  }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #16100a; }
+  button:disabled { opacity: .55; cursor: default; }
+
+  /* The verdict banner is the whole point of the page: one glance, one answer. */
+  .verdict { border-radius: 14px; padding: 20px 22px; margin-bottom: 22px; border: 1px solid; display: flex; gap: 18px; align-items: center; flex-wrap: wrap; }
+  .verdict .mark { font-size: 34px; line-height: 1; }
+  .verdict b { display: block; font-size: 19px; margin-bottom: 2px; }
+  .verdict p { margin: 0; font-size: 14px; opacity: .9; }
+  .verdict.ok   { background: var(--ok-soft);   border-color: var(--ok);   color: var(--ok); }
+  .verdict.warn { background: var(--warn-soft); border-color: var(--warn); color: var(--warn); }
+  .verdict.fail { background: var(--err-soft);  border-color: var(--err);  color: var(--err); }
+
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 26px; }
+  .stat { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; box-shadow: var(--shadow); }
+  .stat b { display: block; font-size: 24px; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+  .stat span { font-size: 12.5px; color: var(--text-3); }
+
+  .group { margin-bottom: 26px; }
+  .check {
+    display: grid; grid-template-columns: 22px 1fr; gap: 12px;
+    background: var(--surface); border: 1px solid var(--border); border-left-width: 3px;
+    border-radius: 10px; padding: 13px 16px; margin-bottom: 8px;
+  }
+  .check.ok   { border-left-color: var(--ok); }
+  .check.warn { border-left-color: var(--warn); }
+  .check.fail { border-left-color: var(--err); }
+  .check .dot { font-size: 15px; line-height: 1.5; }
+  .check .title { font-weight: 600; }
+  .check .detail { color: var(--text-2); font-size: 13.5px; word-break: break-word; }
+  .check .fix {
+    margin-top: 7px; font-family: var(--mono); font-size: 12.5px;
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: 7px;
+    padding: 6px 10px; display: inline-block; color: var(--text-2); word-break: break-all;
+  }
+
+  table.grid { width: 100%; border-collapse: collapse; font-size: 13.5px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  table.grid th, table.grid td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+  table.grid tr:last-child td { border-bottom: none; }
+  table.grid th { color: var(--text-3); font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em; background: var(--surface-2); }
+  .pill { display: inline-block; font-size: 11.5px; font-weight: 700; padding: 2px 9px; border-radius: 999px; }
+  .pill.ok { background: var(--ok-soft); color: var(--ok); }
+  .pill.no { background: var(--err-soft); color: var(--err); }
+  .pill.mode { background: var(--surface-2); color: var(--text-3); border: 1px solid var(--border); }
+  code { font-family: var(--mono); font-size: 12.5px; }
+
+  footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--border); color: var(--text-3); font-size: 12.5px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .loading { text-align: center; padding: 60px 0; color: var(--text-3); }
+  @media (max-width: 560px) { .verdict .mark { display: none; } }
+</style>
+  <script src="/nav.js" defer></script>
+</head>
+<body>
+<main>
+  <header class="top">
+    <div>
+      <h1>สถานะระบบ</h1>
+      <p class="sub">ตรวจก่อนปล่อยให้โพสต์ · <a href="/publish">ไปหน้าคิวโพสต์</a></p>
+    </div>
+    <div>
+      <button id="refresh" class="primary">ตรวจใหม่</button>
+      <button id="theme">สลับธีม</button>
+    </div>
+  </header>
+
+  <div id="app"><div class="loading">กำลังตรวจระบบ…</div></div>
+
+  <footer>
+    <span>ข้อมูลสดจาก <code>/api/status</code> · ไม่มีการเขียนไฟล์ใดๆ</span>
+    <span id="stamp"></span>
+  </footer>
+</main>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+  const MARK = { ok: "✓", warn: "!", fail: "✕" };
+  const VERDICT = {
+    ok:   { mark: "✓", title: "ระบบพร้อมโพสต์", note: "ตรวจครบทุกข้อ ไม่มีอะไรค้าง ปล่อยให้รันอัตโนมัติได้" },
+    warn: { mark: "!", title: "โพสต์ได้ แต่มีเรื่องควรดู", note: "ช่องที่พร้อมยังโพสต์ได้ตามปกติ ส่วนที่เตือนไว้ไม่ทำให้คิวหลุด" },
+    fail: { mark: "✕", title: "ยังไม่ควรปล่อยให้โพสต์", note: "มีอย่างน้อยหนึ่งข้อที่จะทำให้โพสต์ไม่ออก แก้ก่อนเปิดโหมดอัตโนมัติ" },
+  };
+
+  function checkHtml(c) {
+    return `<div class="check ${c.level}">
+      <div class="dot">${MARK[c.level]}</div>
+      <div>
+        <div class="title">${esc(c.title)}</div>
+        <div class="detail">${esc(c.detail)}</div>
+        ${c.fix ? `<div class="fix">${esc(c.fix)}</div>` : ""}
+      </div>
+    </div>`;
+  }
+
+  function render(s) {
+    const v = VERDICT[s.verdict];
+    const f = s.facts;
+
+    // Failures first, then warnings: the page should be read top to bottom as a to-do
+    // list, not as the order the checks happened to run in.
+    const order = { fail: 0, warn: 1, ok: 2 };
+    const checks = [...s.checks].sort((a, b) => order[a.level] - order[b.level]);
+
+    const dest = f.destinations.map((d) => `<tr>
+      <td><code>${esc(d.platform)}</code></td>
+      <td><span class="pill mode">${d.mode === "manual" ? "กดเอง" : "อัตโนมัติ"}</span></td>
+      <td>${d.ready ? '<span class="pill ok">พร้อม</span>' : '<span class="pill no">ยังไม่ตั้งค่า</span>'}</td>
+      <td class="detail">${d.ready ? esc(d.label) : "<code>" + esc(d.missing_env.join(", ")) + "</code>"}</td>
+    </tr>`).join("");
+
+    $("app").innerHTML = `
+      <div class="verdict ${s.verdict}">
+        <div class="mark">${v.mark}</div>
+        <div><b>${v.title}</b><p>${v.note} — ผ่าน ${s.counts.ok} · เตือน ${s.counts.warn} · ต้องแก้ ${s.counts.fail}</p></div>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><b>${f.queue_pending}</b><span>รอโพสต์ในคิว</span></div>
+        <div class="stat"><b>${f.queue_posted}</b><span>โพสต์ไปแล้ว</span></div>
+        <div class="stat"><b>${f.stock_summary?.videos ?? 0}</b><span>คลิปในคลัง</span></div>
+        <div class="stat"><b>${f.stock_summary?.days_of_video_runway ?? 0} วัน</b><span>ก่อนคลิปเริ่มซ้ำ</span></div>
+        <div class="stat"><b>${f.due_now.length}</b><span>ช่องที่ถึงเวลาแล้ว</span></div>
+        <div class="stat"><b>${f.auto_publish ? "เปิด" : "ปิด"}</b><span>โหมดโพสต์อัตโนมัติ</span></div>
+      </div>
+
+      <div class="group">
+        <h2>ผลการตรวจ</h2>
+        ${checks.map(checkHtml).join("")}
+      </div>
+
+      <div class="group">
+        <h2>ปลายทางทั้งหมด</h2>
+        <table class="grid">
+          <thead><tr><th>ช่อง</th><th>ชนิด</th><th>สถานะ</th><th>รายละเอียด</th></tr></thead>
+          <tbody>${dest}</tbody>
+        </table>
+      </div>`;
+
+    $("stamp").textContent = "ตรวจเมื่อ " + new Date(s.generated_at).toLocaleString("th-TH");
+    document.title = `${v.mark} สถานะระบบ · MMGS`;
+  }
+
+  async function load() {
+    $("refresh").disabled = true;
+    $("refresh").textContent = "กำลังตรวจ…";
+    try {
+      const res = await fetch("/api/status");
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error || "ตรวจไม่สำเร็จ");
+      render(json.data);
+    } catch (err) {
+      $("app").innerHTML = `<div class="verdict fail"><div class="mark">✕</div>
+        <div><b>ตรวจระบบไม่ได้</b><p>${esc(err.message)} — เซิร์ฟเวอร์รันอยู่หรือเปล่า (<code>npm run web</code>)</p></div></div>`;
+    } finally {
+      $("refresh").disabled = false;
+      $("refresh").textContent = "ตรวจใหม่";
+    }
+  }
+
+  $("refresh").addEventListener("click", load);
+  $("theme").addEventListener("click", () => {
+    const dark = document.documentElement.getAttribute("data-theme") !== "light";
+    document.documentElement.setAttribute("data-theme", dark ? "light" : "dark");
+  });
+  load();
+</script>
+</body>
+</html>

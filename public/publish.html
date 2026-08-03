@@ -1,0 +1,612 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ตารางโพสต์ · MMGS</title>
+<style>
+  :root {
+    --bg: #eff2f6; --surface: #ffffff; --surface-2: #f7f9fb; --border: #dce3ea;
+    --border-strong: #bcc7d3; --text: #111b25; --text-2: #4c5b6a; --text-3: #7c8b9a;
+    --accent: #a9661f; --accent-2: #c78436; --accent-soft: #fbf1e3;
+    --ok: #16714a; --ok-soft: #e1f1e8; --err: #9d2b22; --err-soft: #fbe5e2;
+    --wait: #2a5b98; --wait-soft: #e5edf7;
+    --shadow: 0 1px 2px rgba(17,27,37,.05), 0 8px 24px -12px rgba(17,27,37,.18);
+    --mono: ui-monospace, "SF Mono", Menlo, monospace;
+    --sans: "Sukhumvit Set", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0a121a; --surface: #111d27; --surface-2: #16232e; --border: #21313e;
+      --border-strong: #354959; --text: #e2eaf1; --text-2: #9cafbf; --text-3: #6a7f92;
+      --accent: #dda062; --accent-2: #e8b57f; --accent-soft: #2a1c0e;
+      --ok: #4ac68a; --ok-soft: #0e2a1d; --err: #e5786b; --err-soft: #2d1411;
+      --wait: #6da6de; --wait-soft: #0f2337;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 28px -14px rgba(0,0,0,.7);
+      color-scheme: dark;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: var(--sans); font-size: 15px; line-height: 1.6;
+  }
+  .shell { max-width: 1180px; margin: 0 auto; padding: 32px 20px 80px; }
+  .kicker {
+    font-size: 12px; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--accent); font-weight: 700;
+  }
+  h1 { font-size: clamp(26px, 4vw, 38px); margin: 6px 0 8px; letter-spacing: -.02em; }
+  h2 { font-size: 19px; margin: 0 0 4px; }
+  h3 { font-size: 15px; margin: 0; }
+  p.lede { color: var(--text-2); margin: 0 0 4px; max-width: 62ch; }
+  a { color: var(--accent); }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 20px; box-shadow: var(--shadow); margin-bottom: 20px;
+  }
+  .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .spread { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+
+  button {
+    font: inherit; font-weight: 600; cursor: pointer; border-radius: 9px;
+    border: 1px solid transparent; padding: 8px 15px;
+    background: var(--accent); color: #fff; transition: filter .15s;
+  }
+  button:hover:not(:disabled) { filter: brightness(1.08); }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  button.ghost { background: transparent; color: var(--text-2); border-color: var(--border-strong); }
+  button.danger { background: var(--err); }
+  button.small { padding: 5px 11px; font-size: 13px; }
+
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600;
+    padding: 5px 11px; border-radius: 999px; border: 1px solid var(--border);
+    background: var(--surface-2); color: var(--text-2);
+  }
+  .chip.on { background: var(--ok-soft); color: var(--ok); border-color: transparent; }
+  .chip.off { background: var(--err-soft); color: var(--err); border-color: transparent; }
+  .chip .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; }
+  .stat { background: var(--surface-2); border: 1px solid var(--border); border-radius: 11px; padding: 12px 14px; }
+  .stat b { display: block; font-size: 24px; line-height: 1.2; letter-spacing: -.02em; }
+  .stat span { font-size: 12.5px; color: var(--text-3); }
+
+  .day { border: 1px solid var(--border); border-radius: 13px; overflow: hidden; margin-bottom: 14px; background: var(--surface); }
+  .day > header {
+    background: var(--surface-2); border-bottom: 1px solid var(--border);
+    padding: 10px 16px; display: flex; gap: 10px; align-items: baseline;
+  }
+  .day > header b { font-size: 15px; }
+  .day > header span { color: var(--text-3); font-size: 13px; }
+  .day.today > header { background: var(--accent-soft); }
+
+  .slot { border-top: 1px solid var(--border); padding: 14px 16px; display: grid; gap: 12px; grid-template-columns: 92px 1fr; }
+  .slot:first-of-type { border-top: none; }
+  .slot .when { font-variant-numeric: tabular-nums; }
+  .slot .when b { font-size: 17px; display: block; }
+  .slot .when span { font-size: 12px; color: var(--text-3); }
+  .slot .body { min-width: 0; }
+  .slot .title { font-weight: 600; margin-bottom: 6px; }
+  .slot.empty .body { color: var(--text-3); }
+
+  .media { display: flex; gap: 12px; align-items: flex-start; margin: 8px 0; flex-wrap: wrap; }
+  .media video { width: 128px; border-radius: 9px; background: #000; display: block; }
+  .media .file { font-family: var(--mono); font-size: 12px; color: var(--text-3); word-break: break-all; }
+  .slides { display: flex; gap: 6px; overflow-x: auto; max-width: 100%; padding-bottom: 4px; }
+  .slides img { width: 76px; border-radius: 7px; border: 1px solid var(--border); flex: 0 0 auto; }
+
+  table.grid { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  table.grid th, table.grid td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  table.grid th { color: var(--text-3); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
+  table.grid td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .scroll-x { overflow-x: auto; }
+
+  textarea {
+    width: 100%; min-height: 118px; resize: vertical; font: inherit; line-height: 1.55;
+    padding: 11px 13px; border-radius: 10px; border: 1px solid var(--border-strong);
+    background: var(--surface-2); color: var(--text);
+  }
+  textarea:focus, input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  input[type=text], input[type=number], select {
+    font: inherit; padding: 7px 10px; border-radius: 9px;
+    border: 1px solid var(--border-strong); background: var(--surface-2); color: var(--text);
+  }
+  label.field { display: grid; gap: 4px; font-size: 12.5px; color: var(--text-3); font-weight: 600; }
+
+  .status { font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 999px; }
+  .status.DRAFT { background: var(--wait-soft); color: var(--wait); }
+  .status.READY { background: var(--accent-soft); color: var(--accent); }
+  .status.POSTED { background: var(--ok-soft); color: var(--ok); }
+  .status.FAILED { background: var(--err-soft); color: var(--err); }
+  .status.SKIPPED, .status.HIDDEN { background: var(--surface-2); color: var(--text-3); }
+  .status.NEW { background: var(--wait-soft); color: var(--wait); }
+  .status.SOLD { background: var(--surface-2); color: var(--text-3); text-decoration: line-through; }
+
+  .log {
+    font-family: var(--mono); font-size: 12.5px; white-space: pre-wrap; word-break: break-word;
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 12px 14px; margin-top: 10px; max-height: 320px; overflow: auto;
+  }
+  .note { font-size: 13px; color: var(--text-3); }
+  .warn { background: var(--err-soft); color: var(--err); border-radius: 10px; padding: 12px 14px; font-size: 13.5px; }
+  footer { margin-top: 40px; color: var(--text-3); font-size: 13px; display: flex; gap: 18px; flex-wrap: wrap; }
+  /* Auto vs manual is the one split that changes what the buttons below even mean, so it
+     gets a real tab bar rather than a filter dropdown. */
+  .tabs { display: flex; gap: 6px; border-bottom: 1px solid var(--border); }
+  .tab {
+    background: none; border: none; border-bottom: 2px solid transparent;
+    padding: 10px 14px; margin-bottom: -1px; cursor: pointer;
+    color: var(--text-3); font-size: 14px; font-weight: 600; font-family: inherit;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .tab:hover { color: var(--text-1); }
+  .tab[aria-selected="true"] { color: var(--text-1); border-bottom-color: var(--accent); }
+  .tab .count {
+    font-size: 11.5px; font-weight: 700; padding: 1px 7px; border-radius: 999px;
+    background: var(--border); color: var(--text-2); font-variant-numeric: tabular-nums;
+  }
+  .tab[aria-selected="true"] .count { background: var(--accent); color: #06120b; }
+
+  @media (max-width: 620px) { .slot { grid-template-columns: 1fr; } }
+</style>
+  <script src="/nav.js" defer></script>
+</head>
+<body>
+<main class="shell">
+
+  <header style="margin-bottom:26px">
+    <div class="kicker">MMGS · Publish</div>
+    <h1>ตารางลงคลิปและคิวโพสต์</h1>
+    <p class="lede">
+      ทุกช่องเวลาในตารางจะถูกเติมคลิปจากคลังไว้ล่วงหน้าพร้อมแคปชั่น
+      แก้ข้อความได้ตรงนี้ แล้วกดโพสต์ทีเดียวออกทุกแพลตฟอร์มที่ตั้งค่าไว้
+    </p>
+    <p class="note"><a href="/">← กลับไปห้องควบคุมสายพานผลิตวิดีโอ</a> · <a href="/status">ตรวจสถานะระบบก่อนโพสต์ →</a></p>
+  </header>
+
+  <section class="card">
+    <div class="spread">
+      <div><h2>ปลายทางที่ต่อไว้</h2><p class="note">ช่องที่ยังไม่พร้อมจะถูกข้ามอัตโนมัติ ไม่ทำให้ทั้งงานล้ม</p></div>
+      <div class="row">
+        <button class="ghost small" id="btn-reload">รีเฟรช</button>
+        <button class="small" id="btn-plan">เติมตาราง 7 วัน</button>
+      </div>
+    </div>
+    <div class="chips" id="readiness" style="margin-top:12px"></div>
+  </section>
+
+  <section class="card">
+    <h2>คลังคอนเทนต์</h2>
+    <p class="note" style="margin-bottom:12px">ไฟล์ในโฟลเดอร์ <code>output/</code> และรูปที่วางไว้ใน <code>content/media/</code></p>
+    <div class="stats" id="stats"></div>
+    <div id="stock-warn" style="margin-top:12px"></div>
+  </section>
+
+  <section class="card">
+    <div class="spread">
+      <div><h2>ชีทที่ดิน</h2>
+        <p class="note">ดึงที่ดินที่เคยลงเพจมาเก็บเป็นตาราง พร้อมลิงก์แผนที่และสถานที่ใกล้เคียง เอาไว้ทยอยโพสต์ลงกลุ่ม</p></div>
+      <div class="row">
+        <button class="ghost small" id="btn-listings-page">ดึงจากโพสต์เพจ</button>
+        <button class="ghost small" id="btn-listings-enrich">เติมสถานที่ใกล้เคียง</button>
+      </div>
+    </div>
+
+    <details style="margin-top:12px">
+      <summary style="cursor:pointer;font-weight:600;font-size:14px">วางข้อความโพสต์เก่าเอง (ใช้ได้เลยโดยไม่ต้องมี token)</summary>
+      <p class="note" style="margin:8px 0">คัดลอกข้อความโพสต์เก่ามาวาง คั่นแต่ละโพสต์ด้วยบรรทัดที่มี <code>---</code></p>
+      <textarea id="listing-paste" placeholder="ขายที่ดิน 2 ไร่ องครักษ์ นครนายก ถมแล้ว ติดถนน&#10;ราคา 2.8 ล้าน แผนที่ https://maps.app.goo.gl/xxxx&#10;Line: @244raxjb&#10;---&#10;ขายที่ดิน 100 ตร.ว. ปากพลี ..."></textarea>
+      <div class="row" style="margin-top:9px">
+        <button class="small" id="btn-listings-paste">แยกข้อมูลเข้าชีท</button>
+        <span class="note">ใช้ Claude Haiku ประมาณ $0.001 ต่อโพสต์</span>
+      </div>
+    </details>
+
+    <div class="row" style="margin-top:12px">
+      <button class="ghost small" onclick="location.href='/api/listings-sheet?format=csv'">ดาวน์โหลดชีท CSV</button>
+      <button class="ghost small" onclick="location.href='/api/listings-sheet?format=tsv'">TSV (วางลงชีตได้เลย)</button>
+      <label class="ghost small" style="border:1px solid var(--border-strong);border-radius:9px;padding:8px 15px;cursor:pointer;font-weight:600;color:var(--text-2)">
+        นำเข้าชีทที่แก้แล้ว
+        <input type="file" id="listing-csv-in" accept=".csv,text/csv" hidden>
+      </label>
+    </div>
+    <div id="listing-log"></div>
+    <div id="listing-table" style="margin-top:14px"></div>
+  </section>
+
+  <section class="card">
+    <div class="spread" style="margin-bottom:12px">
+      <div><h2>ไฟล์ทำงานร่วมกับ Google Sheet</h2>
+        <p class="note">ส่งดราฟต์ออกเป็นไฟล์ → เปิดในชีต → แก้แคปชั่น/สถานะ → นำกลับเข้าระบบ</p></div>
+    </div>
+    <div class="row">
+      <button class="ghost small" onclick="location.href='/api/publish/sheet?format=csv'">ดาวน์โหลด CSV</button>
+      <button class="ghost small" onclick="location.href='/api/publish/sheet?format=tsv'">ดาวน์โหลด TSV (วางลงชีตได้เลย)</button>
+      <label class="ghost small" style="border:1px solid var(--border-strong);border-radius:9px;padding:8px 15px;cursor:pointer;font-weight:600;color:var(--text-2)">
+        นำเข้า CSV ที่แก้แล้ว
+        <input type="file" id="csv-in" accept=".csv,text/csv" hidden>
+      </label>
+      <button class="ghost small" id="btn-pull">ดึงโพสต์เก่าจากเพจ</button>
+    </div>
+    <div id="sheet-log"></div>
+  </section>
+
+  <section>
+    <div class="spread" style="margin-bottom:12px">
+      <div><h2>ตารางลงคลิป</h2><p class="note" id="mode-note"></p></div>
+      <div class="row">
+        <label class="field">จำนวนวัน
+          <select id="days"><option>7</option><option>14</option><option>30</option></select>
+        </label>
+      </div>
+    </div>
+
+    <div class="tabs" id="tabs">
+      <button class="tab" data-tab="auto">หน้าเพจ · โพสต์อัตโนมัติ<span class="count" id="count-auto">0</span></button>
+      <button class="tab" data-tab="manual">กลุ่ม · กดโพสต์เอง<span class="count" id="count-manual">0</span></button>
+    </div>
+    <p class="note" id="tab-note" style="margin:10px 2px 14px"></p>
+
+    <div id="calendar"></div>
+  </section>
+
+  <footer>
+    <span>คิวเก็บที่ <code>content/queue.json</code> · ตารางที่ <code>content/schedule.config.json</code></span>
+    <span>รันประจำวันด้วย <code>npm run daily</code></span>
+  </footer>
+</main>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  let DATA = null;
+
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+  // Carousel slides live in subfolders, so each path segment is encoded separately --
+  // encodeURIComponent on the whole path would escape the slashes and 404.
+  const encodePath = (p) => String(p).split("/").map(encodeURIComponent).join("/");
+
+  async function api(url, body) {
+    const res = await fetch(url, body === undefined ? {} : {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
+    });
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.message || "ผิดพลาด");
+    return json.data;
+  }
+
+  function renderReadiness(rows) {
+    $("readiness").innerHTML = rows.map((r) => `
+      <span class="chip ${r.ready ? "on" : "off"}" title="${esc(r.ready ? r.note : "ต้องมี " + r.missing_env.join(", "))}">
+        <i class="dot"></i>${esc(r.label)}
+      </span>`).join("");
+  }
+
+  function renderStats(s) {
+    const cells = [
+      ["คลิปทั้งหมด", s.videos], ["คลิปแนวตั้ง 9:16", s.vertical_videos],
+      ["รูป", s.images], ["ยังไม่เคยโพสต์", s.never_posted],
+      ["ช่องต่อวัน", s.slots_per_day], ["คลิปพอใช้ (วัน)", s.days_of_video_runway],
+    ];
+    $("stats").innerHTML = cells.map(([label, n]) =>
+      `<div class="stat"><b>${n}</b><span>${label}</span></div>`).join("");
+
+    const warns = [];
+    if (s.images === 0) warns.push("ยังไม่มีรูปในคลัง — ช่อง 08:00 ที่เป็นโพสต์ภาพจะว่าง วางไฟล์ .jpg/.png ไว้ใน <code>content/media/</code> ได้เลย");
+    if (s.days_of_video_runway < 7) warns.push("คลิปในคลังพอใช้ไม่ถึงสัปดาห์ — เรนเดอร์เพิ่มจากห้องควบคุมก่อนคลังหมด");
+    $("stock-warn").innerHTML = warns.length ? `<div class="warn">${warns.join("<br>")}</div>` : "";
+  }
+
+  // Which destinations need a human, taken from the server's registry rather than
+  // hardcoded here -- the console must never disagree with the scheduler about this.
+  const manualSet = () =>
+    new Set((DATA.readiness ?? []).filter((r) => r.mode === "manual").map((r) => r.platform));
+
+  function slotMode(slot) {
+    const manual = manualSet();
+    return (slot.platforms ?? []).some((p) => manual.has(p)) ? "manual" : "auto";
+  }
+
+  let TAB = "auto";
+
+  function slotHtml(slot, isDue) {
+    const it = slot.item;
+    const platforms = slot.platforms.join(" · ");
+    const isManual = slotMode(slot) === "manual";
+    if (!it) {
+      return `<div class="slot empty">
+        <div class="when"><b>${slot.time}</b><span>${esc(slot.name)}</span></div>
+        <div class="body">ยังไม่มีคอนเทนต์ลงช่องนี้ — ${slot.content_type === "image" ? "คลังรูปว่าง" : "คลังคลิปไม่พอ"}
+          <div class="note">${esc(platforms)}</div></div>
+      </div>`;
+    }
+    const posted = it.status === "POSTED";
+    const urls = (it.results ?? []).filter((r) => r.publish_url)
+      .map((r) => `<a href="${esc(r.publish_url)}" target="_blank" rel="noopener">${esc(r.platform)}</a>`).join(" · ");
+    const kit = (it.results ?? []).find((r) => r.kit_dir);
+
+    return `<div class="slot" data-id="${esc(it.id)}">
+      <div class="when"><b>${slot.time}</b><span>${esc(slot.name)}</span>
+        ${isDue ? '<span style="color:var(--accent);font-weight:700">ถึงเวลาแล้ว</span>' : ""}</div>
+      <div class="body">
+        <div class="row" style="margin-bottom:6px">
+          <span class="status ${it.status}">${it.status}</span>
+          <span class="note">${esc(platforms)}</span>
+        </div>
+        <div class="media">
+          ${it.video_file ? `<video src="/output/${encodePath(it.video_file)}" controls preload="metadata" muted></video>` : ""}
+          ${(it.image_files || []).length
+            ? `<div class="slides">${it.image_files.slice(0, 9).map((f, i) =>
+                `<img src="/output/${encodePath(f)}" alt="สไลด์ ${i + 1}" loading="lazy">`).join("")}</div>`
+            : ""}
+          <div>
+            <div class="file">${esc(it.video_file || (it.listing_id ?? "") || `${(it.image_files || []).length} รูป`)}</div>
+            ${it.post?.maps_url ? `<div class="note">🗺️ <a href="${esc(it.post.maps_url)}" target="_blank" rel="noopener">เปิดแผนที่</a></div>` : ""}
+            ${urls ? `<div class="note">โพสต์แล้ว: ${urls}</div>` : ""}
+            ${kit ? `<div class="note">ชุดโพสต์เอง: <code>${esc(kit.kit_dir)}</code></div>` : ""}
+            ${it.note ? `<div class="note">${esc(it.note)}</div>` : ""}
+          </div>
+        </div>
+        <textarea data-caption="${esc(it.id)}" ${posted ? "disabled" : ""}>${esc(it.caption || "")}</textarea>
+        <div class="row" style="margin-top:9px">
+          <button class="ghost small" data-act="save" data-id="${esc(it.id)}" ${posted ? "disabled" : ""}>บันทึกแคปชั่น</button>
+          <button class="ghost small" data-act="ready" data-id="${esc(it.id)}" ${posted ? "disabled" : ""}>ทำเครื่องหมายพร้อม</button>
+          ${isManual
+            /* No "post live" here on purpose. Meta has no Groups publishing API, so a
+               button promising it would be a lie; this prepares the kit instead. */
+            ? `<button class="small" data-act="dry" data-id="${esc(it.id)}">เตรียมชุดโพสต์</button>
+               <span class="note">คัดลอกแคปชั่นกับไฟล์ไปวางในกลุ่มที่เลือกเอง</span>`
+            : `<button class="ghost small" data-act="dry" data-id="${esc(it.id)}">ซ้อมโพสต์</button>
+               <button class="small" data-act="live" data-id="${esc(it.id)}" ${posted ? "disabled" : ""}>โพสต์จริง</button>`}
+          <button class="ghost small" data-act="skip" data-id="${esc(it.id)}" ${posted ? "disabled" : ""}>ข้ามช่องนี้</button>
+        </div>
+        <div class="log" data-log="${esc(it.id)}" hidden></div>
+      </div>
+    </div>`;
+  }
+
+  function renderCalendar() {
+    const today = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Bangkok" });
+
+    const counts = { auto: 0, manual: 0 };
+    for (const day of DATA.calendar) for (const s of day.slots) counts[slotMode(s)]++;
+    $("count-auto").textContent = counts.auto;
+    $("count-manual").textContent = counts.manual;
+
+    for (const btn of document.querySelectorAll(".tab")) {
+      btn.setAttribute("aria-selected", String(btn.dataset.tab === TAB));
+    }
+
+    // Days with nothing in the active tab are dropped rather than rendered empty --
+    // otherwise the group tab is mostly blank headers and reads as broken.
+    const days = DATA.calendar
+      .map((day) => ({ ...day, slots: day.slots.filter((s) => slotMode(s) === TAB) }))
+      .filter((day) => day.slots.length);
+
+    $("calendar").innerHTML =
+      days.map((day) => `
+        <div class="day ${day.date === today ? "today" : ""}">
+          <header><b>${day.date}</b><span>${day.weekday}${day.date === today ? " · วันนี้" : ""}</span></header>
+          ${day.slots.map((s) => slotHtml(s, DATA.due.includes(s.slot_id))).join("")}
+        </div>`).join("")
+      || `<div class="day"><div class="slot empty"><div class="when"></div><div class="body">
+            ยังไม่มีช่อง${TAB === "manual" ? "โพสต์ลงกลุ่ม" : "โพสต์หน้าเพจ"}ในช่วงนี้ — กด "วางแผนคิว" เพื่อสร้าง
+          </div></div></div>`;
+
+    $("tab-note").innerHTML = TAB === "manual"
+      ? 'Meta ปิด API โพสต์ลงกลุ่มไปตั้งแต่ปี 2020 <b>ไม่มีทางโพสต์อัตโนมัติได้</b> ระบบจึงเตรียมแคปชั่นกับไฟล์ไว้ให้ครบ แล้วคุณเลือกกลุ่มกดโพสต์เอง'
+      : 'ช่องเหล่านี้<b>โพสต์เองได้ทั้งหมด</b> — Facebook เพจ/Reels พร้อมแล้ว · TikTok กับ YouTube Shorts เชื่อมเพิ่มได้โดยไม่ต้องแก้อะไรในคิว';
+
+    $("mode-note").innerHTML = DATA.profile.auto_publish
+      ? 'โหมด <b>โพสต์อัตโนมัติ</b> — <code>npm run daily</code> จะโพสต์เองเมื่อถึงเวลา'
+      : 'โหมด <b>เตรียมไว้ให้กดเอง</b> — ระบบเตรียมคลิปกับแคปชั่นไว้ แต่ไม่โพสต์จนกว่าจะกด (แก้ที่ <code>content/page.profile.json</code>)';
+  }
+
+  $("tabs").addEventListener("click", (e) => {
+    const btn = e.target.closest(".tab");
+    if (!btn) return;
+    TAB = btn.dataset.tab;
+    renderCalendar();
+  });
+
+  function renderListings(items) {
+    if (!items.length) {
+      $("listing-table").innerHTML =
+        '<p class="note">ชีทยังว่าง — วางข้อความโพสต์เก่าด้านบน หรือกด "ดึงจากโพสต์เพจ" (ต้องมี token Facebook ก่อน)</p>';
+      return;
+    }
+    const rows = items.map((i) => `
+      <tr>
+        <td><span class="status ${esc(i.status)}">${esc(i.status)}</span></td>
+        <td>${esc(i.title || "-")}<br><span class="note">${esc(i.location || "")}</span></td>
+        <td class="num">${esc(i.size_text || "-")}</td>
+        <td class="num">${esc(i.price_text || (i.price_thb ? Number(i.price_thb).toLocaleString("th-TH") : "-"))}</td>
+        <td>${i.maps_url
+          ? `<a href="${esc(i.maps_url)}" target="_blank" rel="noopener">เปิดแผนที่</a>`
+          : '<span class="note">ไม่มีลิงก์</span>'}</td>
+        <td>${(i.nearby || []).length
+          ? (i.nearby || []).map((n) => esc(n.line)).join("<br>")
+          : `<span class="note">${esc(i.enrich_note || "ยังไม่ได้เติม")}</span>`}</td>
+        <td class="num">${esc(i.last_group_post || "-")}</td>
+      </tr>`).join("");
+
+    $("listing-table").innerHTML = `<div class="scroll-x"><table class="grid">
+      <thead><tr><th>สถานะ</th><th>ที่ดิน</th><th>ขนาด</th><th>ราคา</th><th>แผนที่</th><th>ใกล้เคียง</th><th>ลงกลุ่มล่าสุด</th></tr></thead>
+      <tbody>${rows}</tbody></table></div>
+      <p class="note" style="margin-top:8px">${items.length} แปลง · แก้รายละเอียดได้ในไฟล์ชีท แล้วนำเข้ากลับ</p>`;
+  }
+
+  async function loadListings() {
+    const data = await api("/api/listings");
+    renderListings(data.items);
+  }
+
+  async function load() {
+    DATA = await api(`/api/publish/overview?days=${$("days").value}`);
+    renderReadiness(DATA.readiness);
+    renderStats(DATA.stock_summary);
+    renderCalendar();
+    await loadListings().catch(() => {});
+  }
+
+  function listingBusy(button, text) {
+    button.disabled = true;
+    $("listing-log").innerHTML = `<div class="log">${esc(text)}</div>`;
+  }
+
+  $("btn-listings-paste").addEventListener("click", async (e) => {
+    const text = $("listing-paste").value.trim();
+    if (!text) { alert("วางข้อความโพสต์ก่อนนะครับ"); return; }
+    listingBusy(e.target, "กำลังแยกข้อมูล... (ใช้เวลาสักครู่ต่อโพสต์)");
+    try {
+      const res = await api("/api/listings/import", { text });
+      $("listing-log").innerHTML = `<div class="log">เพิ่ม ${res.added.length} แปลง · รวมในชีท ${res.total}` +
+        (res.skipped.length ? `\nข้าม ${res.skipped.length}: ${res.skipped.map((s) => s.reason).join(", ")}` : "") + "</div>";
+      $("listing-paste").value = "";
+      await loadListings();
+    } catch (err) {
+      $("listing-log").innerHTML = `<div class="warn">${esc(err.message)}</div>`;
+    } finally { e.target.disabled = false; }
+  });
+
+  $("btn-listings-page").addEventListener("click", async (e) => {
+    listingBusy(e.target, "กำลังอ่านโพสต์ที่เก็บไว้จากเพจ...");
+    try {
+      const res = await api("/api/listings/import", { from_page: true });
+      $("listing-log").innerHTML = `<div class="log">เพิ่ม ${res.added.length} แปลง · รวมในชีท ${res.total}</div>`;
+      await loadListings();
+    } catch (err) {
+      $("listing-log").innerHTML = `<div class="warn">${esc(err.message)}<br>` +
+        'ต้องกด "ดึงโพสต์เก่าจากเพจ" ให้สำเร็จก่อน ซึ่งต้องมี token Facebook (ดู 21_PUBLISH_SETUP.md)</div>';
+    } finally { e.target.disabled = false; }
+  });
+
+  $("btn-listings-enrich").addEventListener("click", async (e) => {
+    listingBusy(e.target, "กำลังเติมสถานที่ใกล้เคียงจาก Google Places...");
+    try {
+      const res = await api("/api/listings/enrich", {});
+      $("listing-log").innerHTML = `<div class="log">เติมแล้ว ${res.length} แปลง\n` +
+        res.map((d) => `${d.listing_id}: ${d.nearby} รายการ${d.note ? ` (${d.note})` : ""}`).join("\n") + "</div>";
+      await loadListings();
+    } catch (err) {
+      $("listing-log").innerHTML = `<div class="warn">${esc(err.message)}</div>`;
+    } finally { e.target.disabled = false; }
+  });
+
+  $("listing-csv-in").addEventListener("change", async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const res = await api("/api/listings/sheet-import", { csv: await file.text() });
+      $("listing-log").innerHTML = `<div class="log">อัปเดต ${res.applied.length} แปลง` +
+        (res.ignored.length ? `\nข้าม ${res.ignored.length}` : "") + "</div>";
+      await loadListings();
+    } catch (err) {
+      $("listing-log").innerHTML = `<div class="warn">${esc(err.message)}</div>`;
+    } finally { e.target.value = ""; }
+  });
+
+  function logTo(id, text) {
+    const el = document.querySelector(`[data-log="${CSS.escape(id)}"]`);
+    if (!el) return;
+    el.hidden = false;
+    el.textContent = text;
+  }
+
+  document.addEventListener("click", async (e) => {
+    const btn = e.target.closest("button[data-act]");
+    if (!btn) return;
+    const id = btn.dataset.id;
+    const act = btn.dataset.act;
+    const caption = document.querySelector(`[data-caption="${CSS.escape(id)}"]`)?.value ?? "";
+
+    try {
+      btn.disabled = true;
+      if (act === "save") {
+        await api("/api/publish/item", { id, patch: { caption } });
+        logTo(id, "บันทึกแคปชั่นแล้ว");
+      } else if (act === "ready") {
+        await api("/api/publish/item", { id, patch: { caption, status: "READY" } });
+        await load();
+      } else if (act === "skip") {
+        await api("/api/publish/item", { id, patch: { status: "SKIPPED" } });
+        await load();
+      } else if (act === "dry" || act === "live") {
+        const live = act === "live";
+        if (live && !confirm(`โพสต์จริงลงทุกแพลตฟอร์มของช่อง ${id}\n\nโพสต์แล้วลบเองไม่ได้จากที่นี่ ยืนยันไหม?`)) {
+          btn.disabled = false; return;
+        }
+        // Persist the edited caption first so what you read is what gets posted.
+        await api("/api/publish/item", { id, patch: { caption } });
+        logTo(id, live ? "กำลังอัปโหลด..." : "กำลังซ้อม...");
+        const res = await api("/api/publish/post", { id, live });
+        if (res.skipped) { logTo(id, res.reason); }
+        else {
+          const lines = res.publish.published_destinations.map((d) =>
+            `${d.ok ? "✓" : "✗"} ${d.platform}  ${d.publish_url || d.kit_dir || d.error_message || (d.dry_run ? "(ซ้อม)" : "")}`);
+          logTo(id, `สถานะ: ${res.publish.status}\n${lines.join("\n")}`);
+          if (live) await load();
+        }
+      }
+    } catch (err) {
+      logTo(id, `ผิดพลาด: ${err.message}`);
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  $("btn-reload").addEventListener("click", load);
+  $("days").addEventListener("change", load);
+
+  $("btn-plan").addEventListener("click", async (e) => {
+    e.target.disabled = true;
+    e.target.textContent = "กำลังเตรียม...";
+    try {
+      const res = await api("/api/publish/plan", { days: Number($("days").value) });
+      await load();
+      const unfilled = res.skipped.filter((s) => !s.reason.startsWith("มีอยู่แล้ว"));
+      alert(
+        `เตรียมดราฟต์ใหม่ ${res.created.length} รายการ` +
+        (unfilled.length ? `\n\nช่องที่ยังไม่มีของ ${unfilled.length}:\n` + unfilled.map((s) => `· ${s.slot_id} — ${s.reason}`).join("\n") : "") +
+        (res.missing_required?.length
+          ? `\n\n⚠ ช่องคลิปประจำวันว่าง ${res.missing_required.length} วัน — เพจจะไม่มีคลิปลงวันนั้น เรนเดอร์คลิปเพิ่มจากห้องควบคุม`
+          : "")
+      );
+    } catch (err) { alert(err.message); }
+    finally { e.target.disabled = false; e.target.textContent = "เติมตาราง 7 วัน"; }
+  });
+
+  $("btn-pull").addEventListener("click", async (e) => {
+    e.target.disabled = true;
+    try {
+      const res = await api("/api/publish/page-pull", { limit: 50 });
+      $("sheet-log").innerHTML = `<div class="log">ดึงมา ${res.fetched} โพสต์ · สะสมรวม ${res.total_archived}
+เก็บที่ content/page-posts.json — ออกเป็น CSV ด้วย \`npm run publish -- page:csv\`</div>`;
+    } catch (err) {
+      $("sheet-log").innerHTML = `<div class="warn">${esc(err.message)}</div>`;
+    } finally { e.target.disabled = false; }
+  });
+
+  $("csv-in").addEventListener("change", async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const res = await api("/api/publish/sheet-import", { csv: await file.text() });
+      $("sheet-log").innerHTML = `<div class="log">อัปเดต ${res.applied.length} รายการ` +
+        (res.ignored.length ? `\nข้าม ${res.ignored.length}: ${res.ignored.map((i) => `${i.id} (${i.reason})`).join(", ")}` : "") + "</div>";
+      await load();
+    } catch (err) {
+      $("sheet-log").innerHTML = `<div class="warn">${esc(err.message)}</div>`;
+    } finally { e.target.value = ""; }
+  });
+
+  load().catch((err) => { $("calendar").innerHTML = `<div class="warn">${esc(err.message)}</div>`; });
+</script>
+</body>
+</html>

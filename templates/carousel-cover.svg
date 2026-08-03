@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Carousel cover slide. 1080x1350 (4:5) - the tallest ratio Facebook and Instagram
+     both render without cropping, so it takes the most feed height per post.
+
+     Centre-axis layout. Everything hangs off one vertical line through the middle of the
+     frame, so the eye lands in the centre and travels straight down: tag, headline,
+     consequence, action. The brand logo is a full-bleed watermark behind all of it,
+     which brands every slide without spending a corner on a small badge.
+
+     Edit colours, sizes and positions here; carousel-engine.mjs only fills {{values}}. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0%" stop-color="{{bg_from}}"/>
+      <stop offset="100%" stop-color="{{bg_to}}"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1080" height="1350" fill="url(#bg)"/>
+
+  <!-- Theme ornament (nature theme only; empty for the rest). Sits here, directly on the
+       background, so no decoration can ever be drawn over the copy below it. -->
+  {{decor}}
+
+  <!-- Brand watermark, oversized and faint, behind every element. -->
+  {{brand_mark}}
+
+  <!-- tag pill, centred -->
+  <g transform="translate({{kicker_x}}, 116)">
+    <rect x="0" y="0" width="{{kicker_w}}" height="64" rx="32" fill="{{accent}}"/>
+    <text x="{{kicker_mid}}" y="43" text-anchor="middle" font-family="{{font}}" font-size="29"
+          font-weight="700" fill="{{bg_from}}" letter-spacing="1.5">{{kicker}}</text>
+  </g>
+
+  <!-- Subject illustration, on the axis between tag and headline: says what the deck is
+       about before a word is read. -->
+  {{art}}
+
+  <!-- Headline. Line spacing is 1.37x, not the 1.2x a Latin headline would take: Thai
+       stacks vowels above and tone marks above those, and puts vowels below as well, so
+       consecutive lines collide at spacing that looks generous in Latin. -->
+  <text x="540" y="424" text-anchor="middle" font-family="{{font}}" font-size="92" font-weight="800" fill="{{title_color}}">{{title1}}</text>
+  <text x="540" y="550" text-anchor="middle" font-family="{{font}}" font-size="92" font-weight="800" fill="{{accent}}">{{title2}}</text>
+  <text x="540" y="676" text-anchor="middle" font-family="{{font}}" font-size="92" font-weight="800" fill="{{title_color}}">{{title3}}</text>
+
+  <!-- consequence box: the reason to keep scrolling, stated as a cost, not as hype -->
+  <g transform="translate({{hook_x}}, 756)">
+    <rect x="0" y="0" width="{{hook_w}}" height="196" rx="20" fill="{{warn_soft}}"/>
+    <rect x="0" y="0" width="10" height="196" rx="5" fill="{{warn_color}}"/>
+    <text x="{{hook_mid}}" y="84" text-anchor="middle" font-family="{{font}}" font-size="46" font-weight="700" fill="{{warn_color}}">{{subtitle1}}</text>
+    <text x="{{hook_mid}}" y="146" text-anchor="middle" font-family="{{font}}" font-size="46" font-weight="700" fill="{{warn_color}}">{{subtitle2}}</text>
+  </g>
+
+  <!-- swipe hint: the single biggest driver of carousel completion -->
+  <g transform="translate({{cta_x}}, 1026)">
+    <rect x="0" y="0" width="{{cta_w}}" height="98" rx="49" fill="{{accent}}"/>
+    <text x="{{cta_mid}}" y="64" text-anchor="middle" font-family="{{font}}" font-size="38"
+          font-weight="700" fill="{{bg_from}}">{{cta_text}}</text>
+  </g>
+
+  {{dots}}
+
+  <text x="540" y="1310" text-anchor="middle" font-family="{{font}}" font-size="26"
+        font-weight="600" fill="{{muted_color}}">1 / {{total}}</text>
+</svg>

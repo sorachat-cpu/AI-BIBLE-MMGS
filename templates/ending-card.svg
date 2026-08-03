@@ -1,0 +1,40 @@
+<!--
+  Ending card : overlays the last 5-8 seconds (WF5-fix §2.2, WF5 §5.8).
+
+  This is the only place in the whole pipeline where price and contact details may appear
+  (03_SYSTEM_RULES.md Rule 1), which is why correcting a price costs one re-composite
+  instead of regenerating AI video.
+
+  Placeholders filled by src/lib/svg-card.mjs:
+    {{W}} {{H}} {{BADGE}} {{TITLE}} {{SIZE_TEXT}} {{PRICE}} {{PHONE}} {{LINE_ID}}
+    {{QR_BLOCK}}  <image> element, empty when no QR was requested
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="{{W}}" height="{{H}}" viewBox="0 0 {{W}} {{H}}">
+  <g transform="translate({{PAD}},{{TOP}})">
+    <rect x="0" y="0" width="{{CARD_W}}" height="{{CARD_H}}" rx="{{RADIUS}}"
+          fill="#0C161F" fill-opacity="0.95"/>
+    <rect x="0" y="0" width="{{ACCENT_BAR}}" height="{{CARD_H}}" rx="{{RADIUS}}" fill="#C0392B"/>
+    <rect x="{{ACCENT_BAR}}" y="0" width="{{ACCENT_BAR}}" height="{{CARD_H}}" fill="#0C161F" fill-opacity="0.95"/>
+
+    <rect x="{{TEXT_X}}" y="{{BADGE_Y}}" width="{{BADGE_W}}" height="{{BADGE_H}}"
+          rx="{{BADGE_H}}" fill="#C0392B"/>
+    <text x="{{BADGE_TEXT_X}}" y="{{BADGE_TEXT_Y}}" font-family="Sathu"
+          font-size="{{BADGE_SIZE}}" font-weight="bold" fill="#FFFFFF">{{BADGE}}</text>
+
+    <text x="{{TEXT_X}}" y="{{TITLE_Y}}" font-family="Sathu" font-size="{{TITLE_SIZE}}"
+          font-weight="bold" fill="#FFFFFF">{{TITLE}}</text>
+    <text x="{{TEXT_X}}" y="{{SIZE_Y}}" font-family="Sathu" font-size="{{SUB_SIZE}}"
+          fill="#93A7B7">{{SIZE_TEXT}}</text>
+    <text x="{{TEXT_X}}" y="{{PRICE_Y}}" font-family="Sathu" font-size="{{PRICE_SIZE}}"
+          font-weight="bold" fill="#E0A05C">{{PRICE}}</text>
+
+    <rect x="{{TEXT_X}}" y="{{CONTACT_Y}}" width="{{CONTACT_W}}" height="{{CONTACT_H}}"
+          rx="{{CONTACT_R}}" fill="#FFFFFF"/>
+    <text x="{{CONTACT_TEXT_X}}" y="{{PHONE_Y}}" font-family="Sathu"
+          font-size="{{CONTACT_SIZE}}" font-weight="bold" fill="#111B25">{{PHONE}}</text>
+    <text x="{{CONTACT_TEXT_X}}" y="{{LINE_Y}}" font-family="Sathu"
+          font-size="{{CONTACT_SIZE}}" fill="#4C5B6A">{{LINE_ID}}</text>
+
+    {{QR_BLOCK}}
+  </g>
+</svg>

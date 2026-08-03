@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Carousel content slide, 1080x1350. Four body slots; unused ones fill as empty
+     strings and simply do not draw. Keep each body line under ~34 Thai characters -
+     nothing here wraps, because Thai has no word spaces to wrap on safely.
+
+     Same centre axis as the cover: illustration, badge, heading, body, takeaway, all hung
+     off the middle line, so a reader swiping through six of these never has to re-find
+     where the text starts. The bullet markers went with the left alignment - centred
+     lines do not need them, and they would break the axis. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350">
+  <defs>
+    <!-- Blur is what makes the panel read as a soft wash rather than a card. -->
+    <filter id="soften" x="-12%" y="-30%" width="124%" height="160%">
+      <feGaussianBlur stdDeviation="22"/>
+    </filter>
+  </defs>
+  <rect width="1080" height="1350" fill="{{bg_to}}"/>
+
+  <!-- Theme ornament (nature theme only; empty for the rest), kept behind all copy. -->
+  {{decor}}
+
+  <!-- Brand watermark, oversized and faint, behind every element. -->
+  {{brand_mark}}
+
+  <!-- Subject illustration, on the axis above the number: on a centred layout the top of
+       the frame is the only band reliably free of copy on every slide. -->
+  {{art}}
+
+  <!-- numbered badge, centred -->
+  <g transform="translate(492, 306)">
+    <rect x="0" y="0" width="96" height="96" rx="26" fill="{{accent}}"/>
+    <text x="48" y="66" text-anchor="middle" font-family="{{font}}" font-size="50"
+          font-weight="800" fill="{{bg_to}}">{{index}}</text>
+  </g>
+  <text x="540" y="454" text-anchor="middle" font-family="{{font}}" font-size="28" font-weight="700"
+        fill="{{muted_color}}" letter-spacing="1.5">ข้อ {{index}} จาก {{total}}</text>
+
+  <!-- Soft wash behind the whole text block. The watermark runs straight through this
+       band, and body copy is the lightest weight on the slide, so it is the first thing
+       the logo eats. A blurred rounded rect lifts the text off it without drawing a hard
+       card that would fight the centre-axis layout. -->
+  {{body_panel}}
+
+  <!-- heading -->
+  <text x="540" y="574" text-anchor="middle" font-family="{{font}}" font-size="74" font-weight="800" fill="{{title_color}}">{{heading1}}</text>
+  <text x="540" y="676" text-anchor="middle" font-family="{{font}}" font-size="74" font-weight="800" fill="{{title_color}}">{{heading2}}</text>
+
+  <g transform="translate(0,{{body_shift}})">
+    <text x="540" y="786" text-anchor="middle" font-family="{{font}}" font-size="46" font-weight="500" fill="{{body_color}}">{{line1}}</text>
+    <text x="540" y="862" text-anchor="middle" font-family="{{font}}" font-size="46" font-weight="500" fill="{{body_color}}">{{line2}}</text>
+    <text x="540" y="938" text-anchor="middle" font-family="{{font}}" font-size="46" font-weight="500" fill="{{body_color}}">{{line3}}</text>
+    <text x="540" y="1014" text-anchor="middle" font-family="{{font}}" font-size="46" font-weight="500" fill="{{body_color}}">{{line4}}</text>
+  </g>
+
+  <!-- the takeaway, boxed so it is not mistaken for a fifth body line -->
+  <g transform="translate({{note_x}}, {{note_y}})">
+    <rect x="0" y="0" width="{{note_w}}" height="112" rx="20" fill="{{accent_soft}}" opacity="{{note_on}}"/>
+    <text x="{{note_mid}}" y="70" text-anchor="middle" font-family="{{font}}" font-size="38"
+          font-weight="700" fill="{{accent}}">{{note}}</text>
+  </g>
+
+  {{dots}}
+</svg>

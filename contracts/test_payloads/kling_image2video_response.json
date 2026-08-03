@@ -1,0 +1,28 @@
+{
+  "code": 0,
+  "message": "SUCCEED",
+  "request_id": "bea69542-6b5d-4f19-8fcc-e9852d01f853",
+  "data": {
+    "task_id": "911108384937222157",
+    "task_status": "succeed",
+    "task_info": {},
+    "task_result": {
+      "videos": [
+        {
+          "id": "911108390041030718",
+          "url": "https://v15-kling-fdl.klingai.com/REDACTED-SIGNED-URL.mp4",
+          "duration": "5.041"
+        }
+      ]
+    },
+    "task_status_msg": "",
+    "created_at": 1785253685363,
+    "updated_at": 1785253980317,
+    "final_unit_deduction": "10",
+    "final_balance_deduction": {
+      "quota": "0",
+      "list_price": "0"
+    }
+  },
+  "_note": "Real Kling image2video response captured 2026-07-28. Fixture for adapter regression tests. duration is in SECONDS ('5.041'), not ms."
+}

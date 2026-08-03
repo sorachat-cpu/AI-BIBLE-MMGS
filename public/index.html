@@ -1,0 +1,1034 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MMGS · ห้องควบคุมสายพานผลิตวิดีโอ</title>
+<style>
+  :root {
+    --bg: #eff2f6;
+    --surface: #ffffff;
+    --surface-2: #f7f9fb;
+    --border: #dce3ea;
+    --border-strong: #bcc7d3;
+    --text: #111b25;
+    --text-2: #4c5b6a;
+    --text-3: #7c8b9a;
+    --accent: #a9661f;
+    --accent-2: #c78436;
+    --accent-soft: #fbf1e3;
+    --ok: #16714a;
+    --ok-soft: #e1f1e8;
+    --err: #9d2b22;
+    --err-soft: #fbe5e2;
+    --wait: #2a5b98;
+    --wait-soft: #e5edf7;
+    --shadow: 0 1px 2px rgba(17, 27, 37, .05), 0 8px 24px -12px rgba(17, 27, 37, .18);
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+    --sans: "Sukhumvit Set", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0a121a;
+      --surface: #111d27;
+      --surface-2: #16232e;
+      --border: #21313e;
+      --border-strong: #354959;
+      --text: #e2eaf1;
+      --text-2: #9cafbf;
+      --text-3: #6a7f92;
+      --accent: #dda062;
+      --accent-2: #e8b57f;
+      --accent-soft: #2a1c0e;
+      --ok: #4ac68a;
+      --ok-soft: #0e2a1d;
+      --err: #e5786b;
+      --err-soft: #2d1411;
+      --wait: #6da6de;
+      --wait-soft: #0f2337;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 28px -14px rgba(0,0,0,.7);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0a121a; --surface: #111d27; --surface-2: #16232e; --border: #21313e;
+    --border-strong: #354959; --text: #e2eaf1; --text-2: #9cafbf; --text-3: #6a7f92;
+    --accent: #dda062; --accent-2: #e8b57f; --accent-soft: #2a1c0e;
+    --ok: #4ac68a; --ok-soft: #0e2a1d; --err: #e5786b; --err-soft: #2d1411;
+    --wait: #6da6de; --wait-soft: #0f2337;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 28px -14px rgba(0,0,0,.7);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: var(--sans); font-size: 15px; line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .shell { max-width: 880px; margin: 0 auto; padding: 44px 20px 90px; }
+
+  /* ---------- masthead ---------- */
+  .masthead { margin-bottom: 30px; }
+  .kicker {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--mono); font-size: 11.5px; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--accent); margin-bottom: 12px;
+  }
+  .kicker::before {
+    content: ""; width: 20px; height: 2px; background: var(--accent); border-radius: 2px;
+  }
+  h1 {
+    margin: 0 0 10px; font-size: clamp(25px, 4vw, 32px); line-height: 1.2;
+    letter-spacing: -.015em; font-weight: 700; text-wrap: balance;
+  }
+  .standfirst { margin: 0; color: var(--text-2); font-size: 15px; max-width: 60ch; }
+
+  /* ---------- budget meter ---------- */
+  .budget {
+    margin-top: 24px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 16px 18px; box-shadow: var(--shadow);
+  }
+  .budget-top {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+    flex-wrap: wrap; margin-bottom: 10px;
+  }
+  .budget-label { font-size: 13px; color: var(--text-2); }
+  .budget-label b { color: var(--text); font-weight: 600; }
+  .budget-figure { font-family: var(--mono); font-size: 19px; font-variant-numeric: tabular-nums; font-weight: 600; }
+  .budget-figure .cap { color: var(--text-3); font-size: 13px; font-weight: 400; }
+  .meter {
+    height: 8px; background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 99px; overflow: hidden;
+  }
+  .meter i {
+    display: block; height: 100%; width: 0; border-radius: 99px;
+    background: var(--ok); transition: width .45s cubic-bezier(.2,.7,.3,1), background .3s;
+  }
+  .meter.warn i { background: var(--accent-2); }
+  .meter.over i { background: var(--err); }
+  .budget-note { margin: 8px 0 0; font-size: 12px; color: var(--text-3); }
+
+  /* ---------- pipeline steps ---------- */
+  /* ---------- featured storyboard ---------- */
+  .feature {
+    margin-top: 30px; border-radius: 14px; padding: 1.5px;
+    background: linear-gradient(140deg, var(--accent) 0%, color-mix(in srgb, var(--accent) 25%, transparent) 45%, var(--border) 100%);
+    box-shadow: var(--shadow);
+  }
+  .feature-inner { background: var(--surface); border-radius: 12.5px; padding: 24px 24px 22px; }
+  .feature .kicker { margin-bottom: 10px; }
+  .feature h2 { margin: 0 0 8px; font-size: 21px; letter-spacing: -.015em; font-weight: 700; }
+  .feature .lede { font-size: 14px; margin-bottom: 20px; max-width: 58ch; }
+  .shots { display: flex; flex-direction: column; gap: 9px; margin-bottom: 17px; }
+  .shot-opt {
+    display: flex; gap: 11px; align-items: flex-start; padding: 12px 14px;
+    border: 1px solid var(--border); border-radius: 9px; background: var(--surface-2);
+    cursor: pointer; transition: border-color .15s, background .15s;
+  }
+  .shot-opt:hover { border-color: var(--accent); }
+  .shot-opt input { width: auto; margin: 3px 0 0; accent-color: var(--accent); flex-shrink: 0; }
+  .shot-opt .txt strong { display: block; font-size: 13.5px; margin-bottom: 2px; }
+  .shot-opt .txt span { font-size: 12.5px; color: var(--text-2); }
+  .divider {
+    margin: 40px 0 26px; display: flex; align-items: center; gap: 14px;
+    font-family: var(--mono); font-size: 11.5px; letter-spacing: .09em;
+    text-transform: uppercase; color: var(--text-3);
+  }
+  .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+  .steplog { margin-top: 13px; display: flex; flex-direction: column; gap: 7px; }
+  .logrow {
+    display: flex; gap: 10px; align-items: baseline; font-size: 12.5px;
+    padding: 8px 12px; border-radius: 7px; background: var(--surface-2);
+    border: 1px solid var(--border);
+  }
+  .logrow .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .logrow.ok .dot { background: var(--ok); }
+  .logrow.degraded .dot, .logrow.skipped .dot { background: var(--accent-2); }
+  .logrow.failed .dot { background: var(--err); }
+  .logrow .stage { font-family: var(--mono); font-size: 11px; color: var(--text-3); min-width: 82px; }
+  .logrow .msg { flex: 1; color: var(--text-2); }
+  .logrow .amt { font-family: var(--mono); font-size: 11.5px; color: var(--text-3); font-variant-numeric: tabular-nums; }
+  .clip { margin-top: 16px; }
+  .clip .cap {
+    font-size: 12.5px; color: var(--text-2); margin-bottom: 7px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .clip .cap b { font-family: var(--mono); font-size: 10.5px; padding: 2px 7px; border-radius: 5px;
+    background: var(--accent-soft); color: var(--accent); }
+
+  /* ---------- geo + points of interest ---------- */
+  .geo-head { margin-top: 14px; padding: 13px 15px; border-radius: 9px;
+    background: var(--surface-2); border: 1px solid var(--border); }
+  .geo-addr { font-size: 14px; font-weight: 600; }
+  .geo-meta { font-family: var(--mono); font-size: 11.5px; color: var(--text-3); margin-top: 4px; }
+  .hl-lines { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 13px; }
+  .hl-lines .hl { font-size: 12.5px; padding: 5px 11px; border-radius: 99px;
+    background: var(--accent-soft); color: var(--accent);
+    border: 1px solid color-mix(in srgb, var(--accent) 32%, transparent); }
+  .poi { margin-top: 15px; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 11px; }
+  .poi-group { border: 1px solid var(--border); border-radius: 9px; padding: 11px 13px; background: var(--surface-2); }
+  .poi-head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 8px; }
+  .poi-icon { font-size: 15px; }
+  .poi-head b { font-size: 13.5px; }
+  .poi-near { margin-left: auto; font-family: var(--mono); font-size: 11px; color: var(--accent); }
+  .poi-row { display: flex; align-items: baseline; gap: 8px; font-size: 12.5px; padding: 3px 0;
+    border-top: 1px solid var(--border); }
+  .poi-row:first-of-type { border-top: none; }
+  .poi-name { flex: 1; color: var(--text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .poi-rate { font-family: var(--mono); font-size: 11px; color: var(--text-3); }
+  .poi-dist { font-family: var(--mono); font-size: 11.5px; color: var(--text);
+    font-variant-numeric: tabular-nums; }
+
+  .pipeline { margin-top: 34px; display: flex; flex-direction: column; gap: 18px; }
+  .step { position: relative; padding-left: 54px; }
+  .step::before {
+    content: attr(data-step);
+    position: absolute; left: 0; top: 0;
+    width: 36px; height: 36px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 13px; font-weight: 600;
+    background: var(--surface); border: 1px solid var(--border-strong); color: var(--text-2);
+    box-shadow: var(--shadow); z-index: 1;
+  }
+  .step[data-state="done"]::before {
+    background: var(--ok-soft); border-color: var(--ok); color: var(--ok);
+  }
+  .step[data-state="busy"]::before {
+    background: var(--wait-soft); border-color: var(--wait); color: var(--wait);
+  }
+  /* connector between steps -- the engines really are a sequence, so the line means something */
+  .step:not(:last-child)::after {
+    content: ""; position: absolute; left: 17.5px; top: 40px; bottom: -22px;
+    width: 1px; background: var(--border-strong); opacity: .55;
+  }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px 22px; box-shadow: var(--shadow);
+  }
+  .card-head { margin-bottom: 4px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .card h2 { margin: 0; font-size: 17px; font-weight: 650; letter-spacing: -.01em; }
+  .tag {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .04em;
+    padding: 3px 8px; border-radius: 99px; background: var(--surface-2);
+    border: 1px solid var(--border); color: var(--text-3); text-transform: uppercase;
+  }
+  .card .lede { margin: 0 0 16px; font-size: 13.5px; color: var(--text-2); }
+
+  label { display: block; font-size: 12.5px; font-weight: 600; color: var(--text-2); margin-bottom: 7px; }
+  input, textarea, select {
+    width: 100%; padding: 11px 13px; border-radius: 8px;
+    border: 1px solid var(--border-strong); background: var(--surface-2); color: var(--text);
+    font-family: var(--sans); font-size: 14.5px; transition: border-color .15s, box-shadow .15s;
+  }
+  textarea { min-height: 110px; resize: vertical; line-height: 1.5; }
+  input:focus, textarea:focus, select:focus {
+    outline: none; border-color: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+  }
+  .field { margin-bottom: 15px; }
+  .field:last-of-type { margin-bottom: 0; }
+  .pair { display: grid; grid-template-columns: 1fr 210px; gap: 15px; }
+  @media (max-width: 580px) { .pair { grid-template-columns: 1fr; } }
+
+  .actions {
+    display: flex; align-items: center; gap: 13px; margin-top: 17px; flex-wrap: wrap;
+  }
+  button {
+    font-family: var(--sans); font-size: 14px; font-weight: 600; cursor: pointer;
+    border-radius: 8px; border: 1px solid transparent; padding: 10px 20px;
+    background: var(--accent); color: #fff; transition: filter .15s, opacity .15s;
+  }
+  button:hover:not(:disabled) { filter: brightness(1.08); }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  button:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  button.ghost {
+    background: transparent; color: var(--text-2); border-color: var(--border-strong);
+    font-weight: 500; padding: 8px 14px; font-size: 13px;
+  }
+  button.ghost:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+  .cost-chip {
+    font-family: var(--mono); font-size: 12px; color: var(--text-3);
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .cost-chip::before {
+    content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); opacity: .7;
+  }
+
+  /* ---------- dropzone ---------- */
+  .drop {
+    border: 1.5px dashed var(--border-strong); border-radius: 10px; padding: 26px 18px;
+    text-align: center; cursor: pointer; background: var(--surface-2);
+    transition: border-color .15s, background .15s, transform .12s;
+  }
+  .drop:hover, .drop.over { border-color: var(--accent); background: var(--accent-soft); }
+  .drop.over { transform: scale(1.005); }
+  .drop:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .drop .icon { font-size: 22px; line-height: 1; margin-bottom: 8px; opacity: .55; }
+  .drop p { margin: 0; font-size: 14px; color: var(--text-2); }
+  .drop p b { color: var(--text); }
+  .drop .small { font-size: 11.5px; color: var(--text-3); margin-top: 6px; }
+  .drop input[type="file"] { display: none; }
+
+  .preview { display: none; margin-top: 13px; align-items: center; gap: 13px; }
+  .preview.show { display: flex; }
+  .preview img {
+    width: 76px; height: 76px; object-fit: cover; border-radius: 8px;
+    border: 1px solid var(--border-strong);
+  }
+  .preview .meta { font-family: var(--mono); font-size: 11.5px; color: var(--text-2); line-height: 1.6; }
+  .preview .meta b { display: block; color: var(--text); font-size: 12.5px; font-family: var(--sans); }
+
+  details { margin-top: 14px; }
+  summary {
+    font-size: 12.5px; color: var(--text-3); cursor: pointer; padding: 4px 0;
+    list-style: none;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary::before { content: "▸ "; }
+  details[open] summary::before { content: "▾ "; }
+  summary:hover { color: var(--accent); }
+  details > input { margin-top: 9px; }
+
+  /* ---------- results ---------- */
+  .result { margin-top: 16px; }
+  .panel {
+    border-radius: 9px; padding: 14px 16px; font-size: 13px;
+    border: 1px solid; display: flex; gap: 11px; align-items: flex-start;
+  }
+  .panel .badge {
+    font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .05em;
+    padding: 3px 7px; border-radius: 5px; flex-shrink: 0; margin-top: 1px;
+  }
+  .panel.ok { background: var(--ok-soft); border-color: color-mix(in srgb, var(--ok) 35%, transparent); color: var(--text); }
+  .panel.ok .badge { background: var(--ok); color: var(--surface); }
+  .panel.err { background: var(--err-soft); border-color: color-mix(in srgb, var(--err) 35%, transparent); color: var(--text); }
+  .panel.err .badge { background: var(--err); color: #fff; }
+  .panel.busy { background: var(--wait-soft); border-color: color-mix(in srgb, var(--wait) 35%, transparent); color: var(--text); }
+  .panel.busy .badge { background: var(--wait); color: #fff; }
+  .panel .body { flex: 1; min-width: 0; }
+  .panel .body strong { display: block; margin-bottom: 3px; font-size: 13.5px; }
+  .panel .body span { color: var(--text-2); font-size: 12.5px; }
+
+  pre.json {
+    margin: 12px 0 0; padding: 14px 16px; border-radius: 9px;
+    background: var(--surface-2); border: 1px solid var(--border);
+    font-family: var(--mono); font-size: 12.5px; line-height: 1.65;
+    overflow-x: auto; white-space: pre; color: var(--text-2);
+  }
+  .json .k { color: var(--accent); }
+  .json .s { color: var(--ok); }
+  .json .n { color: var(--wait); }
+  .json .b { color: var(--err); }
+
+  video { width: 100%; margin-top: 13px; border-radius: 9px; border: 1px solid var(--border); display: block; }
+
+  .chain { margin-top: 12px; display: flex; gap: 9px; flex-wrap: wrap; }
+
+  .spinner {
+    width: 13px; height: 13px; border-radius: 50%; flex-shrink: 0;
+    border: 2px solid color-mix(in srgb, var(--wait) 30%, transparent);
+    border-top-color: var(--wait); animation: spin .7s linear infinite; margin-top: 3px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .elapsed { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  }
+
+  footer {
+    margin-top: 44px; padding-top: 20px; border-top: 1px solid var(--border);
+    font-size: 12.5px; color: var(--text-3); display: flex; justify-content: space-between;
+    gap: 14px; flex-wrap: wrap;
+  }
+  footer code { font-family: var(--mono); font-size: 11.5px; color: var(--text-2); }
+</style>
+  <script src="/nav.js" defer></script>
+</head>
+<body>
+<main class="shell">
+
+  <header class="masthead">
+    <div class="kicker">MMGS · Engine Console</div>
+    <h1>ห้องควบคุมสายพานผลิตวิดีโออสังหาฯ</h1>
+    <p class="standfirst">
+      รันทีละขั้นตามลำดับจริงของสายพาน — ข้อความประกาศ → พิกัดและแผนที่ → วิดีโอ
+      ผลลัพธ์ทุกชิ้นถูกตรวจกับ JSON Schema ตามสเปกก่อนแสดง และทุกบาทที่ใช้ถูกนับเทียบเพดานงบ
+    </p>
+
+    <p style="margin:14px 0 0">
+      <a href="/publish" style="color:var(--accent);font-weight:600">
+        ตารางลงคลิปและคิวโพสต์ประจำวัน →
+      </a>
+    </p>
+
+    <div class="budget">
+      <div class="budget-top">
+        <div class="budget-label">
+          <b>ต้นทุนรอบนี้</b> · เพดานตามกฎเหล็กคือ $0.30 ต่อวิดีโอหนึ่งชิ้น
+        </div>
+        <div class="budget-figure" id="spend">$0.000 <span class="cap">/ $0.30</span></div>
+      </div>
+      <div class="meter" id="meter"><i></i></div>
+      <p class="budget-note" id="budget-note">ยังไม่ได้เรียกใช้ engine ใดในรอบนี้</p>
+    </div>
+  </header>
+
+  <!-- ============ featured: full storyboard ============ -->
+  <section class="feature">
+    <div class="feature-inner">
+      <div class="kicker">โหมดสตอรี่บอร์ด</div>
+      <h2>จากอวกาศ ลงมาที่แปลง แล้วบ้านผุดขึ้น</h2>
+      <p class="lede">
+        สร้างวิดีโอเปิดตัวทรัพย์แบบหลายช็อตในครั้งเดียว —
+        กล้องดิ่งลงจากวงโคจรมาหยุดที่แปลงที่ดินจริงตามพิกัด แล้วตัดเข้าช็อตที่บ้านค่อยๆ
+        ก่อตัวขึ้นบนที่ดินเปล่าผืนนั้น
+      </p>
+
+      <div class="shots">
+        <label class="shot-opt">
+          <input type="checkbox" id="sb-pin" checked>
+          <span class="txt">
+            <strong>จังหวะ 1 · หมุดบนแผนที่</strong>
+            <span>เปิดด้วยภาพแผนที่ที่ปักหมุดไว้ กล้องค่อยๆ ดันเข้าหาหมุด</span>
+          </span>
+        </label>
+        <label class="shot-opt">
+          <input type="checkbox" id="sb-descent" checked>
+          <span class="txt">
+            <strong>จังหวะ 2 · ดิ่งจากฟ้าลงสู่ที่ดินจริง</strong>
+            <span>กล้องร่วงลงจากมุมสูง แล้วภาพแผนที่กลายเป็นรูปที่ดินจริงของคุณ</span>
+          </span>
+        </label>
+        <label class="shot-opt">
+          <input type="checkbox" id="sb-construction" checked>
+          <span class="txt">
+            <strong>จังหวะ 3 · บ้านก่อสร้างขึ้น</strong>
+            <span>บ้านค่อยๆ ก่อตัวขึ้นบนแปลงที่ดินผืนเดิม ต่อเนื่องจากจังหวะที่แล้ว</span>
+          </span>
+        </label>
+        <label class="shot-opt">
+          <input type="checkbox" id="sb-staged">
+          <span class="txt">
+            <strong>จังหวะ 3 แบบละเอียด · ก่อสร้างทีละขั้น</strong>
+            <span>แยกเป็น 5 ขั้น (ฐานราก → โครงสร้าง → ผนัง+หลังคา → ตกแต่ง → เสร็จ) แทนที่จะข้ามไปบ้านเสร็จเลย — <b>ราคาสูงขึ้นมาก ≈ $0.87</b> และต้องมีโควตาสร้างรูป</span>
+          </span>
+        </label>
+        <label class="shot-opt" style="opacity:.75;cursor:default">
+          <input type="checkbox" checked disabled>
+          <span class="txt">
+            <strong>จังหวะ 4 · ข้อมูลทรัพย์ขึ้น</strong>
+            <span>การ์ดปิดท้ายพร้อมราคา จุดเด่น ทำเลใกล้เคียง เบอร์โทร และ QR — ใส่ตอนเรนเดอร์รวม</span>
+          </span>
+        </label>
+      </div>
+
+      <div class="pair">
+        <div class="field">
+          <label for="sb-address">ลิงก์ Google Maps หรือที่อยู่ (สำหรับช็อต 1)</label>
+          <input id="sb-address" value="เขาใหญ่ ปากช่อง นครราชสีมา">
+        </div>
+        <div class="field">
+          <label for="sb-style">สไตล์บ้าน (สำหรับช็อต 2)</label>
+          <select id="sb-style">
+            <option value="MODERN_NORDIC">Modern Nordic</option>
+            <option value="CONTEMPORARY" selected>Contemporary</option>
+            <option value="MINIMALIST">Minimalist</option>
+            <option value="LUXURY_CLASSIC">Luxury Classic</option>
+            <option value="LOFT">Loft</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>รูปที่ดินเปล่า (สำหรับช็อต 2)</label>
+        <div class="drop" id="sb-drop" tabindex="0" role="button" aria-label="เลือกรูปที่ดิน">
+          <div class="icon">◳</div>
+          <p><b>คลิกเพื่อเลือกรูปที่ดิน</b> หรือลากมาวาง</p>
+          <p class="small">ถ้าไม่ใส่ จะทำได้เฉพาะช็อต 1</p>
+          <input type="file" id="sb-file" accept="image/jpeg,image/png,image/webp">
+        </div>
+        <div class="preview" id="sb-preview">
+          <img id="sb-thumb" alt="รูปที่ดินที่เลือก">
+          <span class="meta" id="sb-meta"></span>
+          <button type="button" class="ghost" id="sb-clear" style="margin-left:auto">เอาออก</button>
+        </div>
+      </div>
+
+      <details>
+        <summary>ข้อมูลบนการ์ดปิดท้าย (ราคา / เบอร์โทร / LINE / QR)</summary>
+        <div class="pair" style="margin-top:10px">
+          <div class="field">
+            <label for="rc-badge">ป้ายมุมบน</label>
+            <input id="rc-badge" value="เจ้าของขายเอง">
+          </div>
+          <div class="field">
+            <label for="rc-size">ขนาดที่ดิน</label>
+            <input id="rc-size" value="100 ตร.ว.">
+          </div>
+        </div>
+        <div class="pair">
+          <div class="field">
+            <label for="rc-price">ราคาที่จะโชว์</label>
+            <input id="rc-price" value="12.5 ล้านบาท">
+          </div>
+          <div class="field">
+            <label for="rc-phone">เบอร์โทร</label>
+            <input id="rc-phone" value="081-234-5678">
+          </div>
+        </div>
+        <div class="pair">
+          <div class="field">
+            <label for="rc-line">LINE ID</label>
+            <input id="rc-line" value="@244raxjb">
+          </div>
+          <div class="field">
+            <label for="rc-qr">ลิงก์ปลายทางของ QR</label>
+            <input id="rc-qr" value="https://line.me/R/ti/p/@244raxjb">
+          </div>
+        </div>
+      </details>
+
+      <div class="actions">
+        <button id="sb-run">สร้างสตอรี่บอร์ด</button>
+        <span class="cost-chip">≈ $0.17 ต่อช็อต · ราว 5 นาที/ช็อต</span>
+      </div>
+      <div class="result" id="out-storyboard"></div>
+    </div>
+  </section>
+
+  <div class="divider">หรือทดสอบทีละ engine</div>
+
+  <div class="pipeline">
+
+    <!-- ---------- 01 ---------- -->
+    <section class="step" data-step="01" id="step-property">
+      <div class="card">
+        <div class="card-head">
+          <h2>Property Engine</h2>
+          <span class="tag">Claude Haiku</span>
+        </div>
+        <p class="lede">
+          วางประกาศดิบจากนายหน้าลงไปตรงๆ ระบบจะดึงชื่อ ราคา สไตล์บ้าน และจุดเด่นออกมา
+          พร้อมตัดคำโฆษณาเกินจริง เบอร์โทร และ Line ID ทิ้งทั้งหมด
+        </p>
+        <div class="field">
+          <label for="prop-raw">ข้อความประกาศดิบ</label>
+          <textarea id="prop-raw" placeholder="ขายด่วน!! บ้านเดี่ยวหรู 2 ชั้น สไตล์ Nordic วิวภูเขา เขาใหญ่ พื้นที่ 100 ตารางวา ราคา 12.5 ล้านบาท สนใจโทร 081-234-5678 Line: @broker1"></textarea>
+        </div>
+        <div class="actions">
+          <button data-engine="property">แยกข้อมูล</button>
+          <span class="cost-chip">≈ $0.003</span>
+        </div>
+        <div class="result" id="out-property"></div>
+      </div>
+    </section>
+
+    <!-- ---------- 02 ---------- -->
+    <section class="step" data-step="02" id="step-google">
+      <div class="card">
+        <div class="card-head">
+          <h2>Google Engine</h2>
+          <span class="tag">Maps API</span>
+        </div>
+        <p class="lede">
+          วางลิงก์ Google Maps ได้เลย (หรือพิกัด หรือชื่อที่อยู่) ระบบจะหาพิกัด ภาพดาวเทียม
+          Street View และ<strong>สถานที่สำคัญรอบๆ</strong> — โรงพยาบาล วัด ตลาด แหล่งท่องเที่ยว
+          โรงเรียน ห้าง ร้านสะดวกซื้อ พร้อมระยะทางจริง
+        </p>
+        <div class="field">
+          <label for="goo-address">ลิงก์ Google Maps / พิกัด / ที่อยู่</label>
+          <input id="goo-address" value="https://www.google.com/maps/@13.7466,100.5347,17z"
+                 placeholder="วางลิงก์แผนที่ หรือ 14.7089, 101.4197 หรือ ชื่อสถานที่">
+        </div>
+        <div class="pair">
+          <div class="field">
+            <label for="goo-radius">รัศมีค้นหา</label>
+            <select id="goo-radius">
+              <option value="1000">1 กม. (ในเมือง)</option>
+              <option value="2000" selected>2 กม.</option>
+              <option value="5000">5 กม.</option>
+              <option value="10000">10 กม. (ต่างจังหวัด)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="goo-id">รหัสทรัพย์</label>
+            <input id="goo-id" value="PROP-TH-01029">
+          </div>
+        </div>
+        <div class="actions">
+          <button data-engine="google">หาพิกัด + สถานที่ใกล้เคียง</button>
+          <span class="cost-chip">≈ $0.005 + Places</span>
+        </div>
+        <div class="result" id="out-google"></div>
+      </div>
+    </section>
+
+    <!-- ---------- 03 ---------- -->
+    <section class="step" data-step="03" id="step-video">
+      <div class="card">
+        <div class="card-head">
+          <h2>Video Engine</h2>
+          <span class="tag">Kling</span>
+        </div>
+        <p class="lede">
+          เปลี่ยนภาพนิ่งเป็นคลิปเคลื่อนไหว 5 วินาที
+          วิดีโอที่ออกมาจะ<strong>ไม่มีตัวอักษร ราคา หรือโลโก้ฝังอยู่เลย</strong>
+          เพราะของพวกนั้นต้องไปแปะทีหลังตอนเรนเดอร์ ราคาเปลี่ยนจะได้ไม่ต้องสร้างวิดีโอใหม่
+        </p>
+
+        <div class="field">
+          <label>ภาพต้นทาง</label>
+          <div class="drop" id="vid-drop" tabindex="0" role="button" aria-label="เลือกรูปภาพ">
+            <div class="icon">◳</div>
+            <p><b>คลิกเพื่อเลือกรูป</b> หรือลากมาวางตรงนี้</p>
+            <p class="small">JPG · PNG · ด้านสั้นสุดอย่างน้อย 300px · ไม่เกิน 8MB</p>
+            <input type="file" id="vid-file" accept="image/jpeg,image/png,image/webp">
+          </div>
+          <div class="preview" id="vid-preview">
+            <img id="vid-thumb" alt="ภาพที่เลือกไว้">
+            <span class="meta" id="vid-meta"></span>
+            <button type="button" class="ghost" id="vid-clear" style="margin-left:auto">เอาออก</button>
+          </div>
+        </div>
+
+        <div class="pair">
+          <div class="field">
+            <label for="vid-motion">การเคลื่อนกล้อง</label>
+            <select id="vid-motion">
+              <option value="PAN_RIGHT">แพนขวาผ่านหน้าบ้าน</option>
+              <option value="ZOOM_IN">ดันกล้องเข้าหาประตูหน้า</option>
+              <option value="DRONE_REVEAL">โดรนยกขึ้นเผยตัวบ้าน</option>
+              <option value="TILT_UP">เงยขึ้นเผยความสูง</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="vid-id">รหัสทรัพย์</label>
+            <input id="vid-id" value="PROP-TH-01029">
+          </div>
+        </div>
+
+        <details>
+          <summary>หรือใส่ URL ภาพแทนการอัปโหลด</summary>
+          <input id="vid-image" placeholder="https://.../house.jpg">
+        </details>
+
+        <div class="actions">
+          <button data-engine="video">สร้างวิดีโอ</button>
+          <span class="cost-chip">≈ $0.16 · ใช้เวลาราว 5 นาที</span>
+        </div>
+        <div class="result" id="out-video"></div>
+      </div>
+    </section>
+
+  </div>
+
+  <footer>
+    <span>ผลลัพธ์ผ่านการตรวจ <code>schemas/*.schema.json</code> ทุกชิ้น</span>
+    <span>ยังไม่ได้ต่อฐานข้อมูล — ปิดหน้านี้แล้วผลลัพธ์จะหาย</span>
+  </footer>
+
+</main>
+
+<script>
+  /* ============ cost tracking (mirrors BUDGET_THRESHOLDS in the spec) ============ */
+  const COSTS = { property: 0.003, google: 0.005, video: 0.16 };
+  const CAP = 0.30, GREEN = 0.20, YELLOW = 0.25;
+  let spent = 0;
+
+  function addSpend(engine) {
+    spent += COSTS[engine] ?? 0;
+    const meter = document.getElementById("meter");
+    const pct = Math.min(100, (spent / CAP) * 100);
+    meter.querySelector("i").style.width = pct + "%";
+    meter.className = "meter" + (spent >= CAP ? " over" : spent >= GREEN ? " warn" : "");
+    document.getElementById("spend").innerHTML =
+      "$" + spent.toFixed(3) + ' <span class="cap">/ $0.30</span>';
+    document.getElementById("budget-note").textContent =
+      spent >= CAP ? "เกินเพดานแล้ว — ในระบบจริง Orchestrator จะหยุดธุรกรรมทันที"
+      : spent >= YELLOW ? "ใกล้ชนเพดาน เหลืออีก $" + (CAP - spent).toFixed(3)
+      : "ใช้ไปแล้ว " + Math.round(pct) + "% ของเพดานต่อวิดีโอ";
+  }
+
+  /* ============ engines ============ */
+  const ENGINES = {
+    property: {
+      url: "/api/property-engine",
+      payload: () => ({ raw_input_text: val("prop-raw") }),
+      check: (p) => p.raw_input_text ? null : "วางข้อความประกาศก่อนนะครับ",
+      done: "แยกข้อมูลสำเร็จ",
+    },
+    google: {
+      url: "/api/google-engine",
+      payload: () => ({
+        property_id: val("goo-id"),
+        raw_address: val("goo-address"),
+        nearby_radius_m: Number(val("goo-radius")),
+      }),
+      check: (p) => p.raw_address ? null : "กรอกที่อยู่ก่อนนะครับ",
+      done: "หาพิกัดสำเร็จ",
+    },
+    video: {
+      url: "/api/video-engine",
+      payload: () => ({
+        property_id: val("vid-id"),
+        image_base64: uploaded,
+        image_url: val("vid-image"),
+        camera_motion: val("vid-motion"),
+      }),
+      check: (p) => (p.image_base64 || p.image_url) ? null : "เลือกรูป หรือใส่ URL ภาพก่อนนะครับ",
+      done: "สร้างวิดีโอสำเร็จ",
+      slow: true,
+    },
+  };
+
+  const val = (id) => document.getElementById(id).value.trim();
+
+  document.querySelectorAll("button[data-engine]").forEach((btn) =>
+    btn.addEventListener("click", () => run(btn.dataset.engine, btn))
+  );
+
+  async function run(name, btn) {
+    const engine = ENGINES[name];
+    const out = document.getElementById("out-" + name);
+    const step = document.getElementById("step-" + name);
+    const payload = engine.payload();
+
+    const problem = engine.check(payload);
+    if (problem) return show(out, "err", "ยังไปต่อไม่ได้", problem);
+
+    btn.disabled = true;
+    step.dataset.state = "busy";
+    const stop = busyState(out, engine.slow);
+
+    try {
+      const res = await fetch(engine.url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const body = await res.json();
+      stop();
+
+      if (!body.ok) {
+        step.dataset.state = "";
+        return show(out, "err", "รหัสข้อผิดพลาด " + body.code, body.message);
+      }
+
+      step.dataset.state = "done";
+      addSpend(name);
+      renderSuccess(out, name, engine.done, body.data);
+    } catch (err) {
+      stop();
+      step.dataset.state = "";
+      show(out, "err", "ติดต่อเซิร์ฟเวอร์ไม่ได้", String(err));
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  /* elapsed timer matters here -- a 5-minute wait with no feedback reads as a hang */
+  function busyState(out, slow) {
+    const t0 = Date.now();
+    out.innerHTML =
+      '<div class="panel busy"><div class="spinner"></div><div class="body">' +
+      "<strong>กำลังประมวลผล…</strong>" +
+      '<span>ผ่านไป <span class="elapsed">0:00</span>' +
+      (slow ? " · วิดีโอปกติใช้เวลา 4–6 นาที กรุณาอย่าปิดหน้านี้" : "") +
+      "</span></div></div>";
+    const el = out.querySelector(".elapsed");
+    const id = setInterval(() => {
+      const s = Math.floor((Date.now() - t0) / 1000);
+      el.textContent = Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+    }, 1000);
+    return () => clearInterval(id);
+  }
+
+  function show(out, kind, title, detail) {
+    out.innerHTML =
+      '<div class="panel ' + kind + '"><span class="badge">' +
+      (kind === "err" ? "ERROR" : "OK") + "</span><div class='body'><strong>" +
+      esc(title) + "</strong><span>" + esc(detail) + "</span></div></div>";
+  }
+
+  function renderNearby(nearby) {
+    if (!nearby || !nearby.groups?.length) {
+      const why = nearby?.errors?.length ? esc(nearby.errors[0].message) : "ไม่พบสถานที่ในรัศมีที่กำหนด";
+      return '<div class="logrow skipped"><span class="dot"></span><span class="msg">' + why + "</span></div>";
+    }
+    let h = "";
+    if (nearby.highlight_lines?.length) {
+      h += '<div class="hl-lines">';
+      for (const l of nearby.highlight_lines) h += "<span class='hl'>" + esc(l) + "</span>";
+      h += "</div>";
+    }
+    h += '<div class="poi">';
+    for (const g of nearby.groups) {
+      h += '<div class="poi-group"><div class="poi-head"><span class="poi-icon">' + esc(g.icon || "📍") +
+        '</span><b>' + esc(g.label) + '</b><span class="poi-near">ใกล้สุด ' +
+        esc(g.places[0].distance_text) + "</span></div>";
+      for (const p of g.places) {
+        h += '<div class="poi-row"><span class="poi-name">' + esc(p.name) + "</span>" +
+          (p.rating ? '<span class="poi-rate">★ ' + esc(p.rating) + "</span>" : "") +
+          '<span class="poi-dist">' + esc(p.distance_text) + "</span></div>";
+      }
+      h += "</div>";
+    }
+    h += "</div>";
+    return h;
+  }
+
+  function renderSuccess(out, name, title, data) {
+    let html =
+      '<div class="panel ok"><span class="badge">OK</span><div class="body"><strong>' +
+      esc(title) + "</strong><span>ผ่านการตรวจ schema เรียบร้อย</span></div></div>";
+
+    if (name === "google") {
+      html += '<div class="geo-head">' +
+        '<div class="geo-addr">' + esc(data.geo_location.formatted_address) + "</div>" +
+        '<div class="geo-meta">' + data.geo_location.lat.toFixed(5) + ", " + data.geo_location.lng.toFixed(5) +
+        " · รับมาเป็น" + (data.input_kind === "coords" ? "พิกัดโดยตรง (ไม่เสียค่า geocode)" : "ที่อยู่ข้อความ") +
+        "</div></div>";
+      html += renderNearby(data.nearby);
+      html += '<details style="margin-top:14px"><summary>ดู JSON ทั้งหมด</summary><pre class="json">' +
+        highlight(data) + "</pre></details>";
+      out.innerHTML = html;
+      return;
+    }
+
+    html += '<pre class="json">' + highlight(data) + "</pre>";
+
+    const clip = data?.b_roll_clips?.[0]?.video_url;
+    if (clip) html += '<video controls playsinline src="' + esc(clip) + '"></video>';
+
+    out.innerHTML = html;
+
+    // The engines form a pipeline, so let one step hand its output to the next.
+    if (name === "property") {
+      const chain = document.createElement("div");
+      chain.className = "chain";
+      if (data.raw_address) chain.appendChild(chainBtn("ส่งที่อยู่ไปขั้นที่ 02", () => {
+        document.getElementById("goo-address").value = data.raw_address;
+        document.getElementById("goo-id").value = data.property_id;
+        document.getElementById("vid-id").value = data.property_id;
+        document.getElementById("step-google").scrollIntoView({ behavior: "smooth", block: "center" });
+      }));
+      if (chain.children.length) out.appendChild(chain);
+    }
+  }
+
+  function chainBtn(label, onClick) {
+    const b = document.createElement("button");
+    b.className = "ghost";
+    b.textContent = label;
+    b.addEventListener("click", onClick);
+    return b;
+  }
+
+  function highlight(obj) {
+    return esc(JSON.stringify(obj, null, 2))
+      .replace(/&quot;([^&]+?)&quot;(\s*:)/g, '<span class="k">"$1"</span>$2')
+      .replace(/:\s&quot;(.*?)&quot;/g, ': <span class="s">"$1"</span>')
+      .replace(/:\s(-?\d+\.?\d*)/g, ': <span class="n">$1</span>')
+      .replace(/:\s(true|false|null)/g, ': <span class="b">$1</span>');
+  }
+
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+  /* ============ image upload -- base64 so Kling can read a local file ============ */
+  const MAX_BYTES = 8 * 1024 * 1024;
+  let uploaded = null;   // video engine
+  let sbLand = null;     // storyboard land photo
+
+  // One uploader wired to two independent dropzones.
+  function wireUpload({ dropId, fileId, previewId, thumbId, metaId, clearId, outId, onLoad, onClear }) {
+    const drop = document.getElementById(dropId);
+    const input = document.getElementById(fileId);
+    const preview = document.getElementById(previewId);
+    const out = document.getElementById(outId);
+
+    drop.addEventListener("click", () => input.click());
+    drop.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); input.click(); }
+    });
+    drop.addEventListener("dragover", (e) => { e.preventDefault(); drop.classList.add("over"); });
+    drop.addEventListener("dragleave", () => drop.classList.remove("over"));
+    drop.addEventListener("drop", (e) => {
+      e.preventDefault(); drop.classList.remove("over");
+      if (e.dataTransfer.files[0]) read(e.dataTransfer.files[0]);
+    });
+    input.addEventListener("change", () => input.files[0] && read(input.files[0]));
+    document.getElementById(clearId).addEventListener("click", () => {
+      onClear(); input.value = ""; preview.classList.remove("show"); out.innerHTML = "";
+    });
+
+    function read(file) {
+      if (!file.type.startsWith("image/"))
+        return show(out, "err", "ไฟล์นี้ไม่ใช่รูปภาพ", "รองรับเฉพาะ JPG, PNG และ WebP");
+      if (file.size > MAX_BYTES)
+        return show(out, "err", "รูปใหญ่เกินไป",
+          "ไฟล์นี้ " + (file.size / 1048576).toFixed(1) + "MB เกินขีดจำกัด 8MB กรุณาย่อขนาดก่อน");
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        const probe = new Image();
+        probe.onload = () => {
+          const shortest = Math.min(probe.width, probe.height);
+          if (shortest < 300) {
+            onClear(); preview.classList.remove("show");
+            return show(out, "err", "รูปเล็กเกินไป",
+              "ด้านสั้นสุดมีแค่ " + shortest + "px แต่ Kling ต้องการอย่างน้อย 300px");
+          }
+          onLoad(reader.result);
+          document.getElementById(thumbId).src = reader.result;
+          document.getElementById(metaId).innerHTML =
+            "<b>" + esc(file.name) + "</b>" + probe.width + " × " + probe.height + " px · " +
+            (file.size / 1024).toFixed(0) + " KB";
+          preview.classList.add("show");
+          out.innerHTML = "";
+        };
+        probe.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  wireUpload({
+    dropId: "vid-drop", fileId: "vid-file", previewId: "vid-preview", thumbId: "vid-thumb",
+    metaId: "vid-meta", clearId: "vid-clear", outId: "out-video",
+    onLoad: (d) => { uploaded = d; }, onClear: () => { uploaded = null; },
+  });
+  wireUpload({
+    dropId: "sb-drop", fileId: "sb-file", previewId: "sb-preview", thumbId: "sb-thumb",
+    metaId: "sb-meta", clearId: "sb-clear", outId: "out-storyboard",
+    onLoad: (d) => { sbLand = d; }, onClear: () => { sbLand = null; },
+  });
+
+  /* ============ storyboard ============ */
+  const sbBtn = document.getElementById("sb-run");
+  sbBtn.addEventListener("click", async () => {
+    const out = document.getElementById("out-storyboard");
+    const shots = [];
+    if (document.getElementById("sb-pin").checked) shots.push("pin");
+    if (document.getElementById("sb-descent").checked) shots.push("descent");
+    const staged = document.getElementById("sb-staged").checked;
+    if (document.getElementById("sb-construction").checked && !staged) shots.push("construction");
+
+    if (!shots.length) return show(out, "err", "ยังไปต่อไม่ได้", "เลือกอย่างน้อยหนึ่งจังหวะก่อนนะครับ");
+    if (shots.includes("construction") && !sbLand)
+      return show(out, "err", "ยังไปต่อไม่ได้", "จังหวะบ้านก่อสร้างต้องอัปโหลดรูปที่ดินเปล่าก่อน");
+    if (shots.includes("pin") && !val("sb-address"))
+      return show(out, "err", "ยังไปต่อไม่ได้", "จังหวะหมุดบนแผนที่ต้องมีลิงก์แผนที่หรือที่อยู่");
+
+    sbBtn.disabled = true;
+    const stop = busyState(out, true);
+    try {
+      const res = await fetch("/api/storyboard", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          property_id: val("vid-id") || "PROP-TH-01029",
+          raw_address: val("sb-address"),
+          style_tag: val("sb-style"),
+          land_image_base64: sbLand,
+          shots,
+        }),
+      });
+      const body = await res.json();
+      stop();
+      if (!body.ok) return show(out, "err", "รหัสข้อผิดพลาด " + body.code, body.message);
+      renderStoryboard(out, body.data);
+    } catch (err) {
+      stop();
+      show(out, "err", "ติดต่อเซิร์ฟเวอร์ไม่ได้", String(err));
+    } finally {
+      sbBtn.disabled = false;
+    }
+  });
+
+  function renderStoryboard(out, data) {
+    const anyFailed = data.steps.some((s) => s.status === "failed");
+    let html =
+      '<div class="panel ' + (anyFailed ? "busy" : "ok") + '"><span class="badge">' +
+      (anyFailed ? "บางส่วน" : "OK") + '</span><div class="body"><strong>ได้คลิปมา ' +
+      data.clips.length + " ช็อต</strong><span>รวมค่าใช้จ่าย $" +
+      data.total_cost_usd.toFixed(3) + " · ยังไม่ได้ต่อคลิปเป็นไฟล์เดียว (เป็นงานของ Render Engine)</span></div></div>";
+
+    html += '<div class="steplog">';
+    for (const s of data.steps) {
+      html += '<div class="logrow ' + esc(s.status) + '"><span class="dot"></span>' +
+        '<span class="stage">' + esc(s.stage) + '</span>' +
+        '<span class="msg">' + esc(s.detail) + "</span>" +
+        (s.cost_usd ? '<span class="amt">$' + s.cost_usd.toFixed(3) + "</span>" : "") + "</div>";
+    }
+    html += "</div>";
+
+    data.clips.forEach((c, i) => {
+      html += '<div class="clip"><div class="cap"><b>ช็อต ' + (i + 1) + "</b>" + esc(c.label) +
+        "</div><video controls playsinline src=\"" + esc(c.video_url) + '"></video></div>';
+    });
+
+    out.innerHTML = html;
+
+    // Clips are separate files until Render Engine joins them, burns subtitles and
+    // appends the ending card -- that is the artefact a broker can actually post.
+    const finish = document.createElement("div");
+    finish.className = "chain";
+    const btn = chainBtn("ต่อเป็นวิดีโอสมบูรณ์ พร้อมซับ + การ์ดปิดท้าย", async () => {
+      btn.disabled = true;
+      const stop = busyState(out, false);
+      try {
+        const res = await fetch("/api/render-engine", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            property_id: data.property_id,
+            clips: data.clips.map((c) => ({ video_url: c.video_url })),
+            subtitles: data.clips.map((c, i) => ({ start: i * 5, end: (i + 1) * 5, text: c.label })),
+            // Mid-clip "what's nearby" card, straight from the Places lookup.
+            location_card: (data.detail_suggestions?.nearby_places || []).length
+              ? { places: data.detail_suggestions.nearby_places }
+              : undefined,
+            ending_card: {
+              badge: val("rc-badge") || "เจ้าของขายเอง",
+              title: data.detail_suggestions?.address?.split(",").slice(-3, -1).join(",").trim()
+                     || val("sb-address") || "ทรัพย์แนะนำ",
+              size_text: val("rc-size") || "",
+              price_text: val("rc-price") || "",
+              contact_phone: val("rc-phone") || "",
+              line_id: val("rc-line") || "",
+              qr_url: val("rc-qr") || "",
+            },
+            aspects: ["9:16", "16:9"],
+          }),
+        });
+        const body = await res.json();
+        stop();
+        if (!body.ok) return show(out, "err", "รหัสข้อผิดพลาด " + body.code, body.message);
+        let h = '<div class="panel ok"><span class="badge">OK</span><div class="body">' +
+          "<strong>ได้วิดีโอสมบูรณ์แล้ว</strong><span>ต่อคลิป ใส่ซับไทย และการ์ดปิดท้ายเรียบร้อย</span></div></div>";
+        for (const o of body.data.outputs) {
+          h += '<div class="clip"><div class="cap"><b>' + esc(o.aspect_ratio) + "</b>" + esc(o.label) +
+            ' · <a href="' + esc(o.url) + '" download style="color:var(--accent)">ดาวน์โหลด</a></div>' +
+            '<video controls playsinline src="' + esc(o.url) + '"></video></div>';
+        }
+        out.innerHTML = h;
+      } catch (err) {
+        stop();
+        show(out, "err", "เรนเดอร์ไม่สำเร็จ", String(err));
+      }
+    });
+    finish.appendChild(btn);
+    out.appendChild(finish);
+
+    // The storyboard already reports its own spend; fold it into the session meter.
+    spent += data.total_cost_usd;
+    addSpend("__none__");
+  }
+</script>
+</body>
+</html>

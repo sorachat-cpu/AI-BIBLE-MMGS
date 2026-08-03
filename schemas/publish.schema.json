@@ -1,0 +1,96 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PUBLISH_OUT",
+  "description": "Output contract of Publish Engine (14_PUBLISH_ENGINE.md). Terminal payload of the main pipeline; consumed by Analytics Engine. The platform enum extends the three in the spec because the page this system serves also posts to the Facebook page feed, a LINE OA, and -- for Facebook Groups, whose publishing API Meta removed in 2020 -- an offline MANUAL_KIT destination that produces a ready-to-paste folder instead of an API call.",
+  "type": "object",
+  "required": ["property_id", "status", "published_destinations"],
+  "properties": {
+    "property_id": {
+      "type": "string",
+      "pattern": "^(PROP-TH-[0-9]{4,6}|STOCK-[A-Za-z0-9_.-]{1,64}|LAND-[A-Z0-9]{4,16}|TOPIC-[A-Z0-9-]{1,48})$",
+      "description": "Post subject key. PROP-TH-* is a pipeline property; STOCK-* a library clip with no originating listing; LAND-* a row in the land sheet recovered from an old page post; TOPIC-* a knowledge carousel, which has no property at all."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["SUCCESS", "PARTIAL", "FAILED", "DRY_RUN"],
+      "description": "PARTIAL when at least one destination succeeded and at least one failed. DRY_RUN when nothing was actually sent."
+    },
+    "published_destinations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["platform", "ok"],
+        "properties": {
+          "platform": {
+            "type": "string",
+            "enum": [
+              "TIKTOK",
+              "YOUTUBE_SHORTS",
+              "FACEBOOK_REELS",
+              "FACEBOOK_PAGE",
+              "INSTAGRAM_REELS",
+              "LINE_OA",
+              "MANUAL_KIT"
+            ]
+          },
+          "ok": { "type": "boolean" },
+          "post_id": { "type": ["string", "null"] },
+          "publish_url": { "type": ["string", "null"] },
+          "published_at": { "type": ["string", "null"], "format": "date-time" },
+          "scheduled_for": {
+            "type": ["string", "null"],
+            "format": "date-time",
+            "description": "Set when the post was queued in Meta's Planner instead of published. published_at stays null until it actually goes out."
+          },
+          "caption_used": { "type": ["string", "null"] },
+          "caption_chars": { "type": ["integer", "null"], "minimum": 0 },
+          "dry_run": { "type": "boolean" },
+          "attempts": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "0 means the upload was never attempted -- caption failed validation, or the destination has no credentials."
+          },
+          "error_code": {
+            "type": ["string", "null"],
+            "description": "ERR_PUB_01 expired token, ERR_PUB_02 rate limited, ERR_PUB_03 not configured, ERR_PUB_04 upload rejected, ERR_PUB_05 caption over hard limit"
+          },
+          "error_message": { "type": ["string", "null"] },
+          "kit_dir": {
+            "type": ["string", "null"],
+            "description": "MANUAL_KIT only -- folder holding video, images and caption.txt ready to paste."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "video_path": { "type": ["string", "null"] },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "cost_usd": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Caption generation cost only. Publishing itself is free; upload bandwidth is not metered here."
+    }
+  },
+  "additionalProperties": false,
+  "x-error-codes": {
+    "ERR_PUB_01": "Expired OAuth token -- refresh, then retry the upload once",
+    "ERR_PUB_02": "Platform rate limit (HTTP 429) -- requeue this video for +30 minutes",
+    "ERR_PUB_03": "Destination has no credentials configured -- skipped, not an execution failure",
+    "ERR_PUB_04": "Platform rejected the upload (format, duration, copyright, or policy flag)",
+    "ERR_PUB_05": "Caption exceeded the platform hard limit and could not be trimmed safely"
+  },
+  "x-caption-limits": {
+    "TIKTOK": 2200,
+    "YOUTUBE_SHORTS": 100,
+    "FACEBOOK_REELS": 2200,
+    "FACEBOOK_PAGE": 63206,
+    "INSTAGRAM_REELS": 2200,
+    "LINE_OA": 5000
+  },
+  "x-hard-rules": [
+    "Never publish raw B-roll that has not been through Render Engine (no overlay, no contact card).",
+    "Never print or log access tokens, client secrets, or API keys.",
+    "Caption length limits are hard caps enforced before the API call, not after.",
+    "Every destination is dry_run unless the caller explicitly opts in to live posting."
+  ]
+}

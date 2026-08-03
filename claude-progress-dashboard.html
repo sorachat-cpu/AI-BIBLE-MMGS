@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Claude Mission Control · AI BIBLE</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
+    :root { --ink:#252044; --paper:#fff9e9; --sky:#c7efff; --purple:#8267dc; --pink:#ff9fc5; --mint:#6fd5b1; --yellow:#ffd76e; --red:#ff796e; --line:#352b56; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-width:320px; color:var(--ink); background-color:#9fdaed; background-image:linear-gradient(#ffffff38 2px,transparent 2px),linear-gradient(90deg,#ffffff28 2px,transparent 2px); background-size:28px 28px; font-family:'VT323',monospace; font-size:22px; }
+    .frame { max-width:1320px; margin:0 auto; padding:26px 20px 54px; }
+    .pixel { border:4px solid var(--line); box-shadow:6px 6px 0 #372f5869; }
+    header { background:var(--paper); padding:18px 22px; display:flex; gap:20px; align-items:center; justify-content:space-between; }
+    .brand { display:flex; align-items:center; gap:18px; }
+    .logo { width:56px; height:56px; background:var(--purple); border:4px solid var(--line); box-shadow:inset -8px -8px #5945a8; position:relative; }
+    .logo:before,.logo:after { content:''; position:absolute; background:#fff7cb; }
+    .logo:before { width:32px;height:8px;left:8px;top:12px; box-shadow:0 14px #fff7cb; }
+    .logo:after { width:8px;height:8px;left:22px;top:26px;background:#ff9fc5; }
+    h1,h2,h3,p { margin:0; } h1 { font-family:'Press Start 2P',monospace; font-size:18px; line-height:1.6; } .sub { color:#635a79; font-size:20px; }
+    .live { font-family:'Press Start 2P'; font-size:10px; padding:11px 12px; background:#daf8da; border:3px solid var(--line); white-space:nowrap; } .live i{display:inline-block;width:9px;height:9px;background:#39bd7d;margin-right:8px;animation:blink 1.2s infinite}@keyframes blink{50%{opacity:.3}}
+    .hero { margin-top:22px; display:grid; grid-template-columns:1.5fr .85fr; gap:22px; }
+    .card { background:var(--paper); padding:20px; }
+    .hero-copy { min-height:226px; background:linear-gradient(110deg,#fbecff 0%,#e8faff 72%); position:relative; overflow:hidden; }
+    .hero-copy:after{content:'';position:absolute;width:310px;height:100px;background:#bba9ec;right:-30px;bottom:-52px;border-radius:50% 50% 0 0;box-shadow:-180px 28px #93d8f0}
+    .eyebrow { font-family:'Press Start 2P'; font-size:10px; color:#7264b8; margin-bottom:16px; }.headline{font-family:'Press Start 2P';font-size:20px;line-height:1.75;max-width:650px}.headline strong{color:#e85a9b}.hero-copy p{margin-top:16px;max-width:660px;color:#514a67}
+    .summary { background:#39305d; color:white; padding:20px; display:grid; grid-template-columns:1fr 1fr; gap:12px; align-content:center; }.summary h2{font-family:'Press Start 2P';font-size:12px;grid-column:1/-1;line-height:1.5;color:#fff0b5}.metric{background:#524879;border:3px solid #24203c;padding:11px}.metric b{display:block;font-family:'Press Start 2P';font-size:20px;color:#ffdd77;margin-bottom:5px}.metric span{font-size:18px;color:#e5dffd}
+    .section-title{display:flex;justify-content:space-between;align-items:end;margin:28px 0 12px}.section-title h2{font-family:'Press Start 2P';font-size:13px;line-height:1.5}.section-title span{color:#5b5270}
+    .mission-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}.mission{min-height:212px;padding:15px;position:relative;background:var(--paper);transition:transform .15s}.mission:hover{transform:translate(-3px,-3px);box-shadow:9px 9px 0 #372f5869}.mission.done{background:#eaffdc}.mission.wait{background:#fff9e9}.mission .num{font-family:'Press Start 2P';font-size:10px;color:#766b96}.mission h3{font-family:'Press Start 2P';font-size:11px;line-height:1.6;margin-top:12px;max-width:170px}.mission p{font-size:19px;color:#5c556c;margin-top:9px;line-height:1.05;max-width:205px}.tag{position:absolute;left:15px;bottom:15px;font-family:'Press Start 2P';font-size:9px;padding:7px 8px;border:2px solid var(--line)}.done .tag{background:var(--mint)}.wait .tag{background:#eee7ce}.sprite{position:absolute;right:14px;bottom:20px;width:49px;height:49px;image-rendering:pixelated}.bot{background:#7d6ad5;box-shadow:8px 0 #514694,0 8px #514694,8px 8px #514694}.bot:before{content:'••';position:absolute;left:9px;top:10px;color:#fff;font:bold 21px monospace;letter-spacing:3px}.bot:after{content:'';position:absolute;left:14px;top:-10px;width:18px;height:10px;background:#ff9fc5;border:3px solid #352b56}.sleep{background:#a8a1b9;box-shadow:8px 0 #777088,0 8px #777088,8px 8px #777088}.sleep:after{content:'zZ';position:absolute;right:-14px;top:-24px;font-family:'Press Start 2P';font-size:11px;color:#7b6d9f}
+    .lower{display:grid;grid-template-columns:1.05fr 1.95fr;gap:22px;margin-top:22px}.radar{background:#fff4cf;padding:20px}.radar h2,.activity h2{font-family:'Press Start 2P';font-size:12px;line-height:1.6}.radar p{color:#574e69;margin:12px 0}.bar{height:22px;background:#ded4b5;border:3px solid var(--line);margin:15px 0 7px}.bar i{display:block;height:100%;width:30%;background:repeating-linear-gradient(90deg,#7bd8b6 0 12px,#58b894 12px 16px)}.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:18px}.dot{display:inline-block;width:12px;height:12px;border:2px solid var(--line);margin-right:4px}.activity{background:var(--paper);padding:20px}.feed{margin-top:13px;border-top:3px dashed #b9b0c7}.entry{display:grid;grid-template-columns:82px 17px 1fr;gap:10px;padding:13px 0;border-bottom:3px dashed #b9b0c7;line-height:1}.entry time{color:#766c8d;font-size:18px}.entry i{width:13px;height:13px;background:var(--mint);border:2px solid var(--line);margin-top:3px}.entry b{font-size:20px}.entry span{display:block;color:#655d75;font-size:18px;margin-top:3px}
+    footer{margin-top:22px;background:#312a4d;color:#fff5d8;padding:13px 17px;font-size:19px;display:flex;justify-content:space-between;gap:12px}.key{font-family:'Press Start 2P';font-size:9px;color:#ffdb7d}
+    @media(max-width:900px){.hero,.lower{grid-template-columns:1fr}.mission-grid{grid-template-columns:repeat(2,1fr)}} @media(max-width:560px){.frame{padding:12px}.brand .sub,.live{display:none}header{padding:14px}.mission-grid{grid-template-columns:1fr}.summary{grid-template-columns:repeat(4,1fr)}.metric{padding:8px}.metric b{font-size:15px}.metric span{font-size:14px}.headline{font-size:16px}footer{display:block}.key{display:block;margin-top:8px}}
+  </style>
+</head>
+<body>
+  <main class="frame">
+    <header class="pixel"><div class="brand"><div class="logo" aria-hidden="true"></div><div><h1>CLAUDE MISSION CONTROL</h1><p class="sub">AI BIBLE · Modular Media Generation System</p></div></div><div class="live"><i></i>ROADMAP SYNCED</div></header>
+    <section class="hero"><div class="hero-copy card pixel"><div class="eyebrow">✦ TODAY'S STATUS · 28 JUL 2026</div><div class="headline">ฐานความรู้พร้อมแล้ว<br><strong>ถึงเวลาปลุกเหล่า AI Agent!</strong></div><p>สเปก, schema และ agent profile พร้อมใช้งานแล้ว เหลือเริ่ม Phase 0 เพื่อเคลียร์สัญญาข้อมูลกลางก่อนเข้าสู่การสร้างระบบจริง</p></div><aside class="summary pixel"><h2>QUEST STATS</h2><div class="metric"><b>30%</b><span>Foundation ready</span></div><div class="metric"><b>11</b><span>Agents prepared</span></div><div class="metric"><b>6</b><span>Schema scrolls</span></div><div class="metric"><b>0/7</b><span>Build phases live</span></div></aside></section>
+    <div class="section-title"><h2>AGENT PARTY · WORK QUEUE</h2><span>คลิกดูสถานะตาม roadmap</span></div>
+    <section class="mission-grid" aria-label="งานของ AI agents">
+      <article class="mission done pixel"><div class="num">META-LAYER</div><h3>Archivist Claude</h3><p>อ่านเอกสาร สร้าง agent, schema และ payload ตัวอย่าง</p><div class="sprite bot"></div><div class="tag">✓ COMPLETE</div></article>
+      <article class="mission wait pixel"><div class="num">PHASE 0</div><h3>Contract Keeper</h3><p>แก้ชื่อไฟล์ 06 / 18 / 19 และรวม JSON contract</p><div class="sprite sleep"></div><div class="tag">WAITING FOR OK</div></article>
+      <article class="mission wait pixel"><div class="num">PHASE 1</div><h3>Infra Builder</h3><p>วาง PostgreSQL, Redis และ Provider Interface</p><div class="sprite sleep"></div><div class="tag">NOT STARTED</div></article>
+      <article class="mission wait pixel"><div class="num">PHASE 2</div><h3>Property Scout</h3><p>รับข้อมูลอสังหาฯ ตรวจซ้ำ และ extract entity</p><div class="sprite sleep"></div><div class="tag">NOT STARTED</div></article>
+      <article class="mission wait pixel"><div class="num">PHASE 3</div><h3>Media Makers</h3><p>ค้นหาภาพ สร้างบ้าน และผลิตวิดีโอ</p><div class="sprite sleep"></div><div class="tag">NOT STARTED</div></article>
+      <article class="mission wait pixel"><div class="num">PHASE 4</div><h3>Render Rangers</h3><p>Overlay, render, caption และ publish</p><div class="sprite sleep"></div><div class="tag">NOT STARTED</div></article>
+      <article class="mission wait pixel"><div class="num">PHASE 5</div><h3>Insight Owl</h3><p>Analytics, cost tracker และ recovery workflow</p><div class="sprite sleep"></div><div class="tag">NOT STARTED</div></article>
+      <article class="mission wait pixel"><div class="num">PHASE 6</div><h3>Scale Captain</h3><p>ปรับประสิทธิภาพจากข้อมูลจริงสู่ 10k คลิป/เดือน</p><div class="sprite sleep"></div><div class="tag">NOT STARTED</div></article>
+    </section>
+    <section class="lower"><div class="radar pixel"><h2>PROJECT RADAR</h2><p>ความพร้อมเชิงเอกสารและโครงสร้าง ก่อนเริ่มเขียนระบบจริง</p><div class="bar"><i></i></div><p><b>30% ready</b> · Foundation assets complete</p><div class="legend"><span><i class="dot" style="background:#6fd5b1"></i>Done 6</span><span><i class="dot" style="background:#eee7ce"></i>Queued 7</span><span><i class="dot" style="background:#ff9fc5"></i>Blocker 1</span></div></div><div class="activity pixel"><h2>LATEST LOGBOOK</h2><div class="feed"><div class="entry"><time>28 JUL</time><i></i><div><b>Roadmap + Status Tracker updated</b><span>สรุป Phase 0–6 และ known data issues</span></div></div><div class="entry"><time>28 JUL</time><i></i><div><b>11 Claude agent profiles prepared</b><span>ครอบคลุมทุก engine หลักใน pipeline</span></div></div><div class="entry"><time>28 JUL</time><i></i><div><b>6 schema stubs + test payload ready</b><span>พร้อมใช้เป็นฐานสำหรับ validation ต่อไป</span></div></div><div class="entry"><time>NEXT</time><i style="background:#ff9fc5"></i><div><b>Confirm spec cleanup scope</b><span>เป็นจุดตัดสินใจที่ปลดล็อก Phase 0</span></div></div></div></div></section>
+    <footer class="pixel"><span>Source of truth: <b>20_ROADMAP.md</b> · refresh when a phase changes</span><span class="key">▲ ▲ ▼ ▼ · BUILD MODE</span></footer>
+  </main>
+  <script src="dashboard-data.js"></script>
+  <script>
+    (() => {
+      const data = window.PROGRESS_DATA;
+      if (!data) return;
+      const hero = document.querySelector('.hero-copy');
+      hero.querySelector('.eyebrow').textContent = data.headline.eyebrow;
+      hero.querySelector('.headline').innerHTML = data.headline.title;
+      hero.querySelector('p').textContent = data.headline.note;
+      const metrics = document.querySelectorAll('.metric b');
+      metrics[0].textContent = `${data.summary.foundationReady}%`;
+      metrics[1].textContent = data.summary.agentsPrepared;
+      metrics[2].textContent = data.summary.schemasReady;
+      metrics[3].textContent = `${data.summary.livePhases}/${data.summary.totalPhases}`;
+      const stateStyle = document.createElement('style');
+      stateStyle.textContent = '.mission.active{background:#e0f6ff}.mission.blocked{background:#ffe6e4}.active .tag{background:#a8e7ff}.blocked .tag{background:#ffb2aa}';
+      document.head.appendChild(stateStyle);
+      const missions = Object.values(data.missions);
+      document.querySelectorAll('.mission').forEach((card, index) => {
+        const mission = missions[index];
+        if (!mission) return;
+        card.classList.remove('done', 'active', 'wait', 'blocked');
+        card.classList.add(mission.state);
+        card.querySelector('p').textContent = mission.note;
+        card.querySelector('.tag').textContent = mission.tag;
+      });
+    })();
+  </script>
+</body>
+</html>

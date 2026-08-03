@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "VIDEO_OUT",
+  "description": "Output contract of Video Engine (11_VIDEO_ENGINE.md). Consumed by Render Engine.",
+  "type": "object",
+  "required": ["property_id", "b_roll_clips"],
+  "properties": {
+    "property_id": { "type": "string", "pattern": "^PROP-TH-[0-9]{4,6}$" },
+    "camera_config": {
+      "type": "object",
+      "description": "Input-side config carried alongside HOUSE_OUT into this engine (from 04_WORKFLOW.md Workflow_Step_House_to_Video_Payload).",
+      "required": ["motion_type", "pan_speed"],
+      "properties": {
+        "motion_type": { "type": "string", "enum": ["ZOOM_IN", "PAN_RIGHT", "TILT_UP", "DRONE_REVEAL"] },
+        "pan_speed": { "type": "number", "minimum": 0.1, "maximum": 1.0 }
+      }
+    },
+    "b_roll_clips": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["clip_id", "video_url", "duration_seconds", "camera_motion"],
+        "properties": {
+          "clip_id": { "type": "string", "pattern": "^vid_" },
+          "video_url": { "type": "string", "format": "uri" },
+          "duration_seconds": { "type": "number", "minimum": 3, "maximum": 5 },
+          "camera_motion": { "type": "string", "enum": ["PAN_RIGHT", "ZOOM_IN", "DRONE_REVEAL", "TILT_UP"] }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false,
+  "x-error-codes": {
+    "ERR_VID_01": "Primary provider timeout (>120s) or 5xx -- blacklist temporarily, reroute to Luma or Runway",
+    "ERR_VID_02": "Excessive stutter/artifacts -- retry once, else substitute generic nature/scenery B-roll from Library"
+  },
+  "x-hard-rules": [
+    "Zero text/branding/phone numbers may ever be drawn into the video (Absolute Media Neutrality).",
+    "Always cache output organized by style + camera-motion-direction.",
+    "Specify aspect ratio before generation to avoid later cropping.",
+    "Never burn in text -- price/contact changes must never trigger a video regeneration."
+  ]
+}

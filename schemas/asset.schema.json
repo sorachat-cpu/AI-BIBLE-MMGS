@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ASSET_OUT",
+  "description": "Output contract of Asset Engine (09_ASSET_ENGINE.md). Consumed by House Engine and Render Engine.",
+  "type": "object",
+  "required": ["property_id", "categorized_assets"],
+  "properties": {
+    "property_id": { "type": "string", "pattern": "^PROP-TH-[0-9]{4,6}$" },
+    "categorized_assets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["asset_id", "url", "category", "safety_status"],
+        "properties": {
+          "asset_id": { "type": "string", "pattern": "^ast_" },
+          "url": { "type": "string", "format": "uri" },
+          "category": {
+            "type": "string",
+            "enum": ["LAND_VIEW", "COMMUNITY", "STREET_VIEW", "INTERIOR"],
+            "description": "Only these four values are permitted -- never invent a new category."
+          },
+          "safety_status": {
+            "type": "string",
+            "enum": ["SAFE", "TEXT_DETECTED"],
+            "description": "TEXT_DETECTED means overlay text covers >15% of image area -- blocked from use as an AI reference image (House/Video Engine) but may still pass through to Render Engine for direct display."
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false,
+  "x-error-codes": {
+    "ERR_ASSET_NSFW": "NSFW/unsafe/copyrighted content detected -- reject that image",
+    "ERR_ASSET_01": "Invalid file format -- skip that file, continue with the rest"
+  },
+  "x-hard-rules": [
+    "Strict Category Tagging -- only the four enum values, never invent new categories.",
+    "Text/overlay >15% of image area blocks AI-reference use, does not block direct Render Engine display.",
+    "Resize/compress to <=2MB before uploading to CDN.",
+    "Never let an image bearing a competitor watermark/logo through as an AI reference image."
+  ]
+}
