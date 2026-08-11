@@ -11,7 +11,7 @@
 //
 // Hard rule from the spec, enforced by construction: this file never calls a generative
 // AI API. It only shells out to FFmpeg.
-import { writeFile } from "node:fs/promises";
+import { writeFile, access } from "node:fs/promises";
 import path from "node:path";
 import {
   ffmpeg, downloadTo, ensureDirs, cleanTemp, escapeFilterPath, probeDuration,
@@ -52,7 +52,8 @@ async function normaliseClip(input, output, { w, h }) {
  * @param {object} input
  * @param {Array<{video_url?:string, file?:string}>} input.clips
  * @param {Array<{start,end,text}>} [input.subtitles]      step 5.6
- * @param {string} [input.music_url] [input.voiceover_url] step 5.7
+ * @param {string} [input.music_url] [input.voiceover_url] step 5.7, fetched over HTTP
+ * @param {string} [input.music_file] [input.voiceover_file] same, already on disk
  * @param {object} [input.location_card]  {places, headline, ...}   WF5-fix §2.1
  * @param {object} [input.ending_card]    {badge, price_text, ...}  WF5-fix §2.2
  * @param {string[]} [input.aspects]
@@ -62,6 +63,8 @@ export async function runRenderEngine(input, _options = {}) {
     property_id,
     clips = [],
     subtitles = [],
+    music_file,
+    voiceover_file,
     music_url,
     voiceover_url,
     location_card,
@@ -95,8 +98,28 @@ export async function runRenderEngine(input, _options = {}) {
   }
   steps.push({ stage: "5.5 pull clips", status: "ok", detail: `ดึงคลิปมาแล้ว ${localClips.length} ไฟล์` });
 
-  const musicFile = music_url ? await downloadTo(music_url, path.join(TEMP_DIR, "bgm.mp3")).catch(() => null) : null;
-  const voiceFile = voiceover_url ? await downloadTo(voiceover_url, path.join(TEMP_DIR, "vo.mp3")).catch(() => null) : null;
+  // Audio can arrive either as a URL to fetch or as a file already on disk. The local
+  // form exists because the voiceover is generated here (src/lib/voice.mjs) and there is
+  // nowhere to serve it from; downloadTo() is an HTTP fetch and cannot open a path.
+  // A path that does not exist must degrade the same way a failed download does. Passed
+  // straight to FFmpeg it kills the main encode instead, and the fallback below then
+  // produces a video stripped of subtitles and cards while still reporting success.
+  const usable = async (file) => {
+    if (!file) return null;
+    try {
+      await access(file);
+      return file;
+    } catch {
+      steps.push({ stage: "5.7 audio", status: "degraded", detail: `ไม่พบไฟล์เสียง ${file} — เรนเดอร์ต่อโดยไม่มีเสียง` });
+      return null;
+    }
+  };
+  const musicFile = (await usable(music_file)) ?? (music_url
+    ? await downloadTo(music_url, path.join(TEMP_DIR, "bgm.mp3")).catch(() => null)
+    : null);
+  const voiceFile = (await usable(voiceover_file)) ?? (voiceover_url
+    ? await downloadTo(voiceover_url, path.join(TEMP_DIR, "vo.mp3")).catch(() => null)
+    : null);
 
   for (const aspect of aspects) {
     const dims = ASPECTS[aspect];
@@ -198,22 +221,41 @@ export async function runRenderEngine(input, _options = {}) {
     if (filters.length) args.push("-filter_complex", filters.join(";"));
     args.push("-map", vLabel === "0:v" ? "0:v" : `[${vLabel}]`, "-map", aLabel === "0:a" ? "0:a" : `[${aLabel}]`);
 
-    const outFile = path.join(OUTPUT_DIR, `${property_id}_${stamp}_${tag}.mp4`);
+    // `_render_` marks this as pipeline output. Source footage from Video Engine uses the
+    // same property_id/stamp/aspect shape, so without a marker a later run cannot tell
+    // its own finished clips apart from raw material and re-renders them into itself.
+    const outFile = path.join(OUTPUT_DIR, `${property_id}_${stamp}_render_${tag}.mp4`);
     args.push(
       "-c:v", "libx264", "-preset", "medium", "-crf", "22", "-pix_fmt", "yuv420p",
       "-c:a", "aac", "-b:a", "160k", "-movflags", "+faststart", "-shortest",
       outFile
     );
 
+    let outW = dims.w;
+    let outH = dims.h;
+    let degraded = null;
+
     try {
       await ffmpeg(args, { timeoutMs: 600_000 });
     } catch (err) {
-      // ERR_RND_02: drop to 720p rather than losing the job to an encode failure.
-      const fw = aspect === "9:16" ? 720 : 1280;
-      const fh = aspect === "9:16" ? 1280 : 720;
-      steps.push({ stage: `render ${aspect}`, status: "degraded", detail: `เรนเดอร์เต็มความละเอียดไม่ผ่าน ลดเหลือ ${fw}x${fh}: ${err.message}` });
+      // ERR_RND_02: a bare re-encode of the joined footage, so a failed composite still
+      // yields a usable file. It carries NO subtitles, NO cards and NO audio -- the
+      // fallback command references none of them -- so this is reported as a loss, not as
+      // a smaller success. Claiming "ok" here hands back a plausible video with the whole
+      // message missing, which is worse than failing.
+      outW = aspect === "9:16" ? 720 : 1280;
+      outH = aspect === "9:16" ? 1280 : 720;
+      const lost = [
+        subtitles.length ? "ซับ" : null,
+        overlayPlan.length ? "การ์ด" : null,
+        voiceFile || musicFile ? "เสียง" : null,
+      ].filter(Boolean);
+      degraded =
+        `เรนเดอร์เต็มความละเอียดไม่ผ่าน ลดเหลือ ${outW}x${outH}` +
+        (lost.length ? ` และ**หาย ${lost.join(" / ")}**` : "") +
+        `: ${err.message}`;
       await ffmpeg([
-        "-i", joined, "-vf", `scale=${fw}:${fh}`,
+        "-i", joined, "-vf", `scale=${outW}:${outH}`,
         "-c:v", "libx264", "-preset", "veryfast", "-crf", "24", "-pix_fmt", "yuv420p",
         "-c:a", "aac", "-b:a", "128k", "-movflags", "+faststart", outFile,
       ], { timeoutMs: 600_000 });
@@ -224,13 +266,16 @@ export async function runRenderEngine(input, _options = {}) {
       label: dims.label,
       file: path.basename(outFile),
       url: `/output/${path.basename(outFile)}`,
-      resolution: `${dims.w}x${dims.h}`,
+      // The real size, not the requested one -- the fallback changes it.
+      resolution: `${outW}x${outH}`,
+      degraded: Boolean(degraded),
       duration_seconds: Number(duration.toFixed(2)),
     });
     steps.push({
       stage: `render ${aspect}`,
-      status: "ok",
-      detail: `${dims.w}x${dims.h} · ${segments.length} คลิป · ${overlayPlan.length} การ์ด · ${duration.toFixed(1)} วิ`,
+      status: degraded ? "degraded" : "ok",
+      detail: degraded
+        ?? `${outW}x${outH} · ${segments.length} คลิป · ${overlayPlan.length} การ์ด · ${duration.toFixed(1)} วิ`,
     });
   }
 

@@ -704,6 +704,198 @@ No text, no pins, no overlays, no watermark, no map labels.
 
 ---
 
+### TPL_VID_007_v1 — Cosmic Descent to Plot
+
+```
+Engine:    Video Engine
+Provider:  Kling V2
+Operation: IMAGE_TO_VIDEO
+Camera:    DRONE_REVEAL
+Use Case:  Shot 1 -- นอกโลก ไล่ลงมาจนถึงพื้นที่
+Est. Cost: $0.160 per clip
+```
+*(Static — no variables)*
+
+**Template (Static):**
+
+```text
+Cinematic descent from outer space down to Earth.
+Camera begins in orbit with the curvature of the planet and blackness of space visible,
+then plunges continuously downward through thin cloud layers,
+the terrain below growing steadily larger and sharper,
+finally settling into a low aerial view centred on the property.
+One single unbroken accelerating-then-easing move, no cuts, no shake.
+Photorealistic satellite-to-drone footage, natural daylight.
+No text, no map labels, no pins, no overlays, no watermark.
+```
+
+---
+
+### TPL_VID_009_v1 — Push Toward Map Pin
+
+```
+Engine:    Video Engine
+Provider:  Kling V2
+Operation: IMAGE_TO_VIDEO
+Camera:    ZOOM_IN
+Use Case:  Shot 1 alt. -- เปิดที่หมุดบนแผนที่ แล้วดันกล้องเข้าหาหมุด
+Est. Cost: $0.160 per clip
+```
+*(Static — no variables)*
+
+**Template (Static):**
+
+```text
+Slow cinematic push toward the marker at the centre of the map.
+The map stays flat and legible while the camera closes in steadily,
+streets and blocks growing larger around the pin as it approaches.
+Very smooth continuous forward motion, no shake, no rotation, no cuts.
+Clean digital cartography look, crisp edges, even lighting.
+Do not add, move or duplicate any marker, label or icon.
+```
+
+---
+
+### TPL_VID_010_v1 — Map View Falls Onto Real Plot Photo
+
+```
+Engine:    Video Engine
+Provider:  Kling V2
+Operation: IMAGE_TO_VIDEO
+Camera:    DRONE_REVEAL
+Use Case:  Shot 2 -- จากมุมแผนที่ ร่อนลงจนกลายเป็นภาพถ่ายจริงของแปลง
+Est. Cost: $0.160 per clip
+```
+*(Static — no variables)*
+
+**Template (Static):**
+
+```text
+Continuous aerial descent from high above the ground down to the site.
+Camera drops steadily through open sky and thin haze,
+the view transitioning from a flat overhead perspective into a real photographic
+ground-level view of the same location as it descends.
+One unbroken falling move that eases to a stop, no cuts, no shake.
+Photorealistic drone footage, natural daylight.
+No text, no map labels, no pins, no overlays, no watermark.
+```
+
+---
+
+### TPL_VID_008_v1 — Construction Time-Lapse (Start + End Frame)
+
+```
+Engine:    Video Engine
+Provider:  Kling V2 (kling-v1-6 when image_tail is set -- v2 models ignore end frames)
+Operation: IMAGE_TO_VIDEO
+Camera:    DRONE_REVEAL
+Use Case:  ฉากก่อสร้าง -- ต้องมีทั้งภาพเริ่ม (image) และภาพจบ (image_tail)
+Est. Cost: $0.160 per clip (ต่อ 1 ช่วงเชื่อมระหว่าง 2 stage)
+```
+*(Static — no variables)*
+
+**Template (Static):**
+
+```text
+Time-lapse construction on an empty plot of land.
+The bare ground gives way as a house rises into place piece by piece,
+foundation then frame then walls then roof, settling into a finished home.
+Camera holds a slow steady aerial push forward throughout.
+Smooth continuous transformation, no cuts, no flicker, no shake.
+Photorealistic architectural time-lapse, warm natural daylight.
+No text, no watermark, no people, no vehicles, no signage.
+```
+
+> **คำเตือนต้นทุน**: ใช้ template นี้ต่อเมื่อยอมจ่ายเกินเพดาน $0.30/วิดีโอจริงๆ เท่านั้น
+> ระหว่าง 5 stage มี 4 ช่วงเชื่อม × $0.16 = $0.64 (ยังไม่รวมค่าสร้างภาพนิ่ง 5 ใบ $0.07)
+> รวม **$0.71** ต่อฉากก่อสร้างอย่างเดียว — ทางเลือกที่อยู่ในเพดานคือ `construction-engine.mjs`
+> ซึ่งใช้ภาพนิ่ง 5 ใบ + FFmpeg crossfade แทนที่จะเรียก template นี้ ต้นทุนเหลือ $0.07
+> เลือกใช้ template นี้เฉพาะตอนที่ต้องการภาพเคลื่อนไหวจริงและงบไม่ใช่ข้อจำกัด
+
+---
+
+## 7.1 Master Prompt Structure — Fixed vs Variable (บังคับใช้ทุกครั้งที่สร้าง Prompt ใหม่)
+
+> เพิ่มเมื่อ 9 ส.ค. 2569 ตามคำสั่งของ user ที่ต้องการให้ Claude "จดจำไว้ตลอดในการ generate"
+> โครงนี้คือกฎการประกอบ prompt ที่ Claude ต้องใช้เป็นฐานทุกครั้ง ไม่ใช่คิดใหม่ทุกรอบ
+> เพื่อให้ output จาก Kling มี look & feel เดียวกันทั้งแพลตฟอร์ม (brand consistency)
+
+### แก้ให้ตรงกับสัญญาที่ระบบบังคับจริงแล้ว (สำคัญ)
+
+ร่างต้นฉบับที่ user ให้มามีตัวแปรบางตัวที่ **ไม่ตรงกับ enum ที่ระบบบังคับ** ถ้าปล่อยผ่านจะ generate
+ด้วยค่าที่ validator ปฏิเสธ Claude ต้องเตือนทันทีตามกฎที่ user วางไว้เอง ("ผมจะเตือนทันที ถ้าค่าตัวแปร
+ที่ให้มาขัดกับ fixed structure") — รายการที่แก้แล้วในตารางด้านล่าง:
+
+| ตัวแปร | ร่างเดิมของ user | ค่าจริงที่ระบบยอมรับ (บังคับ) | อยู่ที่ไฟล์ |
+|---|---|---|---|
+| `HOUSE_STYLE` | modern minimalist / Thai contemporary / resort tropical / loft-style / classic colonial | **`MODERN_NORDIC` \| `MINIMALIST` \| `LUXURY_CLASSIC` \| `CONTEMPORARY` \| `LOFT`** (5 ค่าตายตัว มาจาก Property Engine TPL_PROP_002_v1) | `src/wf5/construction.mjs` `STYLE_WORDS`, `17_PROMPT_LIBRARY.md` §6 |
+| `CAMERA_MOVEMENT` | zoom-out top-down / orbiting / push-in dolly / time-lapse vertical build-up | **`PAN_RIGHT` \| `ZOOM_IN` \| `DRONE_REVEAL` \| `TILT_UP`** เท่านั้นที่ผ่าน validator — `ZOOM_OUT` และ `ORBIT` ยังไม่มีจริง (ORBIT ถูกเขียนไว้ใน TPL_VID_005 แต่ไม่อยู่ใน enum ตั้งแต่ก่อนหน้านี้แล้ว เป็นบั๊กเอกสารเก่าที่ยังไม่ได้แก้) | `schemas/video.schema.json`, `src/engines/video-engine.mjs` `CAMERA_MOTIONS` |
+
+**ถ้าต้องการ `ZOOM_OUT` หรือ `ORBIT` จริงๆ** ต้องแก้โค้ด 3 จุดพร้อมกัน (เพิ่ม enum ใน schema + `CAMERA_MOTIONS` +
+`buildCameraControl()` ใน `kling-adapter.mjs`) ไม่ใช่แค่เขียนในเอกสาร — ยังไม่ได้ทำ เพราะเป็นการเปลี่ยนสัญญา
+ที่โค้ดอื่นอ้างอิงอยู่ ต้องตัดสินใจร่วมก่อน
+
+### โครงสร้างมาตรฐาน (Fixed — ห้ามเปลี่ยนโครง เปลี่ยนได้แค่ค่าตัวแปร)
+
+```text
+[SHOT TYPE], [CAMERA_MOVEMENT] of [HOUSE_STYLE] house,
+[MATERIAL_FACADE], set in [ENVIRONMENT],
+[LIGHTING] lighting, [TIME_OF_DAY],
+photorealistic architectural visualization, cinematic real estate commercial,
+smooth camera motion, 8k detail, shallow depth of field on foreground landscaping,
+{{negative_keywords}}, {{safety_keywords}}
+```
+
+`{{negative_keywords}}` และ `{{safety_keywords}}` **ไม่ใช่ค่าที่ผู้ใช้กรอกเอง** — ดึงจาก §4.1/§4.3
+เสมอ (ทั้งชุด ไม่ใช่เลือกบางคำ) เพราะเป็นจุดที่บั๊กจริงเคยเกิด: `construction-engine.mjs` เคยประกอบ prompt
+เองแยกจากไฟล์นี้และลืมใส่ safety keywords ทั้งที่ prompt พูดถึง "excavator on site" ตรงๆ ซึ่งเสี่ยงให้โมเดล
+วาดคนงานเข้ามาในภาพ แก้แล้วให้เรียกผ่าน `buildStagePrompt()` ตัวเดียวจุดเดียวเท่านั้น (ดู §14.3)
+
+### ตัวแปรที่ปรับได้ (ต่อทรัพย์แต่ละแปลง)
+
+| ตัวแปร | ค่าที่ใช้ได้ | ที่มา |
+|---|---|---|
+| `HOUSE_STYLE` | 5 ค่าตายตัวข้างบน | `style_tag` จาก Property Engine |
+| `MATERIAL_FACADE` | white stucco with wood accent / exposed concrete / glass curtain wall / brick and timber | เลือกตาม style_tag ให้เข้ากัน ไม่ใช่สุ่ม |
+| `ENVIRONMENT` | suburban plot with garden / riverside / near golf course / gated village / rural Thailand open field | จาก Google Engine (nearby context) |
+| `LIGHTING` | golden hour warm / soft overcast / blue hour twilight | ค่าเริ่มต้น golden hour เว้นแต่ระบุ |
+| `TIME_OF_DAY` | sunrise / midday / dusk | ค่าเริ่มต้น midday |
+| `CAMERA_MOVEMENT` | 4 ค่าตายตัวข้างบน | ตาม sub-step ดูตารางล่าง |
+
+### แผนที่ sub-step 5.1–5.8 → Template ID จริง
+
+**แก้ความเข้าใจผิดหนึ่งจุดก่อน**: ไม่ใช่ทุก sub-step ที่ต้องมี Kling prompt — 5.6/5.7/5.8 เป็นงานของ
+Render Engine ซึ่ง **"ห้ามเรียก generative AI API ใดๆ ทั้งสิ้น ทำแค่สั่ง FFmpeg"** (คอมเมนต์หัวไฟล์
+`render-engine.mjs`) การ์ด ซับ และเสียง ประกอบด้วยโค้ดล้วน ไม่มี prompt ให้ Kling เลย
+
+| Sub-step | ทำอะไร | Template ID | Camera | ใช้งานจริงในโค้ดหรือยัง |
+|---|---|---|---|---|
+| 5.1 Satellite Zoom | นอกโลก → หมุด → ภาพดาวเทียม | `TPL_VID_007_v1` (Kling) **หรือ** `mapzoom-engine.mjs` (FFmpeg ล้วน ถูกกว่า 16 เท่า ไม่ใช้ AI) | DRONE_REVEAL | **ใช้เส้นทาง FFmpeg จริงในระบบตอนนี้** — `TPL_VID_007` มีไว้เผื่ออนาคตอยากได้แบบ AI สร้างเอง |
+| 5.1 alt. | เปิดที่หมุด แล้วดันกล้อง | `TPL_VID_009_v1` | ZOOM_IN | ยังไม่ถูกเรียกจากโค้ดที่ใช้งานจริง |
+| 5.2 Drone Animation | ร่อนจากมุมแผนที่ลงภาพถ่ายจริง | `TPL_VID_010_v1` | DRONE_REVEAL | ยังไม่ถูกเรียกจากโค้ดที่ใช้งานจริง (แทนที่ด้วยฉาก "plot" ใน `story-engine.mjs` ที่ซูมภาพถ่ายจริงด้วย FFmpeg) |
+| 5.3 House Visualization | ดันกล้องเข้าหาประตูบ้าน | `TPL_VID_003_v1` | ZOOM_IN | มีในโค้ด ยังไม่ถูกเรียกใช้จริง (บ้านที่สร้างด้วย AI ยังไม่ทำ — รอเครดิต Kling) |
+| 5.4 Construction Simulation | ที่ดินเปล่า → บ้านเสร็จ ทีละขั้น | `TPL_VID_008_v1` (มีภาพเคลื่อนไหวจริง $0.71/ฉาก) **หรือ** `construction-engine.mjs` (ภาพนิ่ง 5 ใบ + crossfade $0.07/ฉาก) | DRONE_REVEAL | **ใช้เส้นทางถูก (`construction-engine.mjs`) เป็นค่าเริ่มต้น** — สลับไป `TPL_VID_008` ได้ถ้ายอมจ่ายเกินเพดาน |
+| 5.5 Image to Video | ภาพนิ่งทั่วไป → คลิป | `TPL_VID_001` ถึง `TPL_VID_004` ตาม camera ที่เลือก | ตามที่เลือก | มีในโค้ด (`video-engine.mjs`) รอโควตา Kling |
+| 5.6 Subtitle | ฝังซับ | **ไม่มี — FFmpeg `subtitles` filter ล้วน** | — | ใช้งานจริงแล้ว (`render-engine.mjs` + `lib/ass.mjs`) |
+| 5.7 BGM & Voice | ใส่เสียง | **ไม่มี — เสียงพูดสร้างจาก `say -v Kanya` (เสียงระบบ macOS) ไม่ใช่ Kling** | — | ใช้งานจริงแล้ว (`lib/voice.mjs`) — เปลี่ยนไปใช้ ElevenLabs ผ่าน Higgsfield ได้ถ้าต้องการเสียงคุณภาพสูงกว่า |
+| 5.8 Final Render | ประกอบร่างสุดท้าย | **ไม่มี — FFmpeg ล้วน** | — | ใช้งานจริงแล้ว (`render-engine.mjs`) |
+
+### กติกาที่ Claude กำกับตลอดโปรเจกต์ (ตามที่ user สั่งไว้)
+
+1. ทุกครั้งที่สร้าง prompt ใหม่ ใช้โครงสร้าง Fixed ด้านบนเป็นฐานเสมอ ไม่คิดใหม่หมดทุกรอบ
+2. เปลี่ยนได้เฉพาะช่องตัวแปร ตามข้อมูลจริงของทรัพย์แต่ละแปลง (ดึงจาก Property/Google Engine)
+3. **เตือนทันที** ถ้าค่าตัวแปรที่ขอมาไม่ตรงกับ enum ที่ระบบบังคับ (ตัวอย่างจริงที่เจอแล้ว: `resort tropical`,
+   `ZOOM_OUT`, `ORBIT`) — ไม่เงียบแล้วเดาค่าที่ใกล้เคียงเอง
+4. `--ar`/`--duration` ต้องตรงปลายทางเสมอ: 9:16 = TikTok/Reels/Shorts, 16:9 = YouTube
+5. ห้าม inline prompt ในโค้ด engine ใดๆ — ดึงผ่าน `prompt-library.mjs` หรือ `buildStagePrompt()`
+   เท่านั้น (17_PROMPT_LIBRARY.md §15 rule 2, เพิ่งพบว่า `construction-engine.mjs` ละเมิดข้อนี้จริง
+   และแก้แล้วเมื่อ 9 ส.ค. 2569)
+6. Kling คือ fallback หลักตอนนี้เพราะ Higgsfield API สถานะแดง (บัญชี Kling เองก็ว่างอยู่ ณ วันที่บันทึก
+   — ดู `20_ROADMAP.md` รอบล่าสุด) prompt ทุกอันจึงต้อง "แข็งแรงพอ" ที่จะไม่ต้องพึ่งการปรับแต่งเพิ่มเมื่อ
+   สลับ provider
+
+---
+
 ## 8. Caption Generation Templates (Publish Engine)
 
 ---
@@ -1287,6 +1479,10 @@ Return only the insight text. No JSON. No markdown.
 | `TPL_VID_004_v1` | Video | Kling/RW | Tilt up reveal | $0.160–0.260 |
 | `TPL_VID_005_v1` | Video | Higs/RW | Orbital arc | $0.180–0.260 |
 | `TPL_VID_006_v1` | Video | Luma/Kling | Aerial map fly-in | $0.080–0.160 |
+| `TPL_VID_007_v1` | Video | Kling V2 | Cosmic descent to plot (5.1) | $0.160 |
+| `TPL_VID_008_v1` | Video | Kling v1-6 | Construction time-lapse, start+end frame (5.4) — $0.71/scene, over the $0.30 cap | $0.160/transition |
+| `TPL_VID_009_v1` | Video | Kling V2 | Push toward map pin (5.1 alt.) | $0.160 |
+| `TPL_VID_010_v1` | Video | Kling V2 | Map view falls onto real plot photo (5.2) | $0.160 |
 | `TPL_CAP_001_v1` | Publish | Claude Haiku | TikTok caption (Thai) | $0.001|
 | `TPL_CAP_002_v1` | Publish | Claude Haiku | YouTube Shorts description | $0.001 |
 | `TPL_CAP_003_v1` | Publish | Claude Haiku | Facebook Reels caption | $0.001 |

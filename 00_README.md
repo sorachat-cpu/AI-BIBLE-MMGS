@@ -55,9 +55,17 @@ flowchart LR
   O --> R["Render Engine<br/>FFmpeg ประกอบร่าง"]
   R -.->|"ยังไม่ได้ต่อ"| Q["คิวโพสต์"]
 
-  style R stroke-dasharray: 5 5
+  MZ["Map Zoom Engine<br/>หมุด → ซูมลงแปลง"] --> R
+  VO["เสียงพูดไทย + ซับ<br/>say -v Kanya"] --> R
+
+  style R fill:#0e2a1d,stroke:#4ac68a
+  style MZ fill:#0e2a1d,stroke:#4ac68a
+  style VO fill:#0e2a1d,stroke:#4ac68a
   style Q fill:#0e2a1d,stroke:#4ac68a
 ```
+
+> **เส้นทางที่ใช้ได้แล้ว (3 ส.ค.)**: `Map Zoom → Render` ทำคลิปเสร็จได้จริงโดยไม่แตะ AI เลย
+> ส่วน `House → Video` ยังพักเพราะโควตาหมดและงบเกินเพดาน · สั่งงานด้วย `npm run render`
 
 > คลิป 7 ตัวใน `output/` ตอนนี้มาจากการทดลอง Video Engine รอบก่อน **โควตา Kling หมดแล้ว
 > สร้างใหม่ไม่ได้** จึงห้ามลบ ส่วนสไลด์ carousel ลบได้เสมอเพราะเรนเดอร์ใหม่จาก `topics.mjs` ได้ตลอด
@@ -71,7 +79,10 @@ flowchart LR
 | Carousel Engine | ✅ ออกแบบใหม่แล้ว | ธีม `daylight` พื้นสว่างโทนธรรมชาติ · ฟอนต์ Sukhumvit Set (ลง Prompt แล้วดีกว่านี้ ดู `assets/README.md`) |
 | หน้าตรวจสถานะ `/status` | ✅ ใช้งานจริง | ตรวจ 13 ข้อก่อนปล่อยโพสต์ |
 | TikTok / YouTube / Instagram | ⚪ รอ credential | โครงพร้อมแล้ว ใส่ค่าใน `.env` ก็ใช้ได้ |
-| Property / Google / House / Video / Render | ⏸ **พักไว้** | สายผลิตวิดีโอ ยังไม่ต่อเข้าคิวโพสต์ |
+| **Map Zoom Engine** | ✅ ใช้งานจริง | หมุดแผนที่ → ซูมลงแปลง · **ไม่ใช้ AI** ต้นทุน $0.01/คลิป |
+| **เสียงพูดไทย + ซับ** | ✅ ใช้งานจริง | เสียง `Kanya` ของ macOS ฟรี · **ซับตรงกับเสียงโดยการวัด ไม่ใช่การเดา** |
+| Render Engine | ✅ ใช้งานจริง | ต่อคลิป ฝังซับ ใส่เสียง การ์ดปิดท้าย · สั่งด้วย `npm run render` |
+| House / Video Engine (สร้างคลิปด้วย AI) | ⏸ **พักไว้** | โควตา Kling หมด · เส้นทางปลูกบ้าน 5 ขั้น = $0.87 เกินเพดาน $0.30 |
 | ตีเส้นแปลง · ตัดต่อ+ซับ · คลังคอนเทนต์ | 📋 มีสเปกแล้ว | ดู `23_PAGE_STUDIO.md` |
 
 ### เอกสารที่เกี่ยวกับงานช่วงนี้

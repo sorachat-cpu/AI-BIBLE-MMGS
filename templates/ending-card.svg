@@ -28,8 +28,10 @@
     <text x="{{TEXT_X}}" y="{{PRICE_Y}}" font-family="Sathu" font-size="{{PRICE_SIZE}}"
           font-weight="bold" fill="#E0A05C">{{PRICE}}</text>
 
+    <!-- Hidden, not just emptied, when there is nothing to contact: an empty white slab
+         reads as a rendering fault. CONTACT_ON is 0 when both phone and LINE are blank. -->
     <rect x="{{TEXT_X}}" y="{{CONTACT_Y}}" width="{{CONTACT_W}}" height="{{CONTACT_H}}"
-          rx="{{CONTACT_R}}" fill="#FFFFFF"/>
+          rx="{{CONTACT_R}}" fill="#FFFFFF" opacity="{{CONTACT_ON}}"/>
     <text x="{{CONTACT_TEXT_X}}" y="{{PHONE_Y}}" font-family="Sathu"
           font-size="{{CONTACT_SIZE}}" font-weight="bold" fill="#111B25">{{PHONE}}</text>
     <text x="{{CONTACT_TEXT_X}}" y="{{LINE_Y}}" font-family="Sathu"

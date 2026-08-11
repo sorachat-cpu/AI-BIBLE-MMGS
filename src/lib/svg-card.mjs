@@ -35,6 +35,35 @@ function esc(text) {
     .replace(/"/g, "&quot;").replace(/'/g, "&apos;");
 }
 
+// Thai vowels above/below and tone marks stack on the preceding consonant and take no
+// horizontal space, so counting them overstates the width badly.
+const ZERO_WIDTH_THAI = /[ัิ-ฺ็-๎]/;
+
+/**
+ * Cut a line to what will actually fit, because nothing here wraps.
+ *
+ * An over-long title does not push the card wider, it runs off the edge and out of frame,
+ * and listing titles routinely carry the size and the sub-district as well as the name.
+ * Estimating is enough: being a character conservative costs nothing, overflowing is
+ * visible in the finished video.
+ */
+function fitText(text, maxWidthPx, fontSize) {
+  const chars = [...String(text ?? "")];
+  const advance = fontSize * 0.62;
+  let width = 0;
+  for (let i = 0; i < chars.length; i++) {
+    if (!ZERO_WIDTH_THAI.test(chars[i])) width += advance;
+    if (width > maxWidthPx) {
+      // Back off to a base character. Cutting mid-cluster either strips a tone mark off
+      // its consonant or leaves an orphaned mark sitting against the ellipsis.
+      let end = Math.max(1, i - 1);
+      while (end > 1 && ZERO_WIDTH_THAI.test(chars[end])) end--;
+      return `${chars.slice(0, end).join("").trim()}…`;
+    }
+  }
+  return String(text ?? "");
+}
+
 function fill(template, values) {
   return template.replace(/\{\{(\w+)\}\}/g, (_, key) =>
     values[key] === undefined ? "" : String(values[key])
@@ -142,7 +171,12 @@ export async function renderEndingCard({
   const qrSide = Math.round(u * 12);
   // Keep contact text clear of the QR block when one is present.
   const contactTextW = qrFile ? Math.round(u * 14) : 0;
-  const cardH = contactY + contactH + Math.round(u * 6);
+  // Drop the reserved height too, otherwise the card keeps a block of dead space where
+  // the contact panel would have been.
+  const hasContact = Boolean(phone || line_id);
+  const cardH = hasContact
+    ? contactY + contactH + Math.round(u * 6)
+    : priceY + Math.round(u * 5);
 
   // librsvg refuses to load external file:// references, so the QR has to be inlined as
   // a data URI -- a plain href silently renders nothing.
@@ -166,9 +200,15 @@ export async function renderEndingCard({
     BADGE_TEXT_X: textX + Math.round(u * 3),
     BADGE_TEXT_Y: badgeY + Math.round(badgeH * 0.68),
     BADGE: esc(badge),
-    TITLE: esc(title), TITLE_Y: titleY, TITLE_SIZE: Math.round(u * 5.0),
-    SIZE_TEXT: esc(size_text), SIZE_Y: sizeY, SUB_SIZE: Math.round(u * 3.4),
-    PRICE: esc(price_text), PRICE_Y: priceY, PRICE_SIZE: Math.round(u * 7.4),
+    TITLE: esc(fitText(title, cardW - textX * 2, Math.round(u * 5.0))),
+    TITLE_Y: titleY, TITLE_SIZE: Math.round(u * 5.0),
+    SIZE_TEXT: esc(fitText(size_text, cardW - textX * 2, Math.round(u * 3.4))),
+    SIZE_Y: sizeY, SUB_SIZE: Math.round(u * 3.4),
+    // Largest type on the card, so it overflows first: 23 of 67 listings carry a price
+    // string wider than the card at this size ("ยกแปลง4ไร่ 4.8ล้านบาท" and similar).
+    PRICE: esc(fitText(price_text, cardW - textX * 2, Math.round(u * 7.4))),
+    PRICE_Y: priceY, PRICE_SIZE: Math.round(u * 7.4),
+    CONTACT_ON: phone || line_id ? 1 : 0,
     CONTACT_Y: contactY, CONTACT_W: cardW - textX * 2, CONTACT_H: contactH,
     CONTACT_R: Math.round(u * 1.8), CONTACT_SIZE: Math.round(u * 3.6),
     CONTACT_TEXT_X: textX + Math.round(u * 3.5),

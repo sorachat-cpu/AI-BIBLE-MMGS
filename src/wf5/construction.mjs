@@ -78,12 +78,28 @@ export class ConstructionError extends Error {
 }
 
 /** Base context is prepended to every stage so the plot and camera angle stay put. */
-function buildStagePrompt(stage, styleTag) {
+// Global Prompt Rules, 17_PROMPT_LIBRARY.md §4. Every image/video prompt in the system
+// must carry these three blocks -- this is the one place construction stages assembled
+// their own partial copy instead of the canonical set, which is how "excavator on site"
+// (stage 1's own wording) went out without "no construction workers" to block a person
+// being drawn operating it.
+const NEGATIVE_KEYWORDS =
+  "no text, no watermark, no logo, no price tag, no phone number, no signage, " +
+  "no subtitle, no caption overlay, no brand name, no UI elements, no writing, no numbers";
+const SAFETY_KEYWORDS = "no people, no vehicles, no animals, no construction workers";
+
+/**
+ * Per-stage image prompt. Exported so construction-engine.mjs (the crossfade-based scene
+ * builder) uses the exact same wording as this file's own image-to-video path rather than
+ * assembling a second, drifting copy -- 17_PROMPT_LIBRARY.md §15 rule 2 forbids prompts
+ * being inlined anywhere outside a single shared builder.
+ */
+export function buildStagePrompt(stage, styleTag) {
   const style = STYLE_WORDS[styleTag] ?? "contemporary";
   const base =
     `same plot of land, same camera angle as original photo, ${style} house, ` +
     `photorealistic, real estate marketing photo`;
-  return `${base}, ${stage.prompt}. No text, no watermark, no logo, no signage, no numbers.`;
+  return `${base}, ${stage.prompt}. ${NEGATIVE_KEYWORDS}, ${SAFETY_KEYWORDS}.`;
 }
 
 export function estimateConstructionCost(stageCount) {

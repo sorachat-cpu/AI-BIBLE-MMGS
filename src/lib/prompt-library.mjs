@@ -110,9 +110,8 @@ No people, no cars, no text, no watermark, no logo, no signage, no numbers.`,
 };
 
 // ---------------------------------------------------------------------------
-// New templates added 2026-07-29 for the "cosmic descent -> house rises" storyboard.
-// These are NOT in 17_PROMPT_LIBRARY.md yet -- per that doc's Claude Rule #8 the
-// Template Registry Summary must be updated before these are considered canonical.
+// Templates for the "cosmic descent -> house rises" storyboard, added 2026-07-29.
+// Registered in 17_PROMPT_LIBRARY.md §7.1 and the §13 registry table on 2026-08-09.
 // Version suffix stays _v1 because they are new IDs, not edits of existing ones.
 // ---------------------------------------------------------------------------
 const STORYBOARD_TEMPLATES = {

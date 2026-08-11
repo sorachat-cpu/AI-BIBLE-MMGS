@@ -14,6 +14,48 @@ const STATIC_MAP_URL = "https://maps.googleapis.com/maps/api/staticmap";
 const STREET_VIEW_URL = "https://maps.googleapis.com/maps/api/streetview";
 const IMAGE_SIZE = "1080x1080";
 
+/**
+ * Satellite frames at several zoom levels, wide first, for a fly-down to the plot.
+ *
+ * The descent is a zoom across still frames, not generated motion, so it needs no video
+ * model: four static-map images cost about $0.008 against $0.16 for one AI clip, and the
+ * imagery is the real satellite view of that exact parcel rather than an invention.
+ *
+ * Levels are spaced unevenly on purpose. Google's zoom is logarithmic, so an even step
+ * reads as a slow start and a sudden drop; these land closer to a constant descent.
+ *
+ * @param {{lat:number, lng:number}} at
+ * @param {string} apiKey
+ * @param {number[]} [zooms]
+ * @returns {Array<{zoom:number, url:string}>}
+ */
+export function satelliteZoomUrls({ lat, lng }, apiKey, zooms = [6, 11, 15, 18]) {
+  return zooms.map((zoom) => {
+    const u = new URL(STATIC_MAP_URL);
+    u.searchParams.set("center", `${lat},${lng}`);
+    u.searchParams.set("zoom", String(zoom));
+    u.searchParams.set("size", IMAGE_SIZE);
+    u.searchParams.set("scale", "2");
+    u.searchParams.set("maptype", "satellite");
+    u.searchParams.set("key", apiKey);
+    return { zoom, url: u.toString() };
+  });
+}
+
+/** The closest frame, with the marker drawn, to hold on at the end of the descent. */
+export function pinnedPlotUrl({ lat, lng }, apiKey, zoom = 18) {
+  const u = new URL(STATIC_MAP_URL);
+  u.searchParams.set("center", `${lat},${lng}`);
+  u.searchParams.set("zoom", String(zoom));
+  u.searchParams.set("size", IMAGE_SIZE);
+  u.searchParams.set("scale", "2");
+  u.searchParams.set("maptype", "hybrid"); // satellite plus road labels, so it is readable
+  u.searchParams.set("language", "th");
+  u.searchParams.set("markers", `color:red|size:mid|${lat},${lng}`);
+  u.searchParams.set("key", apiKey);
+  return u.toString();
+}
+
 export class GoogleEngineError extends Error {
   constructor(code, message) {
     super(message);
