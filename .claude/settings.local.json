@@ -46,7 +46,12 @@
       "Bash(.venv/bin/python -)",
       "Bash(.venv/bin/python -c \"import src.dashboard; print\\('ok'\\)\")",
       "Bash(.venv/bin/python -m pytest -q)",
-      "Bash(pkill -f \"main.py\")"
+      "Bash(pkill -f \"main.py\")",
+      "Read(//Users/sungsrc/Library/CloudStorage/**)",
+      "Bash(pkill -f 'main.py')",
+      "Bash(./run.sh)",
+      "Bash(chmod +x run.sh)",
+      "Bash(.venv/bin/python -m pytest tests/test_signal_watch.py -q)"
     ]
   }
 }

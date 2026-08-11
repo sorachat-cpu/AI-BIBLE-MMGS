@@ -206,10 +206,26 @@
       "content_type": "listing",
       "source": "listing",
       "status": "DRAFT",
-      "results": [],
+      "results": [
+        {
+          "platform": "MANUAL_KIT",
+          "ok": true,
+          "post_id": null,
+          "publish_url": null,
+          "published_at": "2026-08-03T08:09:11.835Z",
+          "scheduled_for": null,
+          "caption_used": "📍 ขายที่ดิน 200 ตรว. ศรีนาวา เมืองนครนายก\n💰 7 แสนบาท\n\n• น้ำไฟพร้อมถึงหน้าแปลง\n• โฉนดครุฑแดง\n\nสนใจทัก 094-887-4343",
+          "caption_chars": 113,
+          "dry_run": false,
+          "attempts": 1,
+          "error_code": null,
+          "error_message": null,
+          "kit_dir": "/Users/sungsrc/Library/CloudStorage/OneDrive-ส่วนบุคคล/AI_BIBLE/output/post-kits/2026-08-03-LAND-0930677E"
+        }
+      ],
       "note": "",
       "created_at": "2026-08-01T14:45:06.391Z",
-      "updated_at": "2026-08-01T14:45:06.391Z",
+      "updated_at": "2026-08-03T08:09:11.848Z",
       "posted_at": null,
       "property_id": "LAND-0930677E",
       "listing_id": "LAND-0930677E",
@@ -229,7 +245,8 @@
         "maps_url": null,
         "text_only": true
       },
-      "caption": "📍 ขายที่ดิน 200 ตรว. ศรีนาวา เมืองนครนายก\n💰 7 แสนบาท\n\n• น้ำไฟพร้อมถึงหน้าแปลง\n• โฉนดครุฑแดง\n\nสนใจทัก 094-887-4343"
+      "caption": "📍 ขายที่ดิน 200 ตรว. ศรีนาวา เมืองนครนายก\n💰 7 แสนบาท\n\n• น้ำไฟพร้อมถึงหน้าแปลง\n• โฉนดครุฑแดง\n\nสนใจทัก 094-887-4343",
+      "last_publish_status": "DRY_RUN"
     },
     {
       "id": "2026-08-03T12:00",
@@ -333,10 +350,26 @@
       "content_type": "listing",
       "source": "listing",
       "status": "DRAFT",
-      "results": [],
+      "results": [
+        {
+          "platform": "MANUAL_KIT",
+          "ok": true,
+          "post_id": null,
+          "publish_url": null,
+          "published_at": "2026-08-03T08:09:12.652Z",
+          "scheduled_for": null,
+          "caption_used": "📍 ขายที่ดิน 0-2-09 ไร่ ปากช่อง นครราชสีมา\n💰 2.37 ล้านบาท ลดทันที 100,000 บาท\n\n• ถนนลาดยางกว้าง 6 เมตร\n• น้ำ–ไฟ พร้อมใช้งาน\n\nสนใจทัก 094-8874343",
+          "caption_chars": 143,
+          "dry_run": false,
+          "attempts": 1,
+          "error_code": null,
+          "error_message": null,
+          "kit_dir": "/Users/sungsrc/Library/CloudStorage/OneDrive-ส่วนบุคคล/AI_BIBLE/output/post-kits/2026-08-04-LAND-0B047BA7"
+        }
+      ],
       "note": "",
       "created_at": "2026-08-01T14:45:10.035Z",
-      "updated_at": "2026-08-01T14:45:10.035Z",
+      "updated_at": "2026-08-03T08:09:12.672Z",
       "posted_at": null,
       "property_id": "LAND-0B047BA7",
       "listing_id": "LAND-0B047BA7",
@@ -356,7 +389,8 @@
         "maps_url": null,
         "text_only": true
       },
-      "caption": "📍 ขายที่ดิน 0-2-09 ไร่ ปากช่อง นครราชสีมา\n💰 2.37 ล้านบาท ลดทันที 100,000 บาท\n\n• ถนนลาดยางกว้าง 6 เมตร\n• น้ำ–ไฟ พร้อมใช้งาน\n\nสนใจทัก 094-8874343"
+      "caption": "📍 ขายที่ดิน 0-2-09 ไร่ ปากช่อง นครราชสีมา\n💰 2.37 ล้านบาท ลดทันที 100,000 บาท\n\n• ถนนลาดยางกว้าง 6 เมตร\n• น้ำ–ไฟ พร้อมใช้งาน\n\nสนใจทัก 094-8874343",
+      "last_publish_status": "DRY_RUN"
     },
     {
       "id": "2026-08-04T19:00",
@@ -407,10 +441,26 @@
       "content_type": "listing",
       "source": "listing",
       "status": "DRAFT",
-      "results": [],
+      "results": [
+        {
+          "platform": "MANUAL_KIT",
+          "ok": true,
+          "post_id": null,
+          "publish_url": null,
+          "published_at": "2026-08-03T08:09:13.582Z",
+          "scheduled_for": null,
+          "caption_used": "📍 ขายที่ดิน 200 ตร.ว. เขาใหญ่\n💰 เริ่มต้น 1.78 ล้านบาท\n\n• ถนนคอนกรีต 6 เมตร\n• น้ำ-ไฟพร้อม\n\nสนใจทัก 094-887-4343",
+          "caption_chars": 110,
+          "dry_run": false,
+          "attempts": 1,
+          "error_code": null,
+          "error_message": null,
+          "kit_dir": "/Users/sungsrc/Library/CloudStorage/OneDrive-ส่วนบุคคล/AI_BIBLE/output/post-kits/2026-08-05-LAND-0DB25132"
+        }
+      ],
       "note": "",
       "created_at": "2026-08-01T14:45:12.984Z",
-      "updated_at": "2026-08-01T14:45:12.984Z",
+      "updated_at": "2026-08-03T08:09:13.600Z",
       "posted_at": null,
       "property_id": "LAND-0DB25132",
       "listing_id": "LAND-0DB25132",
@@ -430,7 +480,8 @@
         "maps_url": null,
         "text_only": true
       },
-      "caption": "📍 ขายที่ดิน 200 ตร.ว. เขาใหญ่\n💰 เริ่มต้น 1.78 ล้านบาท\n\n• ถนนคอนกรีต 6 เมตร\n• น้ำ-ไฟพร้อม\n\nสนใจทัก 094-887-4343"
+      "caption": "📍 ขายที่ดิน 200 ตร.ว. เขาใหญ่\n💰 เริ่มต้น 1.78 ล้านบาท\n\n• ถนนคอนกรีต 6 เมตร\n• น้ำ-ไฟพร้อม\n\nสนใจทัก 094-887-4343",
+      "last_publish_status": "DRY_RUN"
     },
     {
       "id": "2026-08-05T12:00",
@@ -519,10 +570,26 @@
       "content_type": "listing",
       "source": "listing",
       "status": "DRAFT",
-      "results": [],
+      "results": [
+        {
+          "platform": "MANUAL_KIT",
+          "ok": true,
+          "post_id": null,
+          "publish_url": null,
+          "published_at": "2026-08-03T08:09:14.436Z",
+          "scheduled_for": null,
+          "caption_used": "📍 ขายที่ดิน 50 ตร.วา เขาพระ เมือง นครนายก\n💰 50 ตร.วา 390,000 บาท\n\n• วิวเขาล้อมรอบ\n• บรรยากาศส่วนตัว\n\nสนใจทัก 096-945-3731",
+          "caption_chars": 121,
+          "dry_run": false,
+          "attempts": 1,
+          "error_code": null,
+          "error_message": null,
+          "kit_dir": "/Users/sungsrc/Library/CloudStorage/OneDrive-ส่วนบุคคล/AI_BIBLE/output/post-kits/2026-08-06-LAND-0DE75C9F"
+        }
+      ],
       "note": "",
       "created_at": "2026-08-01T14:45:15.813Z",
-      "updated_at": "2026-08-01T14:45:15.813Z",
+      "updated_at": "2026-08-03T08:09:14.451Z",
       "posted_at": null,
       "property_id": "LAND-0DE75C9F",
       "listing_id": "LAND-0DE75C9F",
@@ -541,7 +608,8 @@
         "maps_url": null,
         "text_only": true
       },
-      "caption": "📍 ขายที่ดิน 50 ตร.วา เขาพระ เมือง นครนายก\n💰 50 ตร.วา 390,000 บาท\n\n• วิวเขาล้อมรอบ\n• บรรยากาศส่วนตัว\n\nสนใจทัก 096-945-3731"
+      "caption": "📍 ขายที่ดิน 50 ตร.วา เขาพระ เมือง นครนายก\n💰 50 ตร.วา 390,000 บาท\n\n• วิวเขาล้อมรอบ\n• บรรยากาศส่วนตัว\n\nสนใจทัก 096-945-3731",
+      "last_publish_status": "DRY_RUN"
     },
     {
       "id": "2026-08-06T19:00",
@@ -592,10 +660,26 @@
       "content_type": "listing",
       "source": "listing",
       "status": "DRAFT",
-      "results": [],
+      "results": [
+        {
+          "platform": "MANUAL_KIT",
+          "ok": true,
+          "post_id": null,
+          "publish_url": null,
+          "published_at": "2026-08-03T08:09:15.274Z",
+          "scheduled_for": null,
+          "caption_used": "📍 ขายที่ดิน 2 ไร่ เขาพระ เมืองนครนายก\n💰 6.5 ล้าน\n\n• ติดถนนลาดยาง\n• โฉนดครุฑแดงพร้อมโอนกรรมสิทธิ์\n\nสนใจทัก 094-887-4343 คุณพลอย, 096-321-6888 คุณซุง",
+          "caption_chars": 147,
+          "dry_run": false,
+          "attempts": 1,
+          "error_code": null,
+          "error_message": null,
+          "kit_dir": "/Users/sungsrc/Library/CloudStorage/OneDrive-ส่วนบุคคล/AI_BIBLE/output/post-kits/2026-08-07-LAND-112347A8"
+        }
+      ],
       "note": "",
       "created_at": "2026-08-01T14:45:18.577Z",
-      "updated_at": "2026-08-01T14:45:18.577Z",
+      "updated_at": "2026-08-03T08:09:15.290Z",
       "posted_at": null,
       "property_id": "LAND-112347A8",
       "listing_id": "LAND-112347A8",
@@ -615,7 +699,8 @@
         "maps_url": null,
         "text_only": true
       },
-      "caption": "📍 ขายที่ดิน 2 ไร่ เขาพระ เมืองนครนายก\n💰 6.5 ล้าน\n\n• ติดถนนลาดยาง\n• โฉนดครุฑแดงพร้อมโอนกรรมสิทธิ์\n\nสนใจทัก 094-887-4343 คุณพลอย, 096-321-6888 คุณซุง"
+      "caption": "📍 ขายที่ดิน 2 ไร่ เขาพระ เมืองนครนายก\n💰 6.5 ล้าน\n\n• ติดถนนลาดยาง\n• โฉนดครุฑแดงพร้อมโอนกรรมสิทธิ์\n\nสนใจทัก 094-887-4343 คุณพลอย, 096-321-6888 คุณซุง",
+      "last_publish_status": "DRY_RUN"
     },
     {
       "id": "2026-08-07T12:00",
