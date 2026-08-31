@@ -180,6 +180,62 @@ No text, captions, logo, watermark, fantasy effect, time lapse, scene transition
       camera_motion: "stable cinematic hold with subtle natural environmental movement",
     },
   },
+  // ---- 3-WF (wf/WF1.md, wf/WF2.md) ----
+  // Active voice throughout: both Flow and Veo take direction from a stated motion vector,
+  // not from a description of a scene. These are the single source for that wording -- the
+  // console, the CLI and the auto runner all read them from here, because keeping a second
+  // copy next to the console is what let the page drift onto a different prompt before.
+  TPL_WF1_v1: {
+    engine: "Video Engine",
+    operation: "IMAGE_TO_VIDEO",
+    camera: "DRONE_REVEAL",
+    useCase: "WF1 -- clean satellite plate down through cloud to the seller's real land photo",
+    static: true,
+    text: `A continuous aerial descent from high above the ground down to the site. The camera
+drops steadily through open sky and plunges down through a layer of real white clouds
+and thin haze. The ground gradually opens up below as the camera emerges under the
+cloud base. The camera tilts forward as it descends, so the perspective deepens from a
+high looking-down angle into a low forward-facing view, arriving at a real photographic
+ground-level view of the same location. One unbroken accelerating flight that eases to
+a stop. No cuts, no shake. Photorealistic drone footage, natural daylight, realistic
+volumetric clouds, natural motion blur. No text, no map labels, no pins, no overlays,
+no watermark.`,
+  },
+  TPL_WF2_v1: {
+    engine: "Video Engine",
+    operation: "IMAGE_TO_VIDEO",
+    camera: "DRONE_REVEAL",
+    useCase: "WF2 -- construction time-lapse on the seller's own plot, ending at warm evening",
+    static: true,
+    // Every ABSOLUTE RULE in wf/WF2.md is stated here explicitly, including the negatives:
+    // the model reliably drifts toward a resort or a two-storey build without them.
+    text: `A construction time-lapse on this exact plot of land. The camera holds the same viewpoint
+throughout. The land itself never changes -- the terrain, the road, the tree line, the
+mountains and the shape of the plot stay exactly as they are. Only the house is built.
+
+Workers clear and level the ground, then footings and a concrete foundation are poured.
+The single-storey frame rises post by post, the sloped roof structure goes on and is
+covered, walls are built and rendered in warm earth tones, wooden doors and windows are
+fitted, the covered front porch takes shape, and a matching roofed carport is built beside
+the house. Natural wood accents are added, then the garden fills in around it -- lawn is
+laid, mature trees and shrubs are planted, a stone footpath is set, potted plants and a
+seating corner appear.
+
+The light moves through the day as the house rises: late afternoon warms into golden hour,
+golden hour cools into blue hour, and blue hour settles into early evening. The change is
+gradual and continuous, never jumping from day to night.
+
+As evening arrives, warm white and warm amber lights switch on one part of the house at a
+time -- windows, front door, porch, living room, kitchen, carport -- glowing softly onto the
+garden. Soft path lights come on along the walkway. The sky deepens to a rich blue evening
+sky while the mountains, trees and road stay visible behind the house.
+
+The camera pushes in very slowly with a gentle parallax, then eases back at the end to
+reveal the finished house, the garden, the carport and the natural landscape behind them.
+
+One continuous time-lapse. The house is built step by step and never appears instantly.
+Photorealistic, cozy, homely, warm and natural. No text, no watermark, no overlays.`,
+  },
   TPL_VID_010_v1: {
     engine: "Video Engine",
     operation: "IMAGE_TO_VIDEO",

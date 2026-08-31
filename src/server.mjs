@@ -10,7 +10,7 @@ import { runVideoEngine, VideoEngineError } from "./engines/video-engine.mjs";
 import { runHouseEngine, HouseEngineError } from "./engines/house-engine.mjs";
 import { runStoryboard, StoryboardError } from "./engines/storyboard.mjs";
 import { runWf3Ad, Wf3AdError } from "./engines/wf3-ad.mjs";
-import { prepareFlowInputs, startWfJob, continueWfJob, WfPrepareError } from "./wf/prepare.mjs";
+import { prepareFlowInputs, startWfJob, continueWfJob, runWfAuto, WfPrepareError } from "./wf/prepare.mjs";
 import { runWfFinish, WfPipelineError } from "./wf/pipeline.mjs";
 import { wf5Readiness } from "./wf5/steps.mjs";
 import { generateConstructionSequence, ConstructionError, estimateConstructionCost } from "./wf5/construction.mjs";
@@ -477,6 +477,14 @@ const server = http.createServer(async (req, res) => {
     if (req.method === "POST" && req.url === "/api/wf/start") {
       await handleEngine(req, res, {
         run: startWfJob, ErrorClass: WfPrepareError, buildArgs: (p) => [p],
+      });
+      return;
+    }
+
+    // Fully automatic: generates WF1/WF2 with Veo instead of routing through Flow by hand.
+    if (req.method === "POST" && req.url === "/api/wf/auto") {
+      await handleEngine(req, res, {
+        run: runWfAuto, ErrorClass: WfPrepareError, buildArgs: (p) => [p],
       });
       return;
     }

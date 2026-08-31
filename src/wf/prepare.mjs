@@ -12,11 +12,20 @@
 // what is baked into the pixels. The WF1 marker is composited afterwards instead
 // (compositeWf1Overlays), which is also why it is absent from the prompt below.
 import path from "node:path";
-import { writeFile, copyFile, mkdir } from "node:fs/promises";
+import { readFile, writeFile, copyFile, mkdir } from "node:fs/promises";
 import {
   ffmpeg, downloadTo, ensureDirs, TEMP_DIR, OUTPUT_DIR, ASPECTS,
 } from "../lib/ffmpeg.mjs";
 import { runGoogleEngine, satelliteZoomUrls } from "../engines/google-engine.mjs";
+import { get as getTemplate } from "../lib/prompt-library.mjs";
+
+// Single source. 17_PROMPT_LIBRARY.md rule 2 forbids prompts living in engine code, and a
+// second copy beside the console is exactly what let the page drift onto stale wording once
+// already -- the console, the CLI and the auto runner all read these ids.
+export const WF1_TEMPLATE_ID = "TPL_WF1_v1";
+export const WF2_TEMPLATE_ID = "TPL_WF2_v1";
+export const WF1_PROMPT = getTemplate(WF1_TEMPLATE_ID).text;
+export const WF2_VIDEO_PROMPT = getTemplate(WF2_TEMPLATE_ID).text;
 
 // Close enough that the parcel's surroundings are recognisable, far enough that the model
 // still has somewhere to descend from. Verified on a real run.
@@ -30,16 +39,6 @@ export class WfPrepareError extends Error {
   }
 }
 
-/** WF1 — wf/WF1.md. Active voice: Flow wants a clear motion vector, not a description. */
-export const WF1_PROMPT = `A continuous aerial descent from high above the ground down to the site. The camera
-drops steadily through open sky and plunges down through a layer of real white clouds
-and thin haze. The ground gradually opens up below as the camera emerges under the
-cloud base. The camera tilts forward as it descends, so the perspective deepens from a
-high looking-down angle into a low forward-facing view, arriving at a real photographic
-ground-level view of the same location. One unbroken accelerating flight that eases to
-a stop. No cuts, no shake. Photorealistic drone footage, natural daylight, realistic
-volumetric clouds, natural motion blur. No text, no map labels, no pins, no overlays,
-no watermark.`;
 
 /** WF2 end plate — wf/WF2.md. Generated first so the video has a fixed frame to land on. */
 export const WF2_IMAGE_PROMPT = `Using the reference photo as the exact location, keep the land, terrain, road, tree line,
@@ -57,33 +56,6 @@ the living room, the kitchen and the carport, spilling gently onto the garden. S
 lights line the walkway and a lamp glows under the eaves. Photorealistic, cozy, homely and
 natural — not luxurious, not a resort, not a modern box, not a two-storey building.`;
 
-/** WF2 motion — wf/WF2.md. Every ABSOLUTE RULE the spec lists is stated explicitly. */
-export const WF2_VIDEO_PROMPT = `A construction time-lapse on this exact plot of land. The camera holds the same viewpoint
-throughout. The land itself never changes — the terrain, the road, the tree line, the
-mountains and the shape of the plot stay exactly as they are. Only the house is built.
-
-Workers clear and level the ground, then footings and a concrete foundation are poured.
-The single-storey frame rises post by post, the sloped roof structure goes on and is
-covered, walls are built and rendered in warm earth tones, wooden doors and windows are
-fitted, the covered front porch takes shape, and a matching roofed carport is built beside
-the house. Natural wood accents are added, then the garden fills in around it — lawn is
-laid, mature trees and shrubs are planted, a stone footpath is set, potted plants and a
-seating corner appear.
-
-The light moves through the day as the house rises: late afternoon warms into golden hour,
-golden hour cools into blue hour, and blue hour settles into early evening. The change is
-gradual and continuous, never jumping from day to night.
-
-As evening arrives, warm white and warm amber lights switch on one part of the house at a
-time — windows, front door, porch, living room, kitchen, carport — glowing softly onto the
-garden. Soft path lights come on along the walkway. The sky deepens to a rich blue evening
-sky while the mountains, trees and road stay visible behind the house.
-
-The camera pushes in very slowly with a gentle parallax, then eases back at the end to
-reveal the finished house, the garden, the carport and the natural landscape behind them.
-
-One continuous time-lapse. The house is built step by step and never appears instantly.
-Photorealistic, cozy, homely, warm and natural. No text, no watermark, no overlays.`;
 
 function stripDataUri(v) {
   return typeof v === "string" ? v.replace(/^data:image\/[a-zA-Z+]+;base64,/, "") : v;
@@ -284,4 +256,106 @@ export async function continueWfJob(input, options = {}) {
     options
   );
   return { ...results, picked: found.picked, job: { property_id, created_at: job.created_at } };
+}
+
+/**
+ * Fully automatic run: generate WF1 and WF2 with Veo, then finish and join.
+ *
+ * This is the same film the Flow route produces, without the operator leaving the app --
+ * possible only because fal's veo3.1 endpoint takes BOTH a first and a last frame, which is
+ * what wf/'s FINAL FRAME = NEXT FIRST FRAME rule requires. Everything after generation is
+ * the same local code path the manual route uses, so the two cannot diverge.
+ *
+ * WF2 needs a picture of the finished house to aim at. If the caller has not supplied one,
+ * WF2 is skipped rather than invented: the house is the one thing this pipeline must not
+ * hallucinate into existence without the seller's say-so, and a timelapse with no target
+ * frame would hand WF3 a hero image nobody approved.
+ */
+export async function runWfAuto(input, options = {}) {
+  const { loadJob } = await import("./job.mjs");
+  const { runWfFinish } = await import("./pipeline.mjs");
+  const { runVideoEngine } = await import("../engines/video-engine.mjs");
+
+  const { property_id, house_image, duration_seconds = 8, ...overrides } = input ?? {};
+  const job = await loadJob(property_id);
+  if (!job) {
+    throw new WfPrepareError(
+      "ERR_WFPREP_NOJOB",
+      `ไม่พบงานของ ${property_id} — ทำขั้นที่ 1 ก่อน (ใส่รูปที่ดิน + รายละเอียด)`
+    );
+  }
+  if (!job.frames?.wf1_start) {
+    throw new WfPrepareError(
+      "ERR_WFPREP_NOSTART",
+      "ไม่มีเฟรมดาวเทียมสำหรับ WF1 — ตอนขั้นที่ 1 ต้องใส่ที่อยู่ และต้องมี GOOGLE_MAPS_API_KEY"
+    );
+  }
+
+  const steps = [];
+  // Ask for fal explicitly: this route exists because Veo there takes both anchor frames,
+  // and falling back to whatever VIDEO_ENGINE happens to be would quietly produce a
+  // different film -- or fail, as it did the first time this ran.
+  const opts = {
+    ...options,
+    providerConfig: {
+      ...(options.providerConfig ?? {}),
+      engine: options.providerConfig?.engine ?? process.env.WF_AUTO_ENGINE ?? "fal",
+      aspectRatio: job.aspect ?? "9:16",
+    },
+  };
+  // Plates go in as data URIs, not paths: the field is called image_base64 and passing a
+  // filesystem path through it only worked by accident.
+  const asDataUri = async (file) =>
+    `data:image/png;base64,${(await readFile(file)).toString("base64")}`;
+  const clip = async (label, imageFile, tailFile, templateId) => {
+    const t0 = Date.now();
+    const [image, image_tail] = await Promise.all([asDataUri(imageFile), asDataUri(tailFile)]);
+    const out = await runVideoEngine(
+      {
+        property_id,
+        image_base64: image,
+        image_tail_base64: image_tail,
+        template_id: templateId,
+        camera_motion: "DRONE_REVEAL",
+        duration_seconds,
+      },
+      opts
+    );
+    const c = out.b_roll_clips[0];
+    steps.push({
+      stage: label, status: "ok",
+      detail: `${c.duration_seconds}s ใน ${Math.round((Date.now() - t0) / 1000)} วินาที`,
+    });
+    return c.video_url;
+  };
+
+  // WF1: clean satellite plate -> the seller's real land photo.
+  const wf1 = await clip("WF1", job.frames.wf1_start, job.frames.wf1_end, WF1_TEMPLATE_ID);
+
+  // WF2 only when there is a finished-house plate to land on.
+  let wf2;
+  const houseTarget = house_image ?? job.frames.wf2_end ?? null;
+  if (houseTarget) {
+    wf2 = await clip("WF2", job.frames.wf2_start, houseTarget, WF2_TEMPLATE_ID);
+  } else {
+    steps.push({
+      stage: "WF2",
+      status: "skipped",
+      detail: "ยังไม่มีภาพบ้านเสร็จเป็นเฟรมจบ — ข้ามไปก่อน (ระบบไม่สร้างบ้านขึ้นเองโดยไม่มีคนอนุมัติ)",
+    });
+  }
+
+  const L = { ...job.listing, ...overrides };
+  const results = await runWfFinish(
+    {
+      property_id, wf1_clip: wf1, wf2_clip: wf2,
+      land_image: job.frames.wf1_end, house_image: houseTarget ?? undefined,
+      aspect: job.aspect ?? "9:16",
+      title: L.title, price_thb: L.price_thb, price_text: L.price_text,
+      size_text: L.size_text, features: L.features, location: L.location,
+      contact: L.contact, cta: L.cta,
+    },
+    options
+  );
+  return { ...results, generated: steps, auto: true };
 }

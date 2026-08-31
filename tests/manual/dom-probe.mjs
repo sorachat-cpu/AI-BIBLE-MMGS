@@ -42,6 +42,7 @@ const want = {
   "wf-clear": ["click"],
   "wf-prepare": ["click"],
   "wf-finish": ["click"],
+  "wf-auto": ["click"],
 };
 let bad = 0;
 for (const [id, evs] of Object.entries(want)) {

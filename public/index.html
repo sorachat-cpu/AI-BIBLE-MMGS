@@ -367,6 +367,10 @@
     padding:10px 14px;background:rgba(255,255,255,.03);font-size:14px}
   .wf-prompt pre{margin:0;padding:14px;font-size:12.5px;line-height:1.65;white-space:pre-wrap;
     word-break:break-word;color:#cfe0ee;max-height:230px;overflow:auto}
+  .wf-auto{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+    border:1px solid var(--accent);border-radius:10px;padding:14px 16px;background:var(--accent-soft)}
+  .wf-auto b{font-size:14.5px}
+  .wf-auto button{flex-shrink:0}
 </style>
   <script src="/nav.js" defer></script>
 </head>
@@ -478,14 +482,27 @@
 
       <!-- ---------- ขั้น 2: กดปุ่มเดียว ---------- -->
       <div class="wf-step">
-        <div class="wf-step-head"><span class="wf-num">2</span> เอาคลิปจาก Flow มาวาง แล้วกดปุ่มเดียว</div>
+        <div class="wf-step-head"><span class="wf-num">2</span> สร้างวิดีโอ</div>
+
+        <div class="wf-auto">
+          <div><b>อัตโนมัติทั้งหมด</b> <span class="small">— ระบบสร้างคลิปเอง ไม่ต้องเปิด Flow</span>
+            <p class="small" style="margin:6px 0 0">
+              ใช้ Veo 3.1 ผ่าน fal.ai (รับทั้งเฟรมแรก+เฟรมจบ ตรงตามสเปค) ต้องมี
+              <code>FAL_KEY</code> ใน <code>.env</code> · ราว $0.40/คลิป 8 วินาที
+            </p>
+          </div>
+          <button id="wf-auto">สร้างให้เลย</button>
+        </div>
+        <div class="result" id="out-wf-auto"></div>
+
+        <div class="divider" style="margin:22px 0 16px">หรือทำมือผ่าน Google Flow</div>
         <p class="small" style="margin:0 0 14px">
           ลากไฟล์ที่ได้จาก Flow ไปวางในโฟลเดอร์ <code>output/flow/</code> — ชื่อไฟล์อะไรก็ได้
           ระบบจะหาเอง เรียงตามเวลาที่สร้าง แล้วต่อ WF1 → WF2 → WF3 ให้ครบ
           โดยใช้ข้อมูลที่กรอกไว้ในขั้นที่ 1
         </p>
         <div class="actions">
-          <button id="wf-finish">ทำต่อให้จบเลย</button>
+          <button id="wf-finish">ทำต่อจากไฟล์ที่วางไว้</button>
           <span class="cost-chip">$0 · ไม่ใช้ AI</span>
         </div>
         <div class="result" id="out-wf-finish"></div>
@@ -955,6 +972,28 @@
     );
   }
 
+  /* ============ 3-WF: fully automatic -- generate the clips here, no Flow round trip ==== */
+  const autoBtn = document.getElementById("wf-auto");
+  autoBtn.addEventListener("click", async () => {
+    const out = document.getElementById("out-wf-auto");
+    autoBtn.disabled = true;
+    // Two Veo generations plus the local finish; each clip is minutes, not seconds.
+    const stop = busyState(out, 420);
+    try {
+      const body = await postJson("/api/wf/auto", {
+        property_id: val("wf-id") || "PROP-TH-01029",
+      });
+      stop();
+      if (!body.ok) return show(out, "err", "รหัสข้อผิดพลาด " + body.code, body.message);
+      renderFinish(out, body.data);
+    } catch (err) {
+      stop();
+      show(out, "err", "ทำงานไม่สำเร็จ", err.message || String(err));
+    } finally {
+      autoBtn.disabled = false;
+    }
+  });
+
   /* ============ 3-WF: step 2 -- finish and join what Flow produced ============ */
   const finBtn = document.getElementById("wf-finish");
   finBtn.addEventListener("click", async () => {
@@ -983,6 +1022,16 @@
       "<strong>ปิดงานเรียบร้อย</strong><span>" +
       (d.full ? "ต่อเป็นวิดีโอเดียวแล้ว " + d.full.duration + " วินาที" : "ทำเสร็จเป็นช่วงๆ") +
       " · ไม่เสียค่า AI</span></div></div>";
+
+    if (d.generated && d.generated.length) {
+      h += '<div class="steplog">';
+      for (const g of d.generated) {
+        h += '<div class="logrow ' + esc(g.status) + '"><span class="dot"></span>' +
+          '<span class="stage">' + esc(g.stage) + ' สร้างเอง</span>' +
+          '<span class="msg">' + esc(g.detail) + "</span></div>";
+      }
+      h += "</div>";
+    }
 
     if (d.picked) {
       const p = d.picked;
