@@ -610,6 +610,34 @@
       : "ใช้ไปแล้ว " + Math.round(pct) + "% ของเพดานต่อวิดีโอ";
   }
 
+  /* A 404 from an unknown route comes back as text/plain, so res.json() throws and every
+     failure used to surface as "ติดต่อเซิร์ฟเวอร์ไม่ได้" -- which sent us hunting for a dead
+     server when the real cause was a server still running an older build without the route.
+     Read the body as text first and report what actually happened. */
+  async function postJson(url, payload) {
+    let res;
+    try {
+      res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    } catch (err) {
+      throw new Error("ติดต่อเซิร์ฟเวอร์ไม่ได้ — เซิร์ฟเวอร์รันอยู่หรือเปล่า? (npm start)");
+    }
+    const text = await res.text();
+    try {
+      return JSON.parse(text);
+    } catch {
+      if (res.status === 404) {
+        throw new Error(
+          "เซิร์ฟเวอร์ไม่รู้จัก " + url + " (404) — น่าจะยังรันโค้ดเวอร์ชันเก่าอยู่ ลองปิดแล้ว npm start ใหม่"
+        );
+      }
+      throw new Error("เซิร์ฟเวอร์ตอบกลับผิดรูปแบบ (HTTP " + res.status + "): " + text.slice(0, 120));
+    }
+  }
+
   /* ============ engines ============ */
   const ENGINES = {
     property: {
@@ -650,12 +678,7 @@
     const stop = busyState(out, engine.expectedSeconds ?? 8);
 
     try {
-      const res = await fetch(engine.url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      const body = await res.json();
+      const body = await postJson(engine.url, payload);
       stop();
 
       if (!body.ok) {
@@ -669,7 +692,7 @@
     } catch (err) {
       stop();
       step.dataset.state = "";
-      show(out, "err", "ติดต่อเซิร์ฟเวอร์ไม่ได้", String(err));
+      show(out, "err", "ทำงานไม่สำเร็จ", err.message || String(err));
     } finally {
       btn.disabled = false;
     }
@@ -877,24 +900,19 @@
     prepBtn.disabled = true;
     const stop = busyState(out, 10);
     try {
-      const res = await fetch("/api/wf/prepare", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          property_id: val("wf-id") || "PROP-TH-01029",
-          raw_address: val("wf-address"),
-          land_image_base64: wfLand,
-          aspect: "9:16",
-        }),
+      const body = await postJson("/api/wf/prepare", {
+        property_id: val("wf-id") || "PROP-TH-01029",
+        raw_address: val("wf-address"),
+        land_image_base64: wfLand,
+        aspect: "9:16",
       });
-      const body = await res.json();
       stop();
       if (!body.ok) return show(out, "err", "รหัสข้อผิดพลาด " + body.code, body.message);
       renderPrepare(out, body.data);
       spent += 0.005; addSpend("__none__");
     } catch (err) {
       stop();
-      show(out, "err", "ติดต่อเซิร์ฟเวอร์ไม่ได้", String(err));
+      show(out, "err", "ทำงานไม่สำเร็จ", err.message || String(err));
     } finally {
       prepBtn.disabled = false;
     }
@@ -967,10 +985,7 @@
     const stop = busyState(out, 60);
     try {
       const priceRaw = val("wf-price");
-      const res = await fetch("/api/wf/finish", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const body = await postJson("/api/wf/finish", {
           property_id: val("wf-id") || "PROP-TH-01029",
           wf1_clip: clip1 || undefined,
           wf2_clip: clip2 || undefined,
@@ -983,15 +998,13 @@
           location: val("wf-location") || undefined,
           contact: val("wf-contact") || undefined,
           features: (val("wf-features") || "").split(",").map((s) => s.trim()).filter(Boolean),
-        }),
       });
-      const body = await res.json();
       stop();
       if (!body.ok) return show(out, "err", "รหัสข้อผิดพลาด " + body.code, body.message);
       renderFinish(out, body.data);
     } catch (err) {
       stop();
-      show(out, "err", "ติดต่อเซิร์ฟเวอร์ไม่ได้", String(err));
+      show(out, "err", "ทำงานไม่สำเร็จ", err.message || String(err));
     } finally {
       finBtn.disabled = false;
     }

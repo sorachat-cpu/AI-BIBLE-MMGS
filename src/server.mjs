@@ -261,7 +261,12 @@ const server = http.createServer(async (req, res) => {
   try {
     if (req.method === "GET" && (req.url === "/" || req.url === "/index.html")) {
       const html = await readFile(path.join(PUBLIC_DIR, "index.html"), "utf8");
-      res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+      // No-store: this is a local dev console that changes under the operator's feet. A
+      // cached page talking to a restarted server is indistinguishable from a broken one.
+      res.writeHead(200, {
+        "Content-Type": "text/html; charset=utf-8",
+        "Cache-Control": "no-store, must-revalidate",
+      });
       res.end(html);
       return;
     }
