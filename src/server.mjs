@@ -10,7 +10,7 @@ import { runVideoEngine, VideoEngineError } from "./engines/video-engine.mjs";
 import { runHouseEngine, HouseEngineError } from "./engines/house-engine.mjs";
 import { runStoryboard, StoryboardError } from "./engines/storyboard.mjs";
 import { runWf3Ad, Wf3AdError } from "./engines/wf3-ad.mjs";
-import { prepareFlowInputs, WfPrepareError } from "./wf/prepare.mjs";
+import { prepareFlowInputs, startWfJob, continueWfJob, WfPrepareError } from "./wf/prepare.mjs";
 import { runWfFinish, WfPipelineError } from "./wf/pipeline.mjs";
 import { wf5Readiness } from "./wf5/steps.mjs";
 import { generateConstructionSequence, ConstructionError, estimateConstructionCost } from "./wf5/construction.mjs";
@@ -473,6 +473,21 @@ const server = http.createServer(async (req, res) => {
 
     // 3-WF console: prepare the plates + prompts Google Flow needs, then finish and join
     // what Flow produced. See wf/README.md.
+    // One-shot console: step 1 remembers the listing, step 2 finds Flow's output itself.
+    if (req.method === "POST" && req.url === "/api/wf/start") {
+      await handleEngine(req, res, {
+        run: startWfJob, ErrorClass: WfPrepareError, buildArgs: (p) => [p],
+      });
+      return;
+    }
+
+    if (req.method === "POST" && req.url === "/api/wf/continue") {
+      await handleEngine(req, res, {
+        run: continueWfJob, ErrorClass: WfPrepareError, buildArgs: (p) => [p],
+      });
+      return;
+    }
+
     if (req.method === "POST" && req.url === "/api/wf/prepare") {
       await handleEngine(req, res, {
         run: prepareFlowInputs,

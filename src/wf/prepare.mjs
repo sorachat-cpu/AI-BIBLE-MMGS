@@ -208,3 +208,80 @@ export async function prepareFlowInputs(input, options = {}) {
     },
   };
 }
+
+/**
+ * Step 1 for the console: prepare Flow's inputs AND remember the listing details.
+ *
+ * The operator types everything once, here. When they come back with clips, nothing is
+ * asked of them again -- runWfContinue() reads it all back out of the job.
+ */
+export async function startWfJob(input, options = {}) {
+  const { saveJob } = await import("./job.mjs");
+  const prep = await prepareFlowInputs(input, options);
+  const {
+    title, price_thb, price_text, size_text, features = [], location, contact, cta,
+    raw_address, aspect = "9:16",
+  } = input ?? {};
+
+  const job = {
+    property_id: prep.property_id,
+    created_at: new Date().toISOString(),
+    aspect,
+    raw_address: raw_address ?? null,
+    geo: prep.geo,
+    frames: {
+      wf1_start: prep.frames.wf1_start,
+      wf1_end: prep.frames.wf1_end,
+      wf2_start: prep.frames.wf2_start,
+    },
+    listing: { title, price_thb, price_text, size_text, features, location, contact, cta },
+  };
+  await saveJob(job);
+  return { ...prep, job_saved: true };
+}
+
+/**
+ * Step 2 for the console: find what Flow produced and finish the whole film.
+ *
+ * Takes a property_id and nothing else. The clips are located by scanning the drop folder,
+ * and the advertisement copy comes from the job saved in step 1 -- the operator does not
+ * retype details or filenames just because they had to leave the app to run Flow.
+ */
+export async function continueWfJob(input, options = {}) {
+  const { property_id, ...overrides } = input ?? {};
+  const { loadJob, scanFlowDir } = await import("./job.mjs");
+  const { runWfFinish } = await import("./pipeline.mjs");
+
+  const job = await loadJob(property_id);
+  if (!job) {
+    throw new WfPrepareError(
+      "ERR_WFPREP_NOJOB",
+      `ไม่พบงานของ ${property_id} — ทำขั้นที่ 1 ก่อน (เตรียมไฟล์ให้ Flow)`
+    );
+  }
+
+  const found = await scanFlowDir();
+  if (!found.wf1_clip && !found.wf2_clip && !found.house_image) {
+    throw new WfPrepareError(
+      "ERR_WFPREP_NOCLIPS",
+      "ยังไม่เจอไฟล์จาก Flow ในโฟลเดอร์ output/flow/ — เอาคลิปหรือภาพบ้านไปวางไว้ก่อน"
+    );
+  }
+
+  const L = { ...job.listing, ...overrides };
+  const results = await runWfFinish(
+    {
+      property_id,
+      wf1_clip: found.wf1_clip ?? undefined,
+      wf2_clip: found.wf2_clip ?? undefined,
+      land_image: job.frames.wf1_end,
+      house_image: found.house_image ?? undefined,
+      aspect: job.aspect ?? "9:16",
+      title: L.title, price_thb: L.price_thb, price_text: L.price_text,
+      size_text: L.size_text, features: L.features, location: L.location,
+      contact: L.contact, cta: L.cta,
+    },
+    options
+  );
+  return { ...results, picked: found.picked, job: { property_id, created_at: job.created_at } };
+}

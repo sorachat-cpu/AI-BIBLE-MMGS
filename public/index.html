@@ -411,22 +411,12 @@
       </p>
 
       <!-- ---------- STEP 1 ---------- -->
+      <!-- ---------- ขั้น 1: ใส่ข้อมูลครั้งเดียว ---------- -->
       <div class="wf-step">
-        <div class="wf-step-head"><span class="wf-num">1</span> เตรียมไฟล์ให้ Flow</div>
-
-        <div class="pair">
-          <div class="field">
-            <label for="wf-address">ลิงก์ Google Maps หรือที่อยู่</label>
-            <input id="wf-address" value="เขาใหญ่ ปากช่อง นครราชสีมา">
-          </div>
-          <div class="field">
-            <label for="wf-id">รหัสทรัพย์</label>
-            <input id="wf-id" value="PROP-TH-01029">
-          </div>
-        </div>
+        <div class="wf-step-head"><span class="wf-num">1</span> ใส่รูปที่ดิน + รายละเอียด</div>
 
         <div class="field">
-          <label>รูปที่ดินจริง <span class="small">— เป็นทั้งเฟรมจบของ WF1 และเฟรมแรกของ WF2</span></label>
+          <label>รูปที่ดินจริง <span class="small">— รูปเดียวพอ ระบบใช้ต่อทั้ง 3 ช่วง</span></label>
           <div class="drop" id="wf-drop" tabindex="0" role="button" aria-label="เลือกรูปที่ดิน">
             <div class="icon">◳</div>
             <p><b>คลิกเพื่อเลือกรูปที่ดิน</b> หรือลากมาวาง</p>
@@ -440,73 +430,62 @@
           </div>
         </div>
 
+        <div class="pair">
+          <div class="field">
+            <label for="wf-address">ลิงก์ Google Maps หรือที่อยู่</label>
+            <input id="wf-address" value="เขาใหญ่ ปากช่อง นครราชสีมา">
+          </div>
+          <div class="field">
+            <label for="wf-id">รหัสทรัพย์</label>
+            <input id="wf-id" value="PROP-TH-01029">
+          </div>
+        </div>
+        <div class="pair">
+          <div class="field">
+            <label for="wf-title">หัวเรื่อง</label>
+            <input id="wf-title" value="บ้านสวนกลางธรรมชาติ">
+          </div>
+          <div class="field">
+            <label for="wf-price">ราคา (ตัวเลขล้วน)</label>
+            <input id="wf-price" value="1590000">
+          </div>
+        </div>
+        <div class="pair">
+          <div class="field">
+            <label for="wf-size">เนื้อที่</label>
+            <input id="wf-size" value="1 ไร่ 2 งาน">
+          </div>
+          <div class="field">
+            <label for="wf-location">ทำเล</label>
+            <input id="wf-location" value="ต.หนองน้ำแดง อ.ปากช่อง จ.นครราชสีมา">
+          </div>
+        </div>
+        <div class="field">
+          <label for="wf-features">จุดเด่น 3–5 ข้อ <span class="small">— คั่นด้วยจุลภาค</span></label>
+          <input id="wf-features" value="บ้านสวนชั้นเดียว,สวนธรรมชาติ,โรงจอดรถ,บรรยากาศสงบ">
+        </div>
+        <div class="field">
+          <label for="wf-contact">ช่องทางติดต่อ</label>
+          <input id="wf-contact" value="081-234-5678 · LINE @244raxjb">
+        </div>
+
         <div class="actions">
-          <button id="wf-prepare">เตรียมเฟรม + prompt</button>
-          <span class="cost-chip">≈ $0.005 · ไม่กี่วินาที</span>
+          <button id="wf-prepare">เริ่มงาน — เตรียมทุกอย่างให้</button>
+          <span class="cost-chip">≈ $0.005 · จำข้อมูลไว้ให้ ไม่ต้องกรอกซ้ำ</span>
         </div>
         <div class="result" id="out-wf-prepare"></div>
       </div>
 
-      <!-- ---------- STEP 2 ---------- -->
+      <!-- ---------- ขั้น 2: กดปุ่มเดียว ---------- -->
       <div class="wf-step">
-        <div class="wf-step-head"><span class="wf-num">2</span> เอาคลิปจาก Flow กลับมา</div>
-        <p class="small" style="margin:0 0 12px">
-          เซฟไฟล์ที่ได้จาก Flow ลงโฟลเดอร์ <code>output/flow/</code> แล้วใส่ชื่อไฟล์ตรงนี้
-          ช่องไหนไม่มีก็เว้นว่างได้ ระบบจะทำเท่าที่มี
+        <div class="wf-step-head"><span class="wf-num">2</span> เอาคลิปจาก Flow มาวาง แล้วกดปุ่มเดียว</div>
+        <p class="small" style="margin:0 0 14px">
+          ลากไฟล์ที่ได้จาก Flow ไปวางในโฟลเดอร์ <code>output/flow/</code> — ชื่อไฟล์อะไรก็ได้
+          ระบบจะหาเอง เรียงตามเวลาที่สร้าง แล้วต่อ WF1 → WF2 → WF3 ให้ครบ
+          โดยใช้ข้อมูลที่กรอกไว้ในขั้นที่ 1
         </p>
-
-        <div class="pair">
-          <div class="field">
-            <label for="wf-clip1">คลิป WF1 (ดิ่งลงสู่ที่ดิน)</label>
-            <input id="wf-clip1" placeholder="output/flow/WF1_result.mp4">
-          </div>
-          <div class="field">
-            <label for="wf-clip2">คลิป WF2 (ก่อสร้าง timelapse)</label>
-            <input id="wf-clip2" placeholder="output/flow/WF2_result.mp4">
-          </div>
-        </div>
-        <div class="field">
-          <label for="wf-house">ภาพบ้านเสร็จตอนค่ำ <span class="small">— เฟรมจบ WF2 = ภาพหลักของโฆษณา</span></label>
-          <input id="wf-house" placeholder="output/flow/WF2_END_house_night.png">
-        </div>
-
-        <details open>
-          <summary>ข้อมูลทรัพย์สำหรับโฆษณา (WF3)</summary>
-          <p class="small" style="margin:10px 0">
-            ใส่เฉพาะข้อมูลที่ยืนยันแล้ว — ช่องที่เว้นว่างจะไม่ถูกใส่ลงโฆษณา และระบบจะรายงานว่าเว้นอะไรไว้บ้าง
-          </p>
-          <div class="pair">
-            <div class="field">
-              <label for="wf-title">หัวเรื่อง</label>
-              <input id="wf-title" value="บ้านสวนกลางธรรมชาติ">
-            </div>
-            <div class="field">
-              <label for="wf-price">ราคา (ตัวเลขล้วน)</label>
-              <input id="wf-price" value="1590000">
-            </div>
-          </div>
-          <div class="pair">
-            <div class="field">
-              <label for="wf-size">เนื้อที่</label>
-              <input id="wf-size" value="1 ไร่ 2 งาน">
-            </div>
-            <div class="field">
-              <label for="wf-location">ทำเล</label>
-              <input id="wf-location" value="ต.หนองน้ำแดง อ.ปากช่อง จ.นครราชสีมา">
-            </div>
-          </div>
-          <div class="field">
-            <label for="wf-features">จุดเด่น 3–5 ข้อ <span class="small">— คั่นด้วยจุลภาค</span></label>
-            <input id="wf-features" value="บ้านสวนชั้นเดียว,สวนธรรมชาติ,โรงจอดรถ,บรรยากาศสงบ">
-          </div>
-          <div class="field">
-            <label for="wf-contact">ช่องทางติดต่อ</label>
-            <input id="wf-contact" value="081-234-5678 · LINE @244raxjb">
-          </div>
-        </details>
-
         <div class="actions">
-          <button id="wf-finish">ปิดงาน + ต่อเป็นวิดีโอเดียว</button>
+          <button id="wf-finish">ทำต่อให้จบเลย</button>
           <span class="cost-chip">$0 · ไม่ใช้ AI</span>
         </div>
         <div class="result" id="out-wf-finish"></div>
@@ -900,11 +879,19 @@
     prepBtn.disabled = true;
     const stop = busyState(out, 10);
     try {
-      const body = await postJson("/api/wf/prepare", {
+      const priceRaw = val("wf-price");
+      const body = await postJson("/api/wf/start", {
         property_id: val("wf-id") || "PROP-TH-01029",
         raw_address: val("wf-address"),
         land_image_base64: wfLand,
         aspect: "9:16",
+        // Saved with the job so step 2 needs nothing but the property id.
+        title: val("wf-title") || undefined,
+        price_thb: priceRaw ? Number(priceRaw) : undefined,
+        size_text: val("wf-size") || undefined,
+        location: val("wf-location") || undefined,
+        contact: val("wf-contact") || undefined,
+        features: (val("wf-features") || "").split(",").map((x) => x.trim()).filter(Boolean),
       });
       stop();
       if (!body.ok) return show(out, "err", "รหัสข้อผิดพลาด " + body.code, body.message);
@@ -966,38 +953,19 @@
         b.textContent = "คัดลอกแล้ว"; setTimeout(() => (b.textContent = "คัดลอก"), 1600);
       })
     );
-    document.getElementById("wf-house").placeholder = d.expects.wf2_end_image;
-    document.getElementById("wf-clip1").placeholder = d.expects.wf1_clip;
-    document.getElementById("wf-clip2").placeholder = d.expects.wf2_clip;
   }
 
   /* ============ 3-WF: step 2 -- finish and join what Flow produced ============ */
   const finBtn = document.getElementById("wf-finish");
   finBtn.addEventListener("click", async () => {
     const out = document.getElementById("out-wf-finish");
-    const clip1 = val("wf-clip1"), clip2 = val("wf-clip2"), house = val("wf-house");
-    if (!clip1 && !clip2 && !house) {
-      return show(out, "err", "ยังไปต่อไม่ได้",
-        "ต้องมีอย่างน้อยหนึ่งอย่าง: คลิป WF1, คลิป WF2, หรือภาพบ้านสำหรับทำโฆษณา");
-    }
-
     finBtn.disabled = true;
     const stop = busyState(out, 60);
     try {
-      const priceRaw = val("wf-price");
-      const body = await postJson("/api/wf/finish", {
-          property_id: val("wf-id") || "PROP-TH-01029",
-          wf1_clip: clip1 || undefined,
-          wf2_clip: clip2 || undefined,
-          land_image: "output/flow/WF1_END_land.png",
-          house_image: house || "output/flow/WF2_END_house_night.png",
-          aspect: "9:16",
-          title: val("wf-title") || undefined,
-          price_thb: priceRaw ? Number(priceRaw) : undefined,
-          size_text: val("wf-size") || undefined,
-          location: val("wf-location") || undefined,
-          contact: val("wf-contact") || undefined,
-          features: (val("wf-features") || "").split(",").map((s) => s.trim()).filter(Boolean),
+      // Everything else came from the job saved in step 1, and the clips are found by
+      // scanning the drop folder -- the operator supplies neither again.
+      const body = await postJson("/api/wf/continue", {
+        property_id: val("wf-id") || "PROP-TH-01029",
       });
       stop();
       if (!body.ok) return show(out, "err", "รหัสข้อผิดพลาด " + body.code, body.message);
@@ -1015,6 +983,18 @@
       "<strong>ปิดงานเรียบร้อย</strong><span>" +
       (d.full ? "ต่อเป็นวิดีโอเดียวแล้ว " + d.full.duration + " วินาที" : "ทำเสร็จเป็นช่วงๆ") +
       " · ไม่เสียค่า AI</span></div></div>";
+
+    if (d.picked) {
+      const p = d.picked;
+      const pick = [];
+      if (p.wf1) pick.push("WF1 ← " + p.wf1);
+      if (p.wf2) pick.push("WF2 ← " + p.wf2);
+      if (p.house) pick.push("ภาพบ้าน ← " + p.house);
+      if (pick.length) {
+        h += '<div class="panel ok"><span class="badge">ไฟล์</span><div class="body">' +
+          "<strong>ระบบเลือกไฟล์เหล่านี้ให้เอง</strong><span>" + esc(pick.join(" · ")) + "</span></div></div>";
+      }
+    }
 
     const rows = [];
     if (d.wf1) rows.push(["WF1", d.wf1.duration + "s · หมุด " + (d.wf1.pin_composited ? "ปักแล้ว" : "ไม่ปัก") +
