@@ -20,7 +20,13 @@ import path from "node:path";
 import { ffmpeg, ensureDirs, TEMP_DIR } from "../lib/ffmpeg.mjs";
 
 const QUEUE = "https://queue.fal.run";
-const MODEL = "fal-ai/veo3.1/first-last-frame-to-video";
+// Two endpoints, because the two workflows need different things:
+//   WF1 must LAND on the seller's real land photo   -> both anchors, first-last-frame
+//   WF2 must BUILD a house nobody has a picture of  -> start frame only, image-to-video
+// The finished house is then read off the generated clip's own last frame, which is what
+// makes WF2 possible without a plate to aim at.
+const MODEL_FIRST_LAST = "fal-ai/veo3.1/first-last-frame-to-video";
+const MODEL_IMAGE = "fal-ai/veo3.1/image-to-video";
 
 // Veo 3.1 offers 4s, 6s or 8s -- there is no 10s. Asking for anything else is rejected, so
 // the nearest allowed value is chosen and reported rather than passed through blindly.
@@ -80,8 +86,10 @@ export class FalVeoAdapter {
   constructor(config = {}) {
     this.providerName = "FAL_VEO31";
     this.apiKey = config.apiKey ?? process.env.FAL_KEY ?? process.env.FAL_API_KEY;
-    this.model = config.model ?? MODEL;
+    this.model = config.model ?? null; // chosen per call, see imageToVideo()
     this.resolution = config.resolution ?? process.env.FAL_RESOLUTION ?? "1080p";
+    // Injectable so tests do not have to sit through a real polling interval.
+    this.pollMs = config.pollMs ?? POLL_MS;
     this.aspectRatio = config.aspectRatio ?? "9:16";
   }
 
@@ -122,37 +130,41 @@ export class FalVeoAdapter {
    * two anchor frames, and the end frame already fixes where the camera finishes.
    */
   async imageToVideo({ image, image_tail, prompt, duration_seconds = 8 }) {
-    if (!image_tail) {
-      throw new FalAdapterError(
-        "ERR_PROV_04",
-        "endpoint นี้ต้องมีทั้งเฟรมแรกและเฟรมจบ — ถ้ามีเฟรมแรกอย่างเดียวให้ใช้ provider อื่น"
-      );
-    }
+    if (!image) throw new FalAdapterError("ERR_PROV_INPUT", "ต้องมีเฟรมแรกอย่างน้อยหนึ่งภาพ");
     // Before any file work: a missing key otherwise surfaces as an ENOENT from the image
     // conversion, which points at the wrong thing entirely.
     this.#headers();
 
     const startedAt = Date.now();
     const duration = nearestDuration(duration_seconds);
+    // An end frame is a constraint, not a requirement: supply one and the clip is made to
+    // land on it, omit one and the model is free to invent the ending -- which is exactly
+    // what WF2 needs, since nobody has a picture of the house yet.
+    const model = this.model ?? (image_tail ? MODEL_FIRST_LAST : MODEL_IMAGE);
 
-    const [first, last] = await Promise.all([
-      toDataUri(image, "first"),
-      toDataUri(image_tail, "last"),
-    ]);
+    const body = {
+      prompt,
+      aspect_ratio: this.aspectRatio,
+      duration: `${duration}s`,
+      resolution: this.resolution,
+      // The film gets its own voiceover and music downstream; a model-invented soundtrack
+      // would have to be stripped again.
+      generate_audio: false,
+    };
+    if (image_tail) {
+      const [first, last] = await Promise.all([
+        toDataUri(image, "first"),
+        toDataUri(image_tail, "last"),
+      ]);
+      body.first_frame_url = first;
+      body.last_frame_url = last;
+    } else {
+      body.image_url = await toDataUri(image, "first");
+    }
 
-    const submitted = await this.#request(`${QUEUE}/${this.model}`, {
+    const submitted = await this.#request(`${QUEUE}/${model}`, {
       method: "POST",
-      body: JSON.stringify({
-        prompt,
-        first_frame_url: first,
-        last_frame_url: last,
-        aspect_ratio: this.aspectRatio,
-        duration: `${duration}s`,
-        resolution: this.resolution,
-        // The film gets its own voiceover and music downstream; a model-invented soundtrack
-        // would have to be stripped again.
-        generate_audio: false,
-      }),
+      body: JSON.stringify(body),
     });
 
     const requestId = submitted?.request_id;
@@ -160,12 +172,12 @@ export class FalVeoAdapter {
       throw new FalAdapterError("ERR_PROV_04", `fal ไม่ได้คืน request_id: ${JSON.stringify(submitted).slice(0, 200)}`);
     }
 
-    const statusUrl = `${QUEUE}/${this.model}/requests/${requestId}/status`;
-    const resultUrl = `${QUEUE}/${this.model}/requests/${requestId}`;
+    const statusUrl = `${QUEUE}/${model}/requests/${requestId}/status`;
+    const resultUrl = `${QUEUE}/${model}/requests/${requestId}`;
     const deadline = Date.now() + TIMEOUT_MS;
 
     while (Date.now() < deadline) {
-      await sleep(POLL_MS);
+      await sleep(this.pollMs);
       const st = await this.#request(statusUrl, { method: "GET" });
       if (st.status === "COMPLETED") break;
       if (st.error || st.status === "FAILED") {
@@ -191,6 +203,7 @@ export class FalVeoAdapter {
         fps: 30,
         resolution: this.resolution,
       },
+      model_used: model,
       cost_is_estimate: true,
       cost_usd: Number((duration * COST_PER_SECOND_USD).toFixed(4)),
       duration_ms: Date.now() - startedAt,

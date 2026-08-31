@@ -12,6 +12,7 @@
 // what is baked into the pixels. The WF1 marker is composited afterwards instead
 // (compositeWf1Overlays), which is also why it is absent from the prompt below.
 import path from "node:path";
+const pathJoin = path.join;
 import { readFile, writeFile, copyFile, mkdir } from "node:fs/promises";
 import {
   ffmpeg, downloadTo, ensureDirs, TEMP_DIR, OUTPUT_DIR, ASPECTS,
@@ -266,10 +267,13 @@ export async function continueWfJob(input, options = {}) {
  * what wf/'s FINAL FRAME = NEXT FIRST FRAME rule requires. Everything after generation is
  * the same local code path the manual route uses, so the two cannot diverge.
  *
- * WF2 needs a picture of the finished house to aim at. If the caller has not supplied one,
- * WF2 is skipped rather than invented: the house is the one thing this pipeline must not
- * hallucinate into existence without the seller's say-so, and a timelapse with no target
- * frame would hand WF3 a hero image nobody approved.
+ * WF2 does not need a picture of the finished house first. Veo's image-to-video endpoint
+ * takes the land photo alone and builds the house during the time-lapse; the finished house
+ * is then read off the generated clip's own final frame. That frame is what WF3 opens on, so
+ * the handoff still holds -- it is discovered rather than supplied.
+ *
+ * (An earlier version demanded a house plate up front and skipped WF2 without one. That was
+ * a limitation of the two-anchor endpoint being used for both shots, not of the workflow.)
  */
 export async function runWfAuto(input, options = {}) {
   const { loadJob } = await import("./job.mjs");
@@ -332,16 +336,25 @@ export async function runWfAuto(input, options = {}) {
   // WF1: clean satellite plate -> the seller's real land photo.
   const wf1 = await clip("WF1", job.frames.wf1_start, job.frames.wf1_end, WF1_TEMPLATE_ID);
 
-  // WF2 only when there is a finished-house plate to land on.
-  let wf2;
+  // WF2: start on the same land photo WF1 ended on. A finished-house plate is optional --
+  // supply one and the time-lapse is made to land on it, omit one and Veo builds the house
+  // and we take the result from the clip's last frame.
   const houseTarget = house_image ?? job.frames.wf2_end ?? null;
-  if (houseTarget) {
-    wf2 = await clip("WF2", job.frames.wf2_start, houseTarget, WF2_TEMPLATE_ID);
-  } else {
+  const wf2 = await clip("WF2", job.frames.wf2_start, houseTarget, WF2_TEMPLATE_ID);
+
+  // The house WF3 advertises: whatever WF2 actually ended on, not a guess about it.
+  let houseFrame = houseTarget;
+  if (!houseFrame) {
+    const { ffmpeg: ff, downloadTo: dl, TEMP_DIR: TMP } = await import("../lib/ffmpeg.mjs");
+    const stamp = Date.now();
+    const local = pathJoin(TMP, `wf2_out_${stamp}.mp4`);
+    await dl(wf2, local);
+    houseFrame = pathJoin(TMP, `wf2_house_${stamp}.png`);
+    await ff(["-sseof", "-0.15", "-i", local, "-frames:v", "1", "-y", houseFrame]);
     steps.push({
-      stage: "WF2",
-      status: "skipped",
-      detail: "ยังไม่มีภาพบ้านเสร็จเป็นเฟรมจบ — ข้ามไปก่อน (ระบบไม่สร้างบ้านขึ้นเองโดยไม่มีคนอนุมัติ)",
+      stage: "บ้านเสร็จ",
+      status: "ok",
+      detail: "ดึงจากเฟรมสุดท้ายของคลิป WF2 — ใช้เป็นภาพหลักของโฆษณา",
     });
   }
 
@@ -349,7 +362,7 @@ export async function runWfAuto(input, options = {}) {
   const results = await runWfFinish(
     {
       property_id, wf1_clip: wf1, wf2_clip: wf2,
-      land_image: job.frames.wf1_end, house_image: houseTarget ?? undefined,
+      land_image: job.frames.wf1_end, house_image: houseFrame ?? undefined,
       aspect: job.aspect ?? "9:16",
       title: L.title, price_thb: L.price_thb, price_text: L.price_text,
       size_text: L.size_text, features: L.features, location: L.location,
