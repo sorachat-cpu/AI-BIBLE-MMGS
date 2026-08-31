@@ -328,12 +328,16 @@
 
   .chain { margin-top: 12px; display: flex; gap: 9px; flex-wrap: wrap; }
 
-  .spinner {
-    width: 13px; height: 13px; border-radius: 50%; flex-shrink: 0;
-    border: 2px solid color-mix(in srgb, var(--wait) 30%, transparent);
-    border-top-color: var(--wait); animation: spin .7s linear infinite; margin-top: 3px;
+  .progress-ring { position: relative; width: 32px; height: 32px; flex-shrink: 0; }
+  .progress-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .progress-ring circle { fill: none; stroke-width: 4; }
+  .progress-ring .track { stroke: color-mix(in srgb, var(--wait) 22%, transparent); }
+  .progress-ring .bar { stroke: var(--wait); stroke-linecap: round; transition: stroke-dashoffset .25s linear; }
+  .progress-ring .pct {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 9px; font-weight: 700; color: var(--wait);
+    font-variant-numeric: tabular-nums;
   }
-  @keyframes spin { to { transform: rotate(360deg); } }
   .elapsed { font-family: var(--mono); font-variant-numeric: tabular-nums; }
   @media (prefers-reduced-motion: reduce) {
     * { animation-duration: .01ms !important; transition-duration: .01ms !important; }
@@ -390,37 +394,30 @@
 
       <div class="shots">
         <label class="shot-opt">
-          <input type="checkbox" id="sb-pin" checked>
-          <span class="txt">
-            <strong>จังหวะ 1 · หมุดบนแผนที่</strong>
-            <span>เปิดด้วยภาพแผนที่ที่ปักหมุดไว้ กล้องค่อยๆ ดันเข้าหาหมุด</span>
-          </span>
-        </label>
-        <label class="shot-opt">
           <input type="checkbox" id="sb-descent" checked>
           <span class="txt">
-            <strong>จังหวะ 2 · ดิ่งจากฟ้าลงสู่ที่ดินจริง</strong>
-            <span>กล้องร่วงลงจากมุมสูง แล้วภาพแผนที่กลายเป็นรูปที่ดินจริงของคุณ</span>
+            <strong>จังหวะ 1 · จากอวกาศดิ่งลงสู่ที่ดินจริง</strong>
+            <span>คลิปเดียวต่อเนื่อง ไม่มีจุดตัดกลางช็อต — กล้องเริ่มจากภาพดาวเทียมมุมกว้าง ดิ่งลงมาจนถึงรูปที่ดินจริงของคุณ (ถ้าไม่มีที่อยู่/พิกัด จะดิ่งลงบนรูปที่ดินอย่างเดียว)</span>
           </span>
         </label>
         <label class="shot-opt">
           <input type="checkbox" id="sb-construction" checked>
           <span class="txt">
-            <strong>จังหวะ 3 · บ้านก่อสร้างขึ้น</strong>
+            <strong>จังหวะ 2 · บ้านก่อสร้างขึ้น</strong>
             <span>บ้านค่อยๆ ก่อตัวขึ้นบนแปลงที่ดินผืนเดิม ต่อเนื่องจากจังหวะที่แล้ว</span>
           </span>
         </label>
         <label class="shot-opt">
           <input type="checkbox" id="sb-staged">
           <span class="txt">
-            <strong>จังหวะ 3 แบบละเอียด · ก่อสร้างทีละขั้น</strong>
+            <strong>จังหวะ 2 แบบละเอียด · ก่อสร้างทีละขั้น</strong>
             <span>แยกเป็น 5 ขั้น (ฐานราก → โครงสร้าง → ผนัง+หลังคา → ตกแต่ง → เสร็จ) แทนที่จะข้ามไปบ้านเสร็จเลย — <b>ราคาสูงขึ้นมาก ≈ $0.87</b> และต้องมีโควตาสร้างรูป</span>
           </span>
         </label>
         <label class="shot-opt" style="opacity:.75;cursor:default">
           <input type="checkbox" checked disabled>
           <span class="txt">
-            <strong>จังหวะ 4 · ข้อมูลทรัพย์ขึ้น</strong>
+            <strong>จังหวะ 3 · ข้อมูลทรัพย์ขึ้น</strong>
             <span>การ์ดปิดท้ายพร้อมราคา จุดเด่น ทำเลใกล้เคียง เบอร์โทร และ QR — ใส่ตอนเรนเดอร์รวม</span>
           </span>
         </label>
@@ -444,6 +441,11 @@
       </div>
 
       <div class="field">
+        <label for="vid-id">รหัสทรัพย์</label>
+        <input id="vid-id" value="PROP-TH-01029">
+      </div>
+
+      <div class="field">
         <label>รูปที่ดินเปล่า (สำหรับช็อต 2)</label>
         <div class="drop" id="sb-drop" tabindex="0" role="button" aria-label="เลือกรูปที่ดิน">
           <div class="icon">◳</div>
@@ -455,6 +457,21 @@
           <img id="sb-thumb" alt="รูปที่ดินที่เลือก">
           <span class="meta" id="sb-meta"></span>
           <button type="button" class="ghost" id="sb-clear" style="margin-left:auto">เอาออก</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>รูปบ้านเสร็จแล้ว (ไม่บังคับ — สำหรับช็อต 3)</label>
+        <div class="drop" id="sb-house-drop" tabindex="0" role="button" aria-label="เลือกรูปบ้านเสร็จ">
+          <div class="icon">◳</div>
+          <p><b>คลิกเพื่อเลือกรูปบ้านเสร็จ</b> หรือลากมาวาง</p>
+          <p class="small">ถ้าใส่ จะข้ามการสร้างรูปบ้านใหม่ (House Engine) แล้วใช้รูปนี้เป็นเฟรมจบแทนทันที — ประหยัดเงินและไม่ต้องรอโควตารูปของ Kling ถ้าไม่ใส่ ระบบจะสร้างรูปบ้านให้เองตามสไตล์ที่เลือกด้านบน</p>
+          <input type="file" id="sb-house-file" accept="image/jpeg,image/png,image/webp">
+        </div>
+        <div class="preview" id="sb-house-preview">
+          <img id="sb-house-thumb" alt="รูปบ้านเสร็จที่เลือก">
+          <span class="meta" id="sb-house-meta"></span>
+          <button type="button" class="ghost" id="sb-house-clear" style="margin-left:auto">เอาออก</button>
         </div>
       </div>
 
@@ -567,63 +584,6 @@
       </div>
     </section>
 
-    <!-- ---------- 03 ---------- -->
-    <section class="step" data-step="03" id="step-video">
-      <div class="card">
-        <div class="card-head">
-          <h2>Video Engine</h2>
-          <span class="tag">Kling</span>
-        </div>
-        <p class="lede">
-          เปลี่ยนภาพนิ่งเป็นคลิปเคลื่อนไหว 5 วินาที
-          วิดีโอที่ออกมาจะ<strong>ไม่มีตัวอักษร ราคา หรือโลโก้ฝังอยู่เลย</strong>
-          เพราะของพวกนั้นต้องไปแปะทีหลังตอนเรนเดอร์ ราคาเปลี่ยนจะได้ไม่ต้องสร้างวิดีโอใหม่
-        </p>
-
-        <div class="field">
-          <label>ภาพต้นทาง</label>
-          <div class="drop" id="vid-drop" tabindex="0" role="button" aria-label="เลือกรูปภาพ">
-            <div class="icon">◳</div>
-            <p><b>คลิกเพื่อเลือกรูป</b> หรือลากมาวางตรงนี้</p>
-            <p class="small">JPG · PNG · ด้านสั้นสุดอย่างน้อย 300px · ไม่เกิน 8MB</p>
-            <input type="file" id="vid-file" accept="image/jpeg,image/png,image/webp">
-          </div>
-          <div class="preview" id="vid-preview">
-            <img id="vid-thumb" alt="ภาพที่เลือกไว้">
-            <span class="meta" id="vid-meta"></span>
-            <button type="button" class="ghost" id="vid-clear" style="margin-left:auto">เอาออก</button>
-          </div>
-        </div>
-
-        <div class="pair">
-          <div class="field">
-            <label for="vid-motion">การเคลื่อนกล้อง</label>
-            <select id="vid-motion">
-              <option value="PAN_RIGHT">แพนขวาผ่านหน้าบ้าน</option>
-              <option value="ZOOM_IN">ดันกล้องเข้าหาประตูหน้า</option>
-              <option value="DRONE_REVEAL">โดรนยกขึ้นเผยตัวบ้าน</option>
-              <option value="TILT_UP">เงยขึ้นเผยความสูง</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="vid-id">รหัสทรัพย์</label>
-            <input id="vid-id" value="PROP-TH-01029">
-          </div>
-        </div>
-
-        <details>
-          <summary>หรือใส่ URL ภาพแทนการอัปโหลด</summary>
-          <input id="vid-image" placeholder="https://.../house.jpg">
-        </details>
-
-        <div class="actions">
-          <button data-engine="video">สร้างวิดีโอ</button>
-          <span class="cost-chip">≈ $0.16 · ใช้เวลาราว 5 นาที</span>
-        </div>
-        <div class="result" id="out-video"></div>
-      </div>
-    </section>
-
   </div>
 
   <footer>
@@ -635,7 +595,7 @@
 
 <script>
   /* ============ cost tracking (mirrors BUDGET_THRESHOLDS in the spec) ============ */
-  const COSTS = { property: 0.003, google: 0.005, video: 0.16 };
+  const COSTS = { property: 0.003, google: 0.005 };
   const CAP = 0.30, GREEN = 0.20, YELLOW = 0.25;
   let spent = 0;
 
@@ -671,18 +631,6 @@
       check: (p) => p.raw_address ? null : "กรอกที่อยู่ก่อนนะครับ",
       done: "หาพิกัดสำเร็จ",
     },
-    video: {
-      url: "/api/video-engine",
-      payload: () => ({
-        property_id: val("vid-id"),
-        image_base64: uploaded,
-        image_url: val("vid-image"),
-        camera_motion: val("vid-motion"),
-      }),
-      check: (p) => (p.image_base64 || p.image_url) ? null : "เลือกรูป หรือใส่ URL ภาพก่อนนะครับ",
-      done: "สร้างวิดีโอสำเร็จ",
-      slow: true,
-    },
   };
 
   const val = (id) => document.getElementById(id).value.trim();
@@ -702,7 +650,7 @@
 
     btn.disabled = true;
     step.dataset.state = "busy";
-    const stop = busyState(out, engine.slow);
+    const stop = busyState(out, engine.expectedSeconds ?? 8);
 
     try {
       const res = await fetch(engine.url, {
@@ -730,20 +678,38 @@
     }
   }
 
-  /* elapsed timer matters here -- a 5-minute wait with no feedback reads as a hang */
-  function busyState(out, slow) {
+  /* elapsed timer matters here -- a 5-minute wait with no feedback reads as a hang.
+     There is no real progress feed from the server (one request, one response at the
+     end), so the ring shows an ESTIMATE: it eases toward 92% on an expected-duration
+     curve and never claims 100% on its own -- only the caller replacing this panel with
+     a real result panel does that. Honest about being an estimate, still far more
+     legible than a plain spinner during a multi-minute wait. `expectedSeconds` picks
+     the curve's pace; pass 0 for an unknown-length wait (property/google-style calls). */
+  function busyState(out, expectedSeconds = 8) {
     const t0 = Date.now();
+    const CIRC = 2 * Math.PI * 14;
     out.innerHTML =
-      '<div class="panel busy"><div class="spinner"></div><div class="body">' +
+      '<div class="panel busy"><div class="progress-ring">' +
+      '<svg viewBox="0 0 32 32"><circle class="track" cx="16" cy="16" r="14"></circle>' +
+      '<circle class="bar" cx="16" cy="16" r="14" stroke-dasharray="' + CIRC + '" stroke-dashoffset="' + CIRC + '"></circle></svg>' +
+      '<span class="pct">0%</span></div><div class="body">' +
       "<strong>กำลังประมวลผล…</strong>" +
       '<span>ผ่านไป <span class="elapsed">0:00</span>' +
-      (slow ? " · วิดีโอปกติใช้เวลา 4–6 นาที กรุณาอย่าปิดหน้านี้" : "") +
+      (expectedSeconds >= 60
+        ? " · ปกติใช้เวลาราว " + Math.round(expectedSeconds / 60) + " นาที กรุณาอย่าปิดหน้านี้"
+        : "") +
       "</span></div></div>";
     const el = out.querySelector(".elapsed");
+    const bar = out.querySelector(".bar");
+    const pctEl = out.querySelector(".pct");
+    const pace = (expectedSeconds || 8) * 0.6;
     const id = setInterval(() => {
-      const s = Math.floor((Date.now() - t0) / 1000);
-      el.textContent = Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
-    }, 1000);
+      const s = (Date.now() - t0) / 1000;
+      el.textContent = Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0");
+      const pct = 92 * (1 - Math.exp(-s / pace));
+      pctEl.textContent = Math.round(pct) + "%";
+      bar.setAttribute("stroke-dashoffset", String(CIRC * (1 - pct / 100)));
+    }, 200);
     return () => clearInterval(id);
   }
 
@@ -841,8 +807,8 @@
 
   /* ============ image upload -- base64 so Kling can read a local file ============ */
   const MAX_BYTES = 8 * 1024 * 1024;
-  let uploaded = null;   // video engine
   let sbLand = null;     // storyboard land photo
+  let sbHouse = null;    // storyboard pre-supplied finished-house photo (optional)
 
   // One uploader wired to two independent dropzones.
   function wireUpload({ dropId, fileId, previewId, thumbId, metaId, clearId, outId, onLoad, onClear }) {
@@ -898,14 +864,14 @@
   }
 
   wireUpload({
-    dropId: "vid-drop", fileId: "vid-file", previewId: "vid-preview", thumbId: "vid-thumb",
-    metaId: "vid-meta", clearId: "vid-clear", outId: "out-video",
-    onLoad: (d) => { uploaded = d; }, onClear: () => { uploaded = null; },
-  });
-  wireUpload({
     dropId: "sb-drop", fileId: "sb-file", previewId: "sb-preview", thumbId: "sb-thumb",
     metaId: "sb-meta", clearId: "sb-clear", outId: "out-storyboard",
     onLoad: (d) => { sbLand = d; }, onClear: () => { sbLand = null; },
+  });
+  wireUpload({
+    dropId: "sb-house-drop", fileId: "sb-house-file", previewId: "sb-house-preview", thumbId: "sb-house-thumb",
+    metaId: "sb-house-meta", clearId: "sb-house-clear", outId: "out-storyboard",
+    onLoad: (d) => { sbHouse = d; }, onClear: () => { sbHouse = null; },
   });
 
   /* ============ storyboard ============ */
@@ -913,7 +879,6 @@
   sbBtn.addEventListener("click", async () => {
     const out = document.getElementById("out-storyboard");
     const shots = [];
-    if (document.getElementById("sb-pin").checked) shots.push("pin");
     if (document.getElementById("sb-descent").checked) shots.push("descent");
     const staged = document.getElementById("sb-staged").checked;
     if (document.getElementById("sb-construction").checked && !staged) shots.push("construction");
@@ -921,11 +886,10 @@
     if (!shots.length) return show(out, "err", "ยังไปต่อไม่ได้", "เลือกอย่างน้อยหนึ่งจังหวะก่อนนะครับ");
     if (shots.includes("construction") && !sbLand)
       return show(out, "err", "ยังไปต่อไม่ได้", "จังหวะบ้านก่อสร้างต้องอัปโหลดรูปที่ดินเปล่าก่อน");
-    if (shots.includes("pin") && !val("sb-address"))
-      return show(out, "err", "ยังไปต่อไม่ได้", "จังหวะหมุดบนแผนที่ต้องมีลิงก์แผนที่หรือที่อยู่");
 
     sbBtn.disabled = true;
-    const stop = busyState(out, true);
+    // One Kling shot runs ~5 min; the storyboard runs the chosen shots back to back.
+    const stop = busyState(out, 300 * Math.max(1, shots.length));
     try {
       const res = await fetch("/api/storyboard", {
         method: "POST",
@@ -935,6 +899,7 @@
           raw_address: val("sb-address"),
           style_tag: val("sb-style"),
           land_image_base64: sbLand,
+          house_image_base64: sbHouse,
           shots,
         }),
       });
@@ -980,14 +945,14 @@
     finish.className = "chain";
     const btn = chainBtn("ต่อเป็นวิดีโอสมบูรณ์ พร้อมซับ + การ์ดปิดท้าย", async () => {
       btn.disabled = true;
-      const stop = busyState(out, false);
+      const stop = busyState(out, 90);
       try {
         const res = await fetch("/api/render-engine", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             property_id: data.property_id,
-            clips: data.clips.map((c) => ({ video_url: c.video_url })),
+            clips: data.clips.map((c) => ({ video_url: c.video_url, file: c.file })),
             subtitles: data.clips.map((c, i) => ({ start: i * 5, end: (i + 1) * 5, text: c.label })),
             // Mid-clip "what's nearby" card, straight from the Places lookup.
             location_card: (data.detail_suggestions?.nearby_places || []).length

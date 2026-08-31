@@ -1,0 +1,70 @@
+<!--
+  WF3 Advertisement panel — WF-REALESTATE-3WF-SPEC.md "WF3 / PROPERTY ADVERTISEMENT".
+
+  Sits over the lower part of the 9:16 frame, on top of the WF2 finished-house shot, and
+  slides up into place as the camera pulls back. Layout lives here, not in JS: edit this
+  file to restyle the ad. Placeholders are filled by src/engines/wf3-ad.mjs:
+    {{W}} {{H}}        panel size
+    {{FONT}}           Thai-capable font stack
+    {{TITLE}}          headline (confirmed data only)
+    {{PRICE}}          e.g. "1,590,000 บาท"  — never rounded, never invented
+    {{SIZE}}           e.g. "2 ไร่ 1 งาน"
+    {{ROWS}}           generated <g>, one per selling point (3-5)
+    {{LOCATION}}       ตำบล/อำเภอ/จังหวัด
+    {{CTA}}            call to action
+    {{CONTACT}}        phone / LINE
+    {{DISCLAIMER}}     ภาพจำลอง notice
+  Y positions are computed in JS so the panel reflows with the number of selling points.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="{{W}}" height="{{H}}" viewBox="0 0 {{W}} {{H}}">
+  <defs>
+    <linearGradient id="scrim" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#120D08" stop-opacity="0"/>
+      <stop offset="22%"  stop-color="#15100A" stop-opacity="0.82"/>
+      <stop offset="45%"  stop-color="#15100A" stop-opacity="0.96"/>
+      <stop offset="100%" stop-color="#120D08" stop-opacity="0.99"/>
+    </linearGradient>
+    <linearGradient id="ctabg" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#E0A05C"/>
+      <stop offset="100%" stop-color="#D08A3E"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="0" y="0" width="{{W}}" height="{{H}}" fill="url(#scrim)"/>
+
+  <!-- headline -->
+  <text x="{{PAD}}" y="{{TITLE_Y}}" font-family="{{FONT}}" font-size="{{TITLE_SIZE}}"
+        font-weight="600" fill="#D9CFC2" letter-spacing="1">{{TITLE}}</text>
+
+  <!-- price: the single loudest element on the card -->
+  <text x="{{PAD}}" y="{{PRICE_Y}}" font-family="{{FONT}}" font-size="{{PRICE_SIZE}}"
+        font-weight="800" fill="#E0A05C">{{PRICE}}</text>
+
+  <!-- land size sits directly under the price, same visual group -->
+  <text x="{{PAD}}" y="{{SIZE_Y}}" font-family="{{FONT}}" font-size="{{SIZE_SIZE}}"
+        font-weight="500" fill="#F5F0E8">{{SIZE}}</text>
+
+  <!-- 3-5 confirmed selling points -->
+  {{ROWS}}
+
+  <!-- location -->
+  <g transform="translate({{PAD}},{{LOC_Y}})">
+    <circle cx="14" cy="-12" r="9" fill="none" stroke="#A2937F" stroke-width="3"/>
+    <circle cx="14" cy="-12" r="3" fill="#A2937F"/>
+    <text x="46" y="0" font-family="{{FONT}}" font-size="{{LOC_SIZE}}"
+          font-weight="500" fill="#C0B4A4">{{LOCATION}}</text>
+  </g>
+
+  <!-- CTA -->
+  <g transform="translate({{PAD}},{{CTA_Y}})">
+    <rect x="0" y="0" width="{{CTA_W}}" height="{{CTA_H}}" rx="{{CTA_R}}" fill="url(#ctabg)"/>
+    <text x="{{CTA_TX}}" y="{{CTA_TY}}" text-anchor="middle" font-family="{{FONT}}"
+          font-size="{{CTA_SIZE}}" font-weight="700" fill="#1A1209">{{CTA}}</text>
+  </g>
+  <text x="{{PAD}}" y="{{CONTACT_Y}}" font-family="{{FONT}}" font-size="{{CONTACT_SIZE}}"
+        font-weight="700" fill="#F5F0E8">{{CONTACT}}</text>
+
+  <!-- required AI-visualisation disclosure, deliberately small -->
+  <text x="{{PAD}}" y="{{DISC_Y}}" font-family="{{FONT}}" font-size="{{DISC_SIZE}}"
+        fill="#8C8073">{{DISCLAIMER}}</text>
+</svg>

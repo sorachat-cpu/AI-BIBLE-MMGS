@@ -16,7 +16,7 @@
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
 import {
-  ffmpeg, probeDuration, downloadTo, ensureDirs, TEMP_DIR, ASPECTS,
+  ffmpeg, probeDuration, downloadTo, ensureDirs, TEMP_DIR, OUTPUT_DIR, ASPECTS,
 } from "../lib/ffmpeg.mjs";
 import { pushIn, FPS } from "../lib/kenburns.mjs";
 import { getImageEngine } from "../providers/registry.mjs";
@@ -49,6 +49,17 @@ export function estimateSceneCost(stageCount) {
 }
 
 /**
+ * Real output length of the finished scene, before a single frame is generated -- callers
+ * that need to budget total film length against a narration track (story-engine.mjs) have
+ * to know this up front, since construction runs after the one stretchable scene has
+ * already been sized. Matches xfadeGraph()'s math exactly: N stages minus (N-1) overlapping
+ * transitions, each transition eating CROSSFADE_SECONDS out of the timeline once.
+ */
+export function estimateSceneDuration(stageCount) {
+  return Number((stageCount * STAGE_SECONDS - Math.max(0, stageCount - 1) * CROSSFADE_SECONDS).toFixed(2));
+}
+
+/**
  * Chain N clips with dissolves.
  *
  * xfade takes exactly two inputs, so a sequence has to be folded pairwise. Each offset is
@@ -70,6 +81,19 @@ function xfadeGraph(count, secondsEach, fade) {
   return { filter: parts.join(";"), label, total: elapsed };
 }
 
+function stripDataUri(v) {
+  return typeof v === "string" ? v.replace(/^data:image\/[a-zA-Z+]+;base64,/, "") : v;
+}
+
+/** Writes a caller-supplied image (data URI/base64, or a URL) to a local file. */
+async function saveSuppliedImage({ base64, url }, filePath) {
+  if (base64) {
+    await writeFile(filePath, Buffer.from(stripDataUri(base64), "base64"));
+  } else {
+    await downloadTo(url, filePath);
+  }
+}
+
 /**
  * Build the construction scene.
  *
@@ -77,18 +101,42 @@ function xfadeGraph(count, secondsEach, fade) {
  * @param {string} input.property_id
  * @param {string} [input.landImageBase64]  the real plot photo, used as the reference so
  *                                          every stage stays on the same piece of land
+ * @param {string} [input.landImageUrl]     same, when only a URL is on hand
  * @param {string} [input.styleTag]
+ * @param {string} [input.details]  free text folded into every stage prompt (e.g. a
+ *                                  listing's own highlight_features) -- see
+ *                                  buildStagePrompt() in wf5/construction.mjs
  * @param {string} [input.aspect]
  * @param {number[]} [input.stageIds]  which of the five stages to render
+ * @param {number} [input.imageFidelity]  how strongly each stage sticks to landImage*
+ *                                        (0.6 default; a caller wanting less background
+ *                                        drift between stages can raise this toward 1.0 --
+ *                                        it is a continuous influence weight, not a hard
+ *                                        constraint, so it reduces drift, never guarantees
+ *                                        a pixel-identical background)
+ * @param {"crossfade"|"cut"} [input.join]  "crossfade" (default) dissolves between stages
+ *                                          like today; "cut" hard-concats them instead --
+ *                                          for a caller that wants zero fades
+ * @param {string} [input.houseImageBase64] caller-supplied finished-house photo -- used
+ *                                          directly as the "complete" stage instead of
+ *                                          generating one (stages 1-4 still generate
+ *                                          normally either way)
+ * @param {string} [input.houseImageUrl]    same, when only a URL is on hand
  * @param {boolean} [input.dryRun]     price it without generating anything
  */
 export async function runConstructionScene(input, options = {}) {
   const {
     property_id,
     landImageBase64,
+    landImageUrl,
     styleTag = "CONTEMPORARY",
+    details,
     aspect = "9:16",
     stageIds,
+    imageFidelity = 0.6,
+    join = "crossfade",
+    houseImageBase64,
+    houseImageUrl,
     dryRun = false,
   } = input ?? {};
 
@@ -108,48 +156,62 @@ export async function runConstructionScene(input, options = {}) {
   const stamp = Date.now();
 
   // ---- one still per stage ----
+  const hasHouseOverride = Boolean(houseImageBase64 || houseImageUrl);
   const frames = [];
   let cost = 0;
   for (const [i, stage] of stages.entries()) {
-    let url;
-    try {
-      // buildStagePrompt() is the same builder wf5/construction.mjs uses for its own
-      // image-to-video path (17_PROMPT_LIBRARY.md §15 rule 2: one shared builder, never
-      // an inline string per call site) -- it also carries the full negative + safety
-      // keyword set, not a hand-picked subset. Sanitised and screened the same way every
-      // prompt in the pipeline is before it reaches a paid provider (§15 rule 7).
-      const prompt = sanitizeMediaPrompt(buildStagePrompt(stage, styleTag));
-      if (containsSensitiveData(prompt)) {
-        throw new ConstructionSceneError("ERR_CONS_RULE_01", `TEXT_INJECTION_DETECTED ในขั้น "${stage.label}"`);
-      }
-      const res = await engine.generateImage({
-        prompt,
-        // Anchoring every stage to the seller's own photo is what keeps it recognisably
-        // the same parcel; without it each stage is a different piece of land.
-        image: landImageBase64,
-        imageFidelity: 0.6,
-        aspectRatio: aspect,
-      });
-      url = res.image_url;
-      cost += res.cost_usd ?? IMAGE_COST_USD;
-    } catch (err) {
-      throw new ConstructionSceneError(
-        "ERR_CONS_IMAGE",
-        `สร้างภาพขั้น "${stage.label}" ไม่สำเร็จ: ${err.message}`
-      );
-    }
+    const useSuppliedHouse = hasHouseOverride && stage.key === "complete";
     const img = path.join(TEMP_DIR, `cons_${stamp}_${i}.png`);
-    await downloadTo(url, img);
+    if (useSuppliedHouse) {
+      // Caller already has a finished-house photo -- use it directly for the "complete"
+      // stage instead of spending another generation call on it.
+      await saveSuppliedImage({ base64: houseImageBase64, url: houseImageUrl }, img);
+    } else {
+      let url;
+      try {
+        // buildStagePrompt() is the same builder wf5/construction.mjs uses for its own
+        // image-to-video path (17_PROMPT_LIBRARY.md §15 rule 2: one shared builder, never
+        // an inline string per call site) -- it also carries the full negative + safety
+        // keyword set, not a hand-picked subset. Sanitised and screened the same way every
+        // prompt in the pipeline is before it reaches a paid provider (§15 rule 7).
+        const prompt = sanitizeMediaPrompt(buildStagePrompt(stage, styleTag, details));
+        if (containsSensitiveData(prompt)) {
+          throw new ConstructionSceneError("ERR_CONS_RULE_01", `TEXT_INJECTION_DETECTED ในขั้น "${stage.label}"`);
+        }
+        const res = await engine.generateImage({
+          prompt,
+          // Anchoring every stage to the seller's own photo is what keeps it recognisably
+          // the same parcel; without it each stage is a different piece of land. This is
+          // an influence weight, not a hard constraint -- it reduces background drift
+          // between stages, it does not guarantee a pixel-identical background.
+          image: stripDataUri(landImageBase64) || landImageUrl,
+          imageFidelity,
+          aspectRatio: aspect,
+        });
+        url = res.image_url;
+        cost += res.cost_usd ?? IMAGE_COST_USD;
+      } catch (err) {
+        throw new ConstructionSceneError(
+          "ERR_CONS_IMAGE",
+          `สร้างภาพขั้น "${stage.label}" ไม่สำเร็จ: ${err.message}`
+        );
+      }
+      await downloadTo(url, img);
+    }
     const seg = path.join(TEMP_DIR, `consseg_${stamp}_${i}.mp4`);
     // Alternate the drift so consecutive stages do not feel like one long push.
     await pushIn(img, seg, dims, STAGE_SECONDS, i % 2 ? { from: 1.08, to: 1.0 } : { from: 1.0, to: 1.08 });
     frames.push({ stage: stage.label, seg });
   }
 
-  // ---- dissolve between them ----
-  const out = path.join(TEMP_DIR, `construction_${stamp}.mp4`);
+  // ---- join stages: dissolve (default) or a hard cut with zero fades ----
+  const out = path.join(OUTPUT_DIR, `construction_${stamp}.mp4`);
   if (frames.length === 1) {
     await ffmpeg(["-i", frames[0].seg, "-c", "copy", out]);
+  } else if (join === "cut") {
+    const listFile = path.join(TEMP_DIR, `cons_${stamp}.txt`);
+    await writeFile(listFile, frames.map((f) => `file '${f.seg.replace(/'/g, "'\\''")}'`).join("\n"));
+    await ffmpeg(["-f", "concat", "-safe", "0", "-i", listFile, "-c", "copy", out]);
   } else {
     const { filter, label } = xfadeGraph(frames.length, STAGE_SECONDS, CROSSFADE_SECONDS);
     const args = [];

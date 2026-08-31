@@ -138,6 +138,12 @@ Required fields to extract:
 - title: Clean property title. Remove all promotional language ("ด่วน", "ถูกมาก", "!!!"), phone numbers, and Line IDs.
 - price_thb: Price as integer only. No commas. No currency symbols.
   Convert: "5ล้าน" → 5000000| "5.5M" → 5500000 | "12.9ล้านบาท" → 12900000
+  If the text mentions multiple prices for the same listing (a range, a per-rai price plus
+  a total price, land price plus house price, etc.) so no single price is clearly "the"
+  price, use the LOWEST price mentioned as price_thb, and prepend "เริ่มต้น {lowest price
+  formatted with comma thousand-separators} บาท " to the title (before the cleaned title
+  text). Example: prices 3900000 and 4500000 both appear → price_thb: 3900000, title
+  starts with "เริ่มต้น 3,900,000 บาท ...".
 - style_tag: Must be EXACTLY one of: MODERN_NORDIC | MINIMALIST | LUXURY_CLASSIC | CONTEMPORARY | LOFT
 - raw_address: The address exactly as written in the listing. Do not geocode or infer.
 - highlight_features: Array of 3-5 key selling features.Rules for highlight_features:
@@ -147,7 +153,9 @@ Required fields to extract:
   - Keep factual and descriptive only
 
 Critical rules:
-- If price cannot be determined → set price_thb to null
+- If no price is mentioned anywhere in the text → set price_thb to null
+- If multiple prices are mentioned, use the lowest one for price_thb and prefix the title
+  with "เริ่มต้น {price} บาท " as described above
 - If style cannot be determined → set style_tag to "CONTEMPORARY"
 - If address is missing → set raw_address to null
 - Do NOT invent data that is not present in the input text
@@ -756,17 +764,24 @@ Do not add, move or duplicate any marker, label or icon.
 
 ---
 
-### TPL_VID_010_v1 — Map View Falls Onto Real Plot Photo
+### TPL_VID_010_v1 — Aerial Descent Onto The Real Plot (WF1)
 
 ```
 Engine:    Video Engine
-Provider:  Kling V2
+Provider:  Kling (v1-6 pro เมื่อมี image_tail)
 Operation: IMAGE_TO_VIDEO
 Camera:    DRONE_REVEAL
-Use Case:  Shot 2 -- จากมุมแผนที่ ร่อนลงจนกลายเป็นภาพถ่ายจริงของแปลง
+Duration:  10s
+Use Case:  WF1 -- ร่อนลงจากมุมสูง ผ่านชั้นฟ้า จบที่ภาพที่ดินจริง
 Est. Cost: $0.160 per clip
 ```
 *(Static — no variables)*
+
+> **ห้ามเพิ่มจังหวะเข้าไปใน prompt นี้** — ข้อความด้านล่างคือเวอร์ชันที่ทำงานได้จริง
+> เคยแก้ 2 รอบเพื่อยัดจังหวะเพิ่ม (FPV dive, เล่าเรื่องหมุดปัก) ผลคือแย่ลงทั้งสองรอบ
+> โมเดลเริ่มคิดการเคลื่อนไหวเอง แทนที่จะร่อนลงเฉย ๆ — คำสั่งผู้ใช้: กลับไปใช้อันเดิม
+>
+> หมุดของ WF1 Scene 1 ทำเป็น overlay ด้วย `compositeWf1Pin()` **ห้ามฝังลงในรูปที่ส่งให้โมเดล**
 
 **Template (Static):**
 

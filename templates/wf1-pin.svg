@@ -1,0 +1,42 @@
+<!--
+  WF1 Scene 1 location marker : WF-REALESTATE-3WF-SPEC.md "SCENE 1 LOCATION PIN".
+
+  Composited over the opening of the WF1 clip by FFmpeg. It is deliberately NOT drawn into
+  the still that goes to the video model: a marker baked into the input image gets read as a
+  physical object and animated as a balloon drifting across the sky (verified on a real run).
+  Kept as a crisp vector overlay, the marker stays a marker.
+
+  Placeholders filled by renderWf1Pin() in src/lib/svg-card.mjs:
+    {{W}} {{H}}   marker size   {{FONT}}   Thai-capable stack
+    {{LABEL}}     short place label shown beside the marker (optional)
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="{{W}}" height="{{H}}" viewBox="0 0 240 300">
+  <defs>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%"   stop-color="#E5484D" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#E5484D" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#F2565B"/>
+      <stop offset="100%" stop-color="#C8353A"/>
+    </linearGradient>
+    <filter id="drop" x="-60%" y="-60%" width="220%" height="220%">
+      <feDropShadow dx="0" dy="6" stdDeviation="9" flood-color="#000000" flood-opacity="0.55"/>
+    </filter>
+  </defs>
+
+  <!-- ground halo, so the marker reads against bright satellite imagery -->
+  <ellipse cx="120" cy="236" rx="86" ry="26" fill="url(#glow)"/>
+  <ellipse cx="120" cy="236" rx="15" ry="5" fill="#8E1F23" opacity="0.75"/>
+
+  <!-- teardrop marker -->
+  <g filter="url(#drop)">
+    <path d="M120 24
+             a72 72 0 0 1 72 72
+             c0 46-46 92-72 136
+             c-26-44-72-90-72-136
+             a72 72 0 0 1 72-72 z"
+          fill="url(#body)" stroke="#FFFFFF" stroke-width="7"/>
+    <circle cx="120" cy="96" r="27" fill="#FFFFFF"/>
+  </g>
+</svg>

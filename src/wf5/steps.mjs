@@ -85,20 +85,31 @@ export async function step53_houseVisualization(input, options = {}) {
  * Preferred path renders the house first and pins it as the closing frame so the result
  * is art-directed. If the image engine is unavailable the shot still runs, with the video
  * model improvising the building from the prompt.
+ *
+ * If the caller already has a finished-house image (House Engine's own reuse cache, a
+ * seller-supplied photo, or one generated in an earlier call), pass it as
+ * house_image_base64 / house_image_url to use it directly as the end frame and skip the
+ * internal House Engine call -- no redundant spend, no dependency on House Engine's
+ * current image-credit instability.
  */
 export async function step54_constructionSimulation(
-  { property_id, style_tag, land_image_base64, land_image_url },
+  { property_id, style_tag, land_image_base64, land_image_url, house_image_base64, house_image_url },
   options = {}
 ) {
-  let endFrameUrl;
+  const housePreSupplied = Boolean(house_image_base64 || house_image_url);
+  let endFrameBase64 = house_image_base64;
+  let endFrameUrl = house_image_base64 ? undefined : house_image_url;
   let houseCost = 0;
   let degraded = null;
-  try {
-    const house = await runHouseEngine({ property_id, style_tag, land_image_base64, land_image_url }, options);
-    endFrameUrl = house.house_image_url;
-    houseCost = house.generation_metadata.cost_usd;
-  } catch (err) {
-    degraded = err.message;
+
+  if (!housePreSupplied) {
+    try {
+      const house = await runHouseEngine({ property_id, style_tag, land_image_base64, land_image_url }, options);
+      endFrameUrl = house.house_image_url;
+      houseCost = house.generation_metadata.cost_usd;
+    } catch (err) {
+      degraded = err.message;
+    }
   }
 
   const video = await runVideoEngine(
@@ -106,13 +117,19 @@ export async function step54_constructionSimulation(
       property_id,
       image_base64: land_image_base64,
       image_url: land_image_base64 ? undefined : land_image_url,
+      image_tail_base64: endFrameBase64,
       image_tail_url: endFrameUrl,
       template_id: "TPL_VID_008_v1",
       camera_motion: "DRONE_REVEAL",
     },
     options
   );
-  return { clip: video.b_roll_clips[0], art_directed: Boolean(endFrameUrl), degraded, house_cost_usd: houseCost };
+  return {
+    clip: video.b_roll_clips[0],
+    art_directed: Boolean(endFrameBase64 || endFrameUrl),
+    degraded,
+    house_cost_usd: houseCost,
+  };
 }
 
 /** 5.5 Image to Video -- the generic still-to-motion step. */
@@ -156,7 +173,7 @@ export async function wf5Readiness() {
           ? "โค้ดพร้อม แต่โควตารูปของ Kling หมด (resource package ครอบคลุมเฉพาะวิดีโอ)"
           : "ยังไม่ได้เขียน adapter ของ SDXL",
       },
-      { id: "5.4", name: "Construction Simulation", ready: true, blocker: "ทำได้แบบ degraded — บ้านจะถูกจินตนาการเองจนกว่า 5.3 จะใช้ได้" },
+      { id: "5.4", name: "Construction Simulation", ready: true, blocker: "ทำได้แบบ degraded (บ้านจะถูกจินตนาการเองจากพรอมต์) จนกว่า 5.3 จะใช้ได้ — หรือส่ง house_image_url/house_image_base64 มาเองเพื่อข้ามข้อจำกัดนี้ทันที" },
       { id: "5.5", name: "Image to Video", ready: true, blocker: null },
       { id: "5.6", name: "Add Subtitle", ready: ffmpeg, blocker: ffmpeg ? null : "ยังไม่ได้ติดตั้ง FFmpeg" },
       {

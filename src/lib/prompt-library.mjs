@@ -143,18 +143,74 @@ Very smooth continuous forward motion, no shake, no rotation, no cuts.
 Clean digital cartography look, crisp edges, even lighting.
 Do not add, move or duplicate any marker, label or icon.`,
   },
+  // Replaces _v1's flat map-push with a full space-to-ground dive -- user's exact prompt,
+  // 2026-08-20. Rule #1 (immutable history): _v1 stays as-is, this is a new id, not an edit.
+  TPL_VID_009_v2: {
+    engine: "Video Engine",
+    operation: "IMAGE_TO_VIDEO",
+    camera: "ZOOM_IN",
+    useCase: "Shot 1 -- opens in orbit, dives down through the atmosphere onto the pinned map",
+    static: true,
+    text: `A cinematic continuous fast zoom-in shot starting from deep space showing planet Earth,
+rapidly diving through the atmosphere, passing clouds, zooming down into the property's
+district as shown on the map, narrowing in on the exact land parcel from the input photo,
+and finally dropping a digital Google Maps red location pin on the exact spot.
+4k resolution, smooth camera movement, photorealistic.
+No text, no extra markers, no watermark.`,
+  },
+  // WF8b §3 -- the preservation-first listing shot. Every other video template in this
+  // file asks the model to CREATE something; this one exists to stop it creating anything.
+  // The negative list is long and specific on purpose: WF8b's whole premise is that a
+  // generated house, road or mountain that is not on the real plot is a false claim about
+  // property being sold, not a stylistic choice.
+  TPL_VID_011_v1: {
+    engine: "Video Engine",
+    operation: "IMAGE_TO_VIDEO",
+    camera: "ZOOM_IN",
+    useCase: "WF8b -- one verified listing photo becomes a 4-6s clip that adds nothing",
+    static: false,
+    text: `Create a realistic cinematic real-estate video from this exact reference image.
+
+Preserve the land, terrain, road, trees, buildings, boundaries, weather, and all visible details exactly as shown. Do not add, remove, repair, or change any land feature. Do not add houses, people, vehicles, roads, water, mountains, utility poles, signs, or objects that are absent from the original image.
+
+Camera movement: {{camera_motion}}. Add only subtle natural movement to existing grass, leaves, and clouds where visible. Use realistic Thai daylight, stable professional real-estate footage, and truthful natural colours.
+
+No text, captions, logo, watermark, fantasy effect, time lapse, scene transition, aerial view, or invented details.`,
+    defaults: {
+      camera_motion: "stable cinematic hold with subtle natural environmental movement",
+    },
+  },
   TPL_VID_010_v1: {
     engine: "Video Engine",
     operation: "IMAGE_TO_VIDEO",
     camera: "DRONE_REVEAL",
-    useCase: "Shot 2 -- falls out of the sky from the map view onto the real plot photo",
-    static: true,
+    useCase: "WF1 -- aerial descent from high above, down through the sky, onto the real plot",
+    // History, so nobody re-breaks this: two rewrites chasing EXTRA BEATS (an FPV dive, a
+    // pin-drop narrative) each made the shot worse -- the model starts inventing motion when
+    // handed a multi-beat story. Do not add beats.
+    //
+    // But the original wording had its own bug, found by reading it back translated: it said
+    // "from a flat overhead perspective" and "one unbroken FALLING move", which instructed a
+    // flat top-down drift straight down -- the exact "sliding across a map" look that kept
+    // getting rejected. WF-REALESTATE-3WF-SPEC.md SCENE 2 asks for the opposite: perspective
+    // INCREASING with speed, and the camera FLYING down, not falling. Those two lines now say
+    // that. Describing the camera's attitude is not the same as adding a beat.
+    //
+    // Separately, and still true: the start frame MUST be clean satellite photography
+    // (maptype=satellite, no markers). Feeding a labelled map in -- roadmap/hybrid, POI
+    // icons, a red pin -- makes the model read the pin and POI glyphs as physical objects
+    // and animate them as balloons drifting through the sky, and no amount of "no pins, no
+    // text" here removes what is baked into the input image. The WF1 location marker is
+    // composited afterwards by compositeWf1Pin() instead.
     text: `Continuous aerial descent from high above the ground down to the site.
-Camera drops steadily through open sky and thin haze,
-the view transitioning from a flat overhead perspective into a real photographic
-ground-level view of the same location as it descends.
-One unbroken falling move that eases to a stop, no cuts, no shake.
-Photorealistic drone footage, natural daylight.
+Camera drops steadily through open sky, down through a layer of real white clouds and
+thin haze, the ground gradually appearing below as it emerges under the cloud base,
+the camera tilting forward as it descends so the perspective deepens from a high
+looking-down angle into a low forward-facing view, arriving at a real photographic
+ground-level view of the same location.
+One unbroken accelerating flight that eases to a stop, no cuts, no shake.
+Photorealistic drone footage, natural daylight, realistic volumetric clouds,
+natural motion blur.
 No text, no map labels, no pins, no overlays, no watermark.`,
   },
   TPL_VID_008_v1: {
