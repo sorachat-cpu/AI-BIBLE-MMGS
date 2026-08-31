@@ -267,3 +267,76 @@ export async function joinWorkflows(input, options = {}) {
     parts: usable.length,
   };
 }
+
+/**
+ * Run whatever stages the caller has material for, then join them.
+ *
+ * Shared by the CLI and the web console so the two cannot drift: the order of the handoffs,
+ * and which image each stage freezes on, is the spec's continuity rule and belongs in one
+ * place. Every stage is optional -- supplying only a WF1 clip finishes WF1 alone, supplying
+ * only a house image builds the advertisement alone.
+ */
+export async function runWfFinish(input, options = {}) {
+  const {
+    property_id,
+    wf1_clip,
+    wf2_clip,
+    land_image,
+    house_image,
+    aspect = "9:16",
+    pin = true,
+    skip_wf3 = false,
+    // WF3 advertisement copy -- confirmed listing data only (wf/WF3.md).
+    title, price_thb, price_text, size_text, features = [], location, contact, cta,
+  } = input ?? {};
+
+  const results = {};
+  const clips = [];
+
+  if (wf1_clip) {
+    results.wf1 = await finishWf1(
+      { property_id, clip: wf1_clip, land_image, aspect, pin }, options
+    );
+    clips.push(results.wf1.file);
+  }
+
+  if (wf2_clip) {
+    results.wf2 = await finishWf2(
+      { property_id, clip: wf2_clip, house_image, aspect }, options
+    );
+    clips.push(results.wf2.file);
+  }
+
+  // WF3's hero is WF2's frozen final frame when there is one, so the advertisement opens on
+  // exactly the picture the timelapse ended on.
+  const hero = results.wf2?.final_frame ?? house_image;
+  if (!skip_wf3 && hero) {
+    const { runWf3Ad, buildWf3Caption } = await import("../engines/wf3-ad.mjs");
+    results.wf3 = await runWf3Ad(
+      {
+        property_id, house_image_file: hero, aspect,
+        title, price_thb, price_text, size_text, features, location, contact,
+        ...(cta ? { cta } : {}),
+      },
+      options
+    );
+    clips.push(results.wf3.file);
+    results.caption = buildWf3Caption({
+      title, size_text, features, location, contact,
+      price_text: results.wf3.data_used.price_text,
+      cta: cta ?? "สนใจรายละเอียด / นัดชมบ้าน ทักแชตได้เลย",
+    });
+  }
+
+  if (clips.length >= 2) {
+    results.full = await joinWorkflows({ property_id, clips, aspect }, options);
+  }
+
+  if (!clips.length) {
+    throw new WfPipelineError(
+      "ERR_WF_INPUT",
+      "ไม่มีอะไรให้ทำ — ต้องมีคลิป WF1, คลิป WF2, หรือภาพบ้านสำหรับ WF3 อย่างน้อยหนึ่งอย่าง"
+    );
+  }
+  return results;
+}

@@ -10,6 +10,8 @@ import { runVideoEngine, VideoEngineError } from "./engines/video-engine.mjs";
 import { runHouseEngine, HouseEngineError } from "./engines/house-engine.mjs";
 import { runStoryboard, StoryboardError } from "./engines/storyboard.mjs";
 import { runWf3Ad, Wf3AdError } from "./engines/wf3-ad.mjs";
+import { prepareFlowInputs, WfPrepareError } from "./wf/prepare.mjs";
+import { runWfFinish, WfPipelineError } from "./wf/pipeline.mjs";
 import { wf5Readiness } from "./wf5/steps.mjs";
 import { generateConstructionSequence, ConstructionError, estimateConstructionCost } from "./wf5/construction.mjs";
 import { runRenderEngine, RenderEngineError } from "./engines/render-engine.mjs";
@@ -460,6 +462,26 @@ const server = http.createServer(async (req, res) => {
         buildArgs: ({ property_id, style_tag, land_image_base64, land_image_url }) => [
           { property_id, style_tag, land_image_base64, land_image_url },
         ],
+      });
+      return;
+    }
+
+    // 3-WF console: prepare the plates + prompts Google Flow needs, then finish and join
+    // what Flow produced. See wf/README.md.
+    if (req.method === "POST" && req.url === "/api/wf/prepare") {
+      await handleEngine(req, res, {
+        run: prepareFlowInputs,
+        ErrorClass: WfPrepareError,
+        buildArgs: (p) => [p],
+      });
+      return;
+    }
+
+    if (req.method === "POST" && req.url === "/api/wf/finish") {
+      await handleEngine(req, res, {
+        run: runWfFinish,
+        ErrorClass: WfPipelineError,
+        buildArgs: (p) => [p],
       });
       return;
     }
