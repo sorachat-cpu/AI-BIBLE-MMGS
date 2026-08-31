@@ -776,7 +776,10 @@
       if (data.raw_address) chain.appendChild(chainBtn("ส่งที่อยู่ไปขั้นที่ 02", () => {
         document.getElementById("goo-address").value = data.raw_address;
         document.getElementById("goo-id").value = data.property_id;
-        document.getElementById("vid-id").value = data.property_id;
+        // Carry the id and address into the 3-WF workspace too, so the operator does not
+        // retype them: that workspace is where the address actually gets used now.
+        document.getElementById("wf-id").value = data.property_id;
+        document.getElementById("wf-address").value = data.raw_address;
         document.getElementById("step-google").scrollIntoView({ behavior: "smooth", block: "center" });
       }));
       if (chain.children.length) out.appendChild(chain);
@@ -859,7 +862,6 @@
     }
   }
 
-  wireUpload({
   wireUpload({
     dropId: "wf-drop", fileId: "wf-file", previewId: "wf-preview", thumbId: "wf-thumb",
     metaId: "wf-meta", clearId: "wf-clear", outId: "out-wf-prepare",
