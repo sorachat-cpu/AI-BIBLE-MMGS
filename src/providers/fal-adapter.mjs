@@ -37,11 +37,12 @@ const MODEL_IMAGE = "fal-ai/veo3.1/image-to-video";
 // the nearest allowed value is chosen and reported rather than passed through blindly.
 const DURATIONS = [4, 6, 8];
 
+const RESOLUTION = "1080p";
 const POLL_MS = Number(process.env.FAL_POLL_MS ?? 5_000);
 const TIMEOUT_MS = Number(process.env.FAL_TIMEOUT_MS ?? 600_000);
 
-// fal bills per second of output; 8s of Veo 3.1 at 720p is about this. Reported as an
-// estimate -- the real charge shows up on the fal dashboard, not in the response.
+// fal bills per second of output. Reported as an estimate -- the real charge shows up on
+// the fal dashboard, not in the response.
 const COST_PER_SECOND_USD = 0.05;
 
 export class FalAdapterError extends Error {
@@ -92,7 +93,11 @@ export class FalVeoAdapter {
     this.providerName = "FAL_VEO31";
     this.apiKey = config.apiKey ?? process.env.FAL_KEY ?? process.env.FAL_API_KEY;
     this.model = config.model ?? null; // chosen per call, see imageToVideo()
-    this.resolution = config.resolution ?? process.env.FAL_RESOLUTION ?? "1080p";
+    // 1080p, always. The delivery format is a 9:16 phone video, and 720p upscaled into a
+    // 1080x1920 frame is visibly soft on exactly the shot that has to sell the property.
+    // Not configurable on purpose -- a cheaper setting left in reach is one that eventually
+    // ships to a customer.
+    this.resolution = RESOLUTION;
     // Injectable so tests do not have to sit through a real polling interval.
     this.pollMs = config.pollMs ?? POLL_MS;
     this.aspectRatio = config.aspectRatio ?? "9:16";
