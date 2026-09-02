@@ -42,13 +42,7 @@ export class MapZoomError extends Error {
  * @param {string} [input.aspect]  "9:16" (default) or "16:9"
  * @param {number[]} [input.zooms]
  * @param {number} [input.minDuration]  stretch the descent to cover a narration track
- * @param {{from:number,to:number}} [input.pinnedZoom]  zoom range for the final pinned
- *                                  hold (default {from:1.0,to:1.03}). A caller that hands
- *                                  `closest_frame` to a downstream clip as its own start
- *                                  anchor (e.g. storyboard.mjs) can pass {from:1.0,to:1.0}
- *                                  so that clip's cut lands on the exact same framing this
- *                                  one ends on, instead of a slightly zoomed-in version of it.
- * @returns {{file, duration, aspect, frames, closest_frame, geo, truncated_seconds, cost_usd}}
+ * @returns {{file, duration, aspect, frames, geo, cost_usd}}
  */
 export async function runMapZoom(input, options = {}) {
   const {
@@ -58,7 +52,6 @@ export async function runMapZoom(input, options = {}) {
     aspect = "9:16",
     zooms = [6, 11, 15, 18],
     minDuration = 0,
-    pinnedZoom = { from: 1.0, to: 1.03 },
   } = input ?? {};
 
   if (!property_id || !/^PROP-TH-\d{4,6}$/.test(property_id)) {
@@ -124,7 +117,7 @@ export async function runMapZoom(input, options = {}) {
       dims,
       (src.pinned ? HOLD_SECONDS : SECONDS_PER_FRAME) * stretch,
       // The last frame is where the viewer reads the location, so it barely moves.
-      src.pinned ? pinnedZoom : undefined
+      src.pinned ? { from: 1.0, to: 1.03 } : undefined
     );
     segments.push(seg);
     frameFiles.push(img);

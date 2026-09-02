@@ -7,10 +7,15 @@
 // `veo3.1/first-last-frame-to-video` takes both.
 //
 // Contract confirmed against fal's own docs rather than assumed:
-//   POST   https://queue.fal.run/{model}                              -> { request_id, ... }
-//   GET    https://queue.fal.run/{model}/requests/{id}/status         -> IN_QUEUE|IN_PROGRESS|COMPLETED
-//   GET    https://queue.fal.run/{model}/requests/{id}                -> { video: { url } }
+//   POST   https://queue.fal.run/{model}   -> { request_id, status_url, response_url, ... }
+//   GET    <status_url>                    -> IN_QUEUE|IN_PROGRESS|COMPLETED
+//   GET    <response_url>                  -> { video: { url } }
 //   Authorization: Key <FAL_KEY>
+//
+// The follow-up URLs are taken from the submit response rather than built. fal drops the
+// variant segment when it hands them back -- submitting to
+// `.../veo3.1/first-last-frame-to-video` yields `.../veo3.1/requests/{id}` -- so composing
+// them from the model id returns 405.
 // Inputs are `first_frame_url` / `last_frame_url`, and fal accepts data URIs there, so the
 // local plates go inline -- no file-hosting step, and nothing of the customer's is left on a
 // CDN. They are re-encoded to JPEG first because a data URI carries the whole payload in the
@@ -172,8 +177,8 @@ export class FalVeoAdapter {
       throw new FalAdapterError("ERR_PROV_04", `fal ไม่ได้คืน request_id: ${JSON.stringify(submitted).slice(0, 200)}`);
     }
 
-    const statusUrl = `${QUEUE}/${model}/requests/${requestId}/status`;
-    const resultUrl = `${QUEUE}/${model}/requests/${requestId}`;
+    const resultUrl = submitted.response_url ?? `${QUEUE}/${model}/requests/${requestId}`;
+    const statusUrl = submitted.status_url ?? `${resultUrl}/status`;
     const deadline = Date.now() + TIMEOUT_MS;
 
     while (Date.now() < deadline) {

@@ -112,7 +112,7 @@
   .budget-note { margin: 8px 0 0; font-size: 12px; color: var(--text-3); }
 
   /* ---------- pipeline steps ---------- */
-  /* ---------- featured: 3-WF workspace ---------- */
+  /* ---------- featured storyboard ---------- */
   .feature {
     margin-top: 30px; border-radius: 14px; padding: 1.5px;
     background: linear-gradient(140deg, var(--accent) 0%, color-mix(in srgb, var(--accent) 25%, transparent) 45%, var(--border) 100%);
@@ -328,16 +328,12 @@
 
   .chain { margin-top: 12px; display: flex; gap: 9px; flex-wrap: wrap; }
 
-  .progress-ring { position: relative; width: 32px; height: 32px; flex-shrink: 0; }
-  .progress-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
-  .progress-ring circle { fill: none; stroke-width: 4; }
-  .progress-ring .track { stroke: color-mix(in srgb, var(--wait) 22%, transparent); }
-  .progress-ring .bar { stroke: var(--wait); stroke-linecap: round; transition: stroke-dashoffset .25s linear; }
-  .progress-ring .pct {
-    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-    font-family: var(--mono); font-size: 9px; font-weight: 700; color: var(--wait);
-    font-variant-numeric: tabular-nums;
+  .spinner {
+    width: 13px; height: 13px; border-radius: 50%; flex-shrink: 0;
+    border: 2px solid color-mix(in srgb, var(--wait) 30%, transparent);
+    border-top-color: var(--wait); animation: spin .7s linear infinite; margin-top: 3px;
   }
+  @keyframes spin { to { transform: rotate(360deg); } }
   .elapsed { font-family: var(--mono); font-variant-numeric: tabular-nums; }
   @media (prefers-reduced-motion: reduce) {
     * { animation-duration: .01ms !important; transition-duration: .01ms !important; }
@@ -349,28 +345,6 @@
     gap: 14px; flex-wrap: wrap;
   }
   footer code { font-family: var(--mono); font-size: 11.5px; color: var(--text-2); }
-
-  /* ---------- 3-WF workspace ---------- */
-  .wf-step{border:1px solid var(--line);border-radius:14px;padding:20px;margin-top:18px;
-    background:rgba(255,255,255,.02)}
-  .wf-step-head{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px;
-    margin-bottom:16px}
-  .wf-num{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;
-    background:var(--accent);color:#10161c;font-size:15px;font-weight:800}
-  .wf-frames{display:flex;gap:14px;flex-wrap:wrap;margin-top:14px}
-  .wf-frames figure{margin:0;flex:1 1 150px;max-width:190px}
-  .wf-frames img{width:100%;border-radius:10px;border:1px solid var(--line);display:block}
-  .wf-frames figcaption{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5}
-  .wf-frames a{color:var(--accent)}
-  .wf-prompt{border:1px solid var(--line);border-radius:10px;margin-top:12px;overflow:hidden}
-  .wf-prompt-head{display:flex;align-items:center;justify-content:space-between;gap:10px;
-    padding:10px 14px;background:rgba(255,255,255,.03);font-size:14px}
-  .wf-prompt pre{margin:0;padding:14px;font-size:12.5px;line-height:1.65;white-space:pre-wrap;
-    word-break:break-word;color:#cfe0ee;max-height:230px;overflow:auto}
-  .wf-auto{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
-    border:1px solid var(--accent);border-radius:10px;padding:14px 16px;background:var(--accent-soft)}
-  .wf-auto b{font-size:14.5px}
-  .wf-auto button{flex-shrink:0}
 </style>
   <script src="/nav.js" defer></script>
 </head>
@@ -403,111 +377,126 @@
     </div>
   </header>
 
-  <!-- ============ featured: 3-WF workspace (Google Flow) ============ -->
+  <!-- ============ featured: full storyboard ============ -->
   <section class="feature">
     <div class="feature-inner">
-      <div class="kicker">3-WF · Google Flow</div>
-      <h2>จากอวกาศ ลงมาที่แปลง แล้วบ้านค่อยๆ ถูกสร้าง</h2>
+      <div class="kicker">โหมดสตอรี่บอร์ด</div>
+      <h2>จากอวกาศ ลงมาที่แปลง แล้วบ้านผุดขึ้น</h2>
       <p class="lede">
-        WF1 และ WF2 สร้างภาพเคลื่อนไหวใน <b>Google Flow</b> (โหมด Video Frames รับทั้งเฟรมแรกและเฟรมจบ)
-        หน้านี้ทำหน้าที่เตรียมเฟรมกับ prompt ให้ แล้วรับคลิปกลับมาปิดงาน —
-        ปักหมุด · ล็อกเฟรมสุดท้ายให้เป็นรูปจริง · สร้างโฆษณา · ต่อเป็นวิดีโอเดียว
+        สร้างวิดีโอเปิดตัวทรัพย์แบบหลายช็อตในครั้งเดียว —
+        กล้องดิ่งลงจากวงโคจรมาหยุดที่แปลงที่ดินจริงตามพิกัด แล้วตัดเข้าช็อตที่บ้านค่อยๆ
+        ก่อตัวขึ้นบนที่ดินเปล่าผืนนั้น
       </p>
 
-      <!-- ---------- STEP 1 ---------- -->
-      <!-- ---------- ขั้น 1: ใส่ข้อมูลครั้งเดียว ---------- -->
-      <div class="wf-step">
-        <div class="wf-step-head"><span class="wf-num">1</span> ใส่รูปที่ดิน + รายละเอียด</div>
-
-        <div class="field">
-          <label>รูปที่ดินจริง <span class="small">— รูปเดียวพอ ระบบใช้ต่อทั้ง 3 ช่วง</span></label>
-          <div class="drop" id="wf-drop" tabindex="0" role="button" aria-label="เลือกรูปที่ดิน">
-            <div class="icon">◳</div>
-            <p><b>คลิกเพื่อเลือกรูปที่ดิน</b> หรือลากมาวาง</p>
-            <p class="small">JPG · PNG · ด้านสั้นสุดอย่างน้อย 300px · ไม่เกิน 8MB</p>
-            <input type="file" id="wf-file" accept="image/jpeg,image/png,image/webp">
-          </div>
-          <div class="preview" id="wf-preview">
-            <img id="wf-thumb" alt="รูปที่ดินที่เลือก">
-            <span class="meta" id="wf-meta"></span>
-            <button type="button" class="ghost" id="wf-clear" style="margin-left:auto">เอาออก</button>
-          </div>
-        </div>
-
-        <div class="pair">
-          <div class="field">
-            <label for="wf-address">ลิงก์ Google Maps หรือที่อยู่</label>
-            <input id="wf-address" value="เขาใหญ่ ปากช่อง นครราชสีมา">
-          </div>
-          <div class="field">
-            <label for="wf-id">รหัสทรัพย์</label>
-            <input id="wf-id" value="PROP-TH-01029">
-          </div>
-        </div>
-        <div class="pair">
-          <div class="field">
-            <label for="wf-title">หัวเรื่อง</label>
-            <input id="wf-title" value="บ้านสวนกลางธรรมชาติ">
-          </div>
-          <div class="field">
-            <label for="wf-price">ราคา (ตัวเลขล้วน)</label>
-            <input id="wf-price" value="1590000">
-          </div>
-        </div>
-        <div class="pair">
-          <div class="field">
-            <label for="wf-size">เนื้อที่</label>
-            <input id="wf-size" value="1 ไร่ 2 งาน">
-          </div>
-          <div class="field">
-            <label for="wf-location">ทำเล</label>
-            <input id="wf-location" value="ต.หนองน้ำแดง อ.ปากช่อง จ.นครราชสีมา">
-          </div>
-        </div>
-        <div class="field">
-          <label for="wf-features">จุดเด่น 3–5 ข้อ <span class="small">— คั่นด้วยจุลภาค</span></label>
-          <input id="wf-features" value="บ้านสวนชั้นเดียว,สวนธรรมชาติ,โรงจอดรถ,บรรยากาศสงบ">
-        </div>
-        <div class="field">
-          <label for="wf-contact">ช่องทางติดต่อ</label>
-          <input id="wf-contact" value="081-234-5678 · LINE @244raxjb">
-        </div>
-
-        <div class="actions">
-          <button id="wf-prepare">เริ่มงาน — เตรียมทุกอย่างให้</button>
-          <span class="cost-chip">≈ $0.005 · จำข้อมูลไว้ให้ ไม่ต้องกรอกซ้ำ</span>
-        </div>
-        <div class="result" id="out-wf-prepare"></div>
+      <div class="shots">
+        <label class="shot-opt">
+          <input type="checkbox" id="sb-pin" checked>
+          <span class="txt">
+            <strong>จังหวะ 1 · หมุดบนแผนที่</strong>
+            <span>เปิดด้วยภาพแผนที่ที่ปักหมุดไว้ กล้องค่อยๆ ดันเข้าหาหมุด</span>
+          </span>
+        </label>
+        <label class="shot-opt">
+          <input type="checkbox" id="sb-descent" checked>
+          <span class="txt">
+            <strong>จังหวะ 2 · ดิ่งจากฟ้าลงสู่ที่ดินจริง</strong>
+            <span>กล้องร่วงลงจากมุมสูง แล้วภาพแผนที่กลายเป็นรูปที่ดินจริงของคุณ</span>
+          </span>
+        </label>
+        <label class="shot-opt">
+          <input type="checkbox" id="sb-construction" checked>
+          <span class="txt">
+            <strong>จังหวะ 3 · บ้านก่อสร้างขึ้น</strong>
+            <span>บ้านค่อยๆ ก่อตัวขึ้นบนแปลงที่ดินผืนเดิม ต่อเนื่องจากจังหวะที่แล้ว</span>
+          </span>
+        </label>
+        <label class="shot-opt">
+          <input type="checkbox" id="sb-staged">
+          <span class="txt">
+            <strong>จังหวะ 3 แบบละเอียด · ก่อสร้างทีละขั้น</strong>
+            <span>แยกเป็น 5 ขั้น (ฐานราก → โครงสร้าง → ผนัง+หลังคา → ตกแต่ง → เสร็จ) แทนที่จะข้ามไปบ้านเสร็จเลย — <b>ราคาสูงขึ้นมาก ≈ $0.87</b> และต้องมีโควตาสร้างรูป</span>
+          </span>
+        </label>
+        <label class="shot-opt" style="opacity:.75;cursor:default">
+          <input type="checkbox" checked disabled>
+          <span class="txt">
+            <strong>จังหวะ 4 · ข้อมูลทรัพย์ขึ้น</strong>
+            <span>การ์ดปิดท้ายพร้อมราคา จุดเด่น ทำเลใกล้เคียง เบอร์โทร และ QR — ใส่ตอนเรนเดอร์รวม</span>
+          </span>
+        </label>
       </div>
 
-      <!-- ---------- ขั้น 2: กดปุ่มเดียว ---------- -->
-      <div class="wf-step">
-        <div class="wf-step-head"><span class="wf-num">2</span> สร้างวิดีโอ</div>
-
-        <div class="wf-auto">
-          <div><b>อัตโนมัติทั้งหมด</b> <span class="small">— ระบบสร้างคลิปเอง ไม่ต้องเปิด Flow</span>
-            <p class="small" style="margin:6px 0 0">
-              ใช้ Veo 3.1 ผ่าน fal.ai — ทำครบ WF1 → WF2 → WF3 จากรูปที่ดินรูปเดียว
-              บ้านถูกสร้างระหว่าง timelapse แล้วดึงเฟรมสุดท้ายมาเป็นภาพโฆษณาเอง
-              ต้องมี <code>FAL_KEY</code> ใน <code>.env</code> · ราว $0.80 ต่อทรัพย์ (2 คลิป × 8 วินาที)
-            </p>
-          </div>
-          <button id="wf-auto">สร้างให้เลย</button>
+      <div class="pair">
+        <div class="field">
+          <label for="sb-address">ลิงก์ Google Maps หรือที่อยู่ (สำหรับช็อต 1)</label>
+          <input id="sb-address" value="เขาใหญ่ ปากช่อง นครราชสีมา">
         </div>
-        <div class="result" id="out-wf-auto"></div>
-
-        <div class="divider" style="margin:22px 0 16px">หรือทำมือผ่าน Google Flow</div>
-        <p class="small" style="margin:0 0 14px">
-          ลากไฟล์ที่ได้จาก Flow ไปวางในโฟลเดอร์ <code>output/flow/</code> — ชื่อไฟล์อะไรก็ได้
-          ระบบจะหาเอง เรียงตามเวลาที่สร้าง แล้วต่อ WF1 → WF2 → WF3 ให้ครบ
-          โดยใช้ข้อมูลที่กรอกไว้ในขั้นที่ 1
-        </p>
-        <div class="actions">
-          <button id="wf-finish">ทำต่อจากไฟล์ที่วางไว้</button>
-          <span class="cost-chip">$0 · ไม่ใช้ AI</span>
+        <div class="field">
+          <label for="sb-style">สไตล์บ้าน (สำหรับช็อต 2)</label>
+          <select id="sb-style">
+            <option value="MODERN_NORDIC">Modern Nordic</option>
+            <option value="CONTEMPORARY" selected>Contemporary</option>
+            <option value="MINIMALIST">Minimalist</option>
+            <option value="LUXURY_CLASSIC">Luxury Classic</option>
+            <option value="LOFT">Loft</option>
+          </select>
         </div>
-        <div class="result" id="out-wf-finish"></div>
       </div>
+
+      <div class="field">
+        <label>รูปที่ดินเปล่า (สำหรับช็อต 2)</label>
+        <div class="drop" id="sb-drop" tabindex="0" role="button" aria-label="เลือกรูปที่ดิน">
+          <div class="icon">◳</div>
+          <p><b>คลิกเพื่อเลือกรูปที่ดิน</b> หรือลากมาวาง</p>
+          <p class="small">ถ้าไม่ใส่ จะทำได้เฉพาะช็อต 1</p>
+          <input type="file" id="sb-file" accept="image/jpeg,image/png,image/webp">
+        </div>
+        <div class="preview" id="sb-preview">
+          <img id="sb-thumb" alt="รูปที่ดินที่เลือก">
+          <span class="meta" id="sb-meta"></span>
+          <button type="button" class="ghost" id="sb-clear" style="margin-left:auto">เอาออก</button>
+        </div>
+      </div>
+
+      <details>
+        <summary>ข้อมูลบนการ์ดปิดท้าย (ราคา / เบอร์โทร / LINE / QR)</summary>
+        <div class="pair" style="margin-top:10px">
+          <div class="field">
+            <label for="rc-badge">ป้ายมุมบน</label>
+            <input id="rc-badge" value="เจ้าของขายเอง">
+          </div>
+          <div class="field">
+            <label for="rc-size">ขนาดที่ดิน</label>
+            <input id="rc-size" value="100 ตร.ว.">
+          </div>
+        </div>
+        <div class="pair">
+          <div class="field">
+            <label for="rc-price">ราคาที่จะโชว์</label>
+            <input id="rc-price" value="12.5 ล้านบาท">
+          </div>
+          <div class="field">
+            <label for="rc-phone">เบอร์โทร</label>
+            <input id="rc-phone" value="081-234-5678">
+          </div>
+        </div>
+        <div class="pair">
+          <div class="field">
+            <label for="rc-line">LINE ID</label>
+            <input id="rc-line" value="@244raxjb">
+          </div>
+          <div class="field">
+            <label for="rc-qr">ลิงก์ปลายทางของ QR</label>
+            <input id="rc-qr" value="https://line.me/R/ti/p/@244raxjb">
+          </div>
+        </div>
+      </details>
+
+      <div class="actions">
+        <button id="sb-run">สร้างสตอรี่บอร์ด</button>
+        <span class="cost-chip">≈ $0.17 ต่อช็อต · ราว 5 นาที/ช็อต</span>
+      </div>
+      <div class="result" id="out-storyboard"></div>
     </div>
   </section>
 
@@ -578,6 +567,63 @@
       </div>
     </section>
 
+    <!-- ---------- 03 ---------- -->
+    <section class="step" data-step="03" id="step-video">
+      <div class="card">
+        <div class="card-head">
+          <h2>Video Engine</h2>
+          <span class="tag">Kling</span>
+        </div>
+        <p class="lede">
+          เปลี่ยนภาพนิ่งเป็นคลิปเคลื่อนไหว 5 วินาที
+          วิดีโอที่ออกมาจะ<strong>ไม่มีตัวอักษร ราคา หรือโลโก้ฝังอยู่เลย</strong>
+          เพราะของพวกนั้นต้องไปแปะทีหลังตอนเรนเดอร์ ราคาเปลี่ยนจะได้ไม่ต้องสร้างวิดีโอใหม่
+        </p>
+
+        <div class="field">
+          <label>ภาพต้นทาง</label>
+          <div class="drop" id="vid-drop" tabindex="0" role="button" aria-label="เลือกรูปภาพ">
+            <div class="icon">◳</div>
+            <p><b>คลิกเพื่อเลือกรูป</b> หรือลากมาวางตรงนี้</p>
+            <p class="small">JPG · PNG · ด้านสั้นสุดอย่างน้อย 300px · ไม่เกิน 8MB</p>
+            <input type="file" id="vid-file" accept="image/jpeg,image/png,image/webp">
+          </div>
+          <div class="preview" id="vid-preview">
+            <img id="vid-thumb" alt="ภาพที่เลือกไว้">
+            <span class="meta" id="vid-meta"></span>
+            <button type="button" class="ghost" id="vid-clear" style="margin-left:auto">เอาออก</button>
+          </div>
+        </div>
+
+        <div class="pair">
+          <div class="field">
+            <label for="vid-motion">การเคลื่อนกล้อง</label>
+            <select id="vid-motion">
+              <option value="PAN_RIGHT">แพนขวาผ่านหน้าบ้าน</option>
+              <option value="ZOOM_IN">ดันกล้องเข้าหาประตูหน้า</option>
+              <option value="DRONE_REVEAL">โดรนยกขึ้นเผยตัวบ้าน</option>
+              <option value="TILT_UP">เงยขึ้นเผยความสูง</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="vid-id">รหัสทรัพย์</label>
+            <input id="vid-id" value="PROP-TH-01029">
+          </div>
+        </div>
+
+        <details>
+          <summary>หรือใส่ URL ภาพแทนการอัปโหลด</summary>
+          <input id="vid-image" placeholder="https://.../house.jpg">
+        </details>
+
+        <div class="actions">
+          <button data-engine="video">สร้างวิดีโอ</button>
+          <span class="cost-chip">≈ $0.16 · ใช้เวลาราว 5 นาที</span>
+        </div>
+        <div class="result" id="out-video"></div>
+      </div>
+    </section>
+
   </div>
 
   <footer>
@@ -589,7 +635,7 @@
 
 <script>
   /* ============ cost tracking (mirrors BUDGET_THRESHOLDS in the spec) ============ */
-  const COSTS = { property: 0.003, google: 0.005 };
+  const COSTS = { property: 0.003, google: 0.005, video: 0.16 };
   const CAP = 0.30, GREEN = 0.20, YELLOW = 0.25;
   let spent = 0;
 
@@ -605,34 +651,6 @@
       spent >= CAP ? "เกินเพดานแล้ว — ในระบบจริง Orchestrator จะหยุดธุรกรรมทันที"
       : spent >= YELLOW ? "ใกล้ชนเพดาน เหลืออีก $" + (CAP - spent).toFixed(3)
       : "ใช้ไปแล้ว " + Math.round(pct) + "% ของเพดานต่อวิดีโอ";
-  }
-
-  /* A 404 from an unknown route comes back as text/plain, so res.json() throws and every
-     failure used to surface as "ติดต่อเซิร์ฟเวอร์ไม่ได้" -- which sent us hunting for a dead
-     server when the real cause was a server still running an older build without the route.
-     Read the body as text first and report what actually happened. */
-  async function postJson(url, payload) {
-    let res;
-    try {
-      res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-    } catch (err) {
-      throw new Error("ติดต่อเซิร์ฟเวอร์ไม่ได้ — เซิร์ฟเวอร์รันอยู่หรือเปล่า? (npm start)");
-    }
-    const text = await res.text();
-    try {
-      return JSON.parse(text);
-    } catch {
-      if (res.status === 404) {
-        throw new Error(
-          "เซิร์ฟเวอร์ไม่รู้จัก " + url + " (404) — น่าจะยังรันโค้ดเวอร์ชันเก่าอยู่ ลองปิดแล้ว npm start ใหม่"
-        );
-      }
-      throw new Error("เซิร์ฟเวอร์ตอบกลับผิดรูปแบบ (HTTP " + res.status + "): " + text.slice(0, 120));
-    }
   }
 
   /* ============ engines ============ */
@@ -653,6 +671,18 @@
       check: (p) => p.raw_address ? null : "กรอกที่อยู่ก่อนนะครับ",
       done: "หาพิกัดสำเร็จ",
     },
+    video: {
+      url: "/api/video-engine",
+      payload: () => ({
+        property_id: val("vid-id"),
+        image_base64: uploaded,
+        image_url: val("vid-image"),
+        camera_motion: val("vid-motion"),
+      }),
+      check: (p) => (p.image_base64 || p.image_url) ? null : "เลือกรูป หรือใส่ URL ภาพก่อนนะครับ",
+      done: "สร้างวิดีโอสำเร็จ",
+      slow: true,
+    },
   };
 
   const val = (id) => document.getElementById(id).value.trim();
@@ -672,10 +702,15 @@
 
     btn.disabled = true;
     step.dataset.state = "busy";
-    const stop = busyState(out, engine.expectedSeconds ?? 8);
+    const stop = busyState(out, engine.slow);
 
     try {
-      const body = await postJson(engine.url, payload);
+      const res = await fetch(engine.url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const body = await res.json();
       stop();
 
       if (!body.ok) {
@@ -689,44 +724,26 @@
     } catch (err) {
       stop();
       step.dataset.state = "";
-      show(out, "err", "ทำงานไม่สำเร็จ", err.message || String(err));
+      show(out, "err", "ติดต่อเซิร์ฟเวอร์ไม่ได้", String(err));
     } finally {
       btn.disabled = false;
     }
   }
 
-  /* elapsed timer matters here -- a 5-minute wait with no feedback reads as a hang.
-     There is no real progress feed from the server (one request, one response at the
-     end), so the ring shows an ESTIMATE: it eases toward 92% on an expected-duration
-     curve and never claims 100% on its own -- only the caller replacing this panel with
-     a real result panel does that. Honest about being an estimate, still far more
-     legible than a plain spinner during a multi-minute wait. `expectedSeconds` picks
-     the curve's pace; pass 0 for an unknown-length wait (property/google-style calls). */
-  function busyState(out, expectedSeconds = 8) {
+  /* elapsed timer matters here -- a 5-minute wait with no feedback reads as a hang */
+  function busyState(out, slow) {
     const t0 = Date.now();
-    const CIRC = 2 * Math.PI * 14;
     out.innerHTML =
-      '<div class="panel busy"><div class="progress-ring">' +
-      '<svg viewBox="0 0 32 32"><circle class="track" cx="16" cy="16" r="14"></circle>' +
-      '<circle class="bar" cx="16" cy="16" r="14" stroke-dasharray="' + CIRC + '" stroke-dashoffset="' + CIRC + '"></circle></svg>' +
-      '<span class="pct">0%</span></div><div class="body">' +
+      '<div class="panel busy"><div class="spinner"></div><div class="body">' +
       "<strong>กำลังประมวลผล…</strong>" +
       '<span>ผ่านไป <span class="elapsed">0:00</span>' +
-      (expectedSeconds >= 60
-        ? " · ปกติใช้เวลาราว " + Math.round(expectedSeconds / 60) + " นาที กรุณาอย่าปิดหน้านี้"
-        : "") +
+      (slow ? " · วิดีโอปกติใช้เวลา 4–6 นาที กรุณาอย่าปิดหน้านี้" : "") +
       "</span></div></div>";
     const el = out.querySelector(".elapsed");
-    const bar = out.querySelector(".bar");
-    const pctEl = out.querySelector(".pct");
-    const pace = (expectedSeconds || 8) * 0.6;
     const id = setInterval(() => {
-      const s = (Date.now() - t0) / 1000;
-      el.textContent = Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0");
-      const pct = 92 * (1 - Math.exp(-s / pace));
-      pctEl.textContent = Math.round(pct) + "%";
-      bar.setAttribute("stroke-dashoffset", String(CIRC * (1 - pct / 100)));
-    }, 200);
+      const s = Math.floor((Date.now() - t0) / 1000);
+      el.textContent = Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+    }, 1000);
     return () => clearInterval(id);
   }
 
@@ -796,10 +813,7 @@
       if (data.raw_address) chain.appendChild(chainBtn("ส่งที่อยู่ไปขั้นที่ 02", () => {
         document.getElementById("goo-address").value = data.raw_address;
         document.getElementById("goo-id").value = data.property_id;
-        // Carry the id and address into the 3-WF workspace too, so the operator does not
-        // retype them: that workspace is where the address actually gets used now.
-        document.getElementById("wf-id").value = data.property_id;
-        document.getElementById("wf-address").value = data.raw_address;
+        document.getElementById("vid-id").value = data.property_id;
         document.getElementById("step-google").scrollIntoView({ behavior: "smooth", block: "center" });
       }));
       if (chain.children.length) out.appendChild(chain);
@@ -827,7 +841,8 @@
 
   /* ============ image upload -- base64 so Kling can read a local file ============ */
   const MAX_BYTES = 8 * 1024 * 1024;
-  let wfLand = null;    // 3-WF: รูปที่ดินจริง (เฟรมจบ WF1 = เฟรมแรก WF2)
+  let uploaded = null;   // video engine
+  let sbLand = null;     // storyboard land photo
 
   // One uploader wired to two independent dropzones.
   function wireUpload({ dropId, fileId, previewId, thumbId, metaId, clearId, outId, onLoad, onClear }) {
@@ -883,209 +898,136 @@
   }
 
   wireUpload({
-    dropId: "wf-drop", fileId: "wf-file", previewId: "wf-preview", thumbId: "wf-thumb",
-    metaId: "wf-meta", clearId: "wf-clear", outId: "out-wf-prepare",
-    onLoad: (d) => { wfLand = d; }, onClear: () => { wfLand = null; },
+    dropId: "vid-drop", fileId: "vid-file", previewId: "vid-preview", thumbId: "vid-thumb",
+    metaId: "vid-meta", clearId: "vid-clear", outId: "out-video",
+    onLoad: (d) => { uploaded = d; }, onClear: () => { uploaded = null; },
+  });
+  wireUpload({
+    dropId: "sb-drop", fileId: "sb-file", previewId: "sb-preview", thumbId: "sb-thumb",
+    metaId: "sb-meta", clearId: "sb-clear", outId: "out-storyboard",
+    onLoad: (d) => { sbLand = d; }, onClear: () => { sbLand = null; },
   });
 
-  /* ============ 3-WF: step 1 -- prepare the plates + prompts for Google Flow ============ */
-  const prepBtn = document.getElementById("wf-prepare");
-  prepBtn.addEventListener("click", async () => {
-    const out = document.getElementById("out-wf-prepare");
-    if (!wfLand) return show(out, "err", "ยังไปต่อไม่ได้", "อัปโหลดรูปที่ดินจริงก่อนนะครับ");
+  /* ============ storyboard ============ */
+  const sbBtn = document.getElementById("sb-run");
+  sbBtn.addEventListener("click", async () => {
+    const out = document.getElementById("out-storyboard");
+    const shots = [];
+    if (document.getElementById("sb-pin").checked) shots.push("pin");
+    if (document.getElementById("sb-descent").checked) shots.push("descent");
+    const staged = document.getElementById("sb-staged").checked;
+    if (document.getElementById("sb-construction").checked && !staged) shots.push("construction");
 
-    prepBtn.disabled = true;
-    const stop = busyState(out, 10);
+    if (!shots.length) return show(out, "err", "ยังไปต่อไม่ได้", "เลือกอย่างน้อยหนึ่งจังหวะก่อนนะครับ");
+    if (shots.includes("construction") && !sbLand)
+      return show(out, "err", "ยังไปต่อไม่ได้", "จังหวะบ้านก่อสร้างต้องอัปโหลดรูปที่ดินเปล่าก่อน");
+    if (shots.includes("pin") && !val("sb-address"))
+      return show(out, "err", "ยังไปต่อไม่ได้", "จังหวะหมุดบนแผนที่ต้องมีลิงก์แผนที่หรือที่อยู่");
+
+    sbBtn.disabled = true;
+    const stop = busyState(out, true);
     try {
-      const priceRaw = val("wf-price");
-      const body = await postJson("/api/wf/start", {
-        property_id: val("wf-id") || "PROP-TH-01029",
-        raw_address: val("wf-address"),
-        land_image_base64: wfLand,
-        aspect: "9:16",
-        // Saved with the job so step 2 needs nothing but the property id.
-        title: val("wf-title") || undefined,
-        price_thb: priceRaw ? Number(priceRaw) : undefined,
-        size_text: val("wf-size") || undefined,
-        location: val("wf-location") || undefined,
-        contact: val("wf-contact") || undefined,
-        features: (val("wf-features") || "").split(",").map((x) => x.trim()).filter(Boolean),
+      const res = await fetch("/api/storyboard", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          property_id: val("vid-id") || "PROP-TH-01029",
+          raw_address: val("sb-address"),
+          style_tag: val("sb-style"),
+          land_image_base64: sbLand,
+          shots,
+        }),
       });
+      const body = await res.json();
       stop();
       if (!body.ok) return show(out, "err", "รหัสข้อผิดพลาด " + body.code, body.message);
-      renderPrepare(out, body.data);
-      spent += 0.005; addSpend("__none__");
+      renderStoryboard(out, body.data);
     } catch (err) {
       stop();
-      show(out, "err", "ทำงานไม่สำเร็จ", err.message || String(err));
+      show(out, "err", "ติดต่อเซิร์ฟเวอร์ไม่ได้", String(err));
     } finally {
-      prepBtn.disabled = false;
+      sbBtn.disabled = false;
     }
   });
 
-  function promptBlock(label, text, note) {
-    const id = "p" + Math.random().toString(36).slice(2, 8);
-    return '<div class="wf-prompt"><div class="wf-prompt-head"><b>' + esc(label) + "</b>" +
-      '<button type="button" class="ghost" data-copy="' + id + '">คัดลอก</button></div>' +
-      (note ? '<p class="small">' + esc(note) + "</p>" : "") +
-      '<pre id="' + id + '">' + esc(text) + "</pre></div>";
-  }
+  function renderStoryboard(out, data) {
+    const anyFailed = data.steps.some((s) => s.status === "failed");
+    let html =
+      '<div class="panel ' + (anyFailed ? "busy" : "ok") + '"><span class="badge">' +
+      (anyFailed ? "บางส่วน" : "OK") + '</span><div class="body"><strong>ได้คลิปมา ' +
+      data.clips.length + " ช็อต</strong><span>รวมค่าใช้จ่าย $" +
+      data.total_cost_usd.toFixed(3) + " · ยังไม่ได้ต่อคลิปเป็นไฟล์เดียว (เป็นงานของ Render Engine)</span></div></div>";
 
-  function renderPrepare(out, d) {
-    const f = d.frames;
-    let h = '<div class="panel ok"><span class="badge">OK</span><div class="body">' +
-      "<strong>เตรียมไฟล์ให้ Flow เรียบร้อย</strong><span>" +
-      (d.geo ? esc(d.geo.formatted_address) : "ไม่ได้ระบุที่อยู่ — ไม่มีเฟรมเริ่มของ WF1") +
-      "</span></div></div>";
-
-    h += '<div class="steplog">';
-    for (const s of d.steps) {
-      h += '<div class="logrow ' + esc(s.status) + '"><span class="dot"></span>' +
-        '<span class="stage">' + esc(s.stage) + '</span><span class="msg">' + esc(s.detail) + "</span></div>";
+    html += '<div class="steplog">';
+    for (const s of data.steps) {
+      html += '<div class="logrow ' + esc(s.status) + '"><span class="dot"></span>' +
+        '<span class="stage">' + esc(s.stage) + '</span>' +
+        '<span class="msg">' + esc(s.detail) + "</span>" +
+        (s.cost_usd ? '<span class="amt">$' + s.cost_usd.toFixed(3) + "</span>" : "") + "</div>";
     }
-    h += "</div>";
+    html += "</div>";
 
-    h += '<div class="wf-frames">';
-    if (f.wf1_start_url) {
-      h += '<figure><img src="' + esc(f.wf1_start_url) + '"><figcaption>WF1 <b>start</b><br>' +
-        '<a href="' + esc(f.wf1_start_url) + '" download>ดาวน์โหลด</a></figcaption></figure>';
-    }
-    h += '<figure><img src="' + esc(f.wf1_end_url) + '"><figcaption>WF1 <b>end</b> = WF2 <b>start</b><br>' +
-      '<a href="' + esc(f.wf1_end_url) + '" download>ดาวน์โหลด</a></figcaption></figure></div>';
+    data.clips.forEach((c, i) => {
+      html += '<div class="clip"><div class="cap"><b>ช็อต ' + (i + 1) + "</b>" + esc(c.label) +
+        "</div><video controls playsinline src=\"" + esc(c.video_url) + '"></video></div>';
+    });
 
-    h += '<p class="small" style="margin:14px 0 6px">ใน Flow เลือกโหมด <b>Video Frames</b> · ตั้ง 9:16 · duration ยาวสุด</p>';
-    h += promptBlock("WF1 — prompt วิดีโอ", d.prompts.wf1,
-      "start = ภาพดาวเทียม · end = รูปที่ดินจริง");
-    h += promptBlock("WF2 ขั้นที่ 1 — prompt สร้างภาพบ้านตอนค่ำ", d.prompts.wf2_image,
-      "ใส่รูปที่ดินเป็น reference · เซฟเป็น " + d.expects.wf2_end_image);
-    h += promptBlock("WF2 ขั้นที่ 2 — prompt วิดีโอ timelapse", d.prompts.wf2_video,
-      "start = รูปที่ดิน · end = ภาพบ้านตอนค่ำจากขั้นที่ 1");
+    out.innerHTML = html;
 
-    h += '<p class="small" style="margin-top:14px">เซฟคลิปที่ได้เป็น <code>' +
-      esc(d.expects.wf1_clip) + "</code> และ <code>" + esc(d.expects.wf2_clip) + "</code> แล้วไปขั้นที่ 2</p>";
-
-    out.innerHTML = h;
-    out.querySelectorAll("[data-copy]").forEach((b) =>
-      b.addEventListener("click", () => {
-        navigator.clipboard.writeText(document.getElementById(b.dataset.copy).textContent);
-        b.textContent = "คัดลอกแล้ว"; setTimeout(() => (b.textContent = "คัดลอก"), 1600);
-      })
-    );
-  }
-
-  /* ============ 3-WF: fully automatic -- generate the clips here, no Flow round trip ==== */
-  const autoBtn = document.getElementById("wf-auto");
-  autoBtn.addEventListener("click", async () => {
-    const out = document.getElementById("out-wf-auto");
-    autoBtn.disabled = true;
-    // Two Veo generations plus the local finish; each clip is minutes, not seconds.
-    const stop = busyState(out, 420);
-    try {
-      const body = await postJson("/api/wf/auto", {
-        property_id: val("wf-id") || "PROP-TH-01029",
-      });
-      stop();
-      if (!body.ok) return show(out, "err", "รหัสข้อผิดพลาด " + body.code, body.message);
-      renderFinish(out, body.data);
-    } catch (err) {
-      stop();
-      show(out, "err", "ทำงานไม่สำเร็จ", err.message || String(err));
-    } finally {
-      autoBtn.disabled = false;
-    }
-  });
-
-  /* ============ 3-WF: step 2 -- finish and join what Flow produced ============ */
-  const finBtn = document.getElementById("wf-finish");
-  finBtn.addEventListener("click", async () => {
-    const out = document.getElementById("out-wf-finish");
-    finBtn.disabled = true;
-    const stop = busyState(out, 60);
-    try {
-      // Everything else came from the job saved in step 1, and the clips are found by
-      // scanning the drop folder -- the operator supplies neither again.
-      const body = await postJson("/api/wf/continue", {
-        property_id: val("wf-id") || "PROP-TH-01029",
-      });
-      stop();
-      if (!body.ok) return show(out, "err", "รหัสข้อผิดพลาด " + body.code, body.message);
-      renderFinish(out, body.data);
-    } catch (err) {
-      stop();
-      show(out, "err", "ทำงานไม่สำเร็จ", err.message || String(err));
-    } finally {
-      finBtn.disabled = false;
-    }
-  });
-
-  function renderFinish(out, d) {
-    let h = '<div class="panel ok"><span class="badge">OK</span><div class="body">' +
-      "<strong>ปิดงานเรียบร้อย</strong><span>" +
-      (d.full ? "ต่อเป็นวิดีโอเดียวแล้ว " + d.full.duration + " วินาที" : "ทำเสร็จเป็นช่วงๆ") +
-      " · ไม่เสียค่า AI</span></div></div>";
-
-    if (d.generated && d.generated.length) {
-      h += '<div class="steplog">';
-      for (const g of d.generated) {
-        h += '<div class="logrow ' + esc(g.status) + '"><span class="dot"></span>' +
-          '<span class="stage">' + esc(g.stage) + ' สร้างเอง</span>' +
-          '<span class="msg">' + esc(g.detail) + "</span></div>";
+    // Clips are separate files until Render Engine joins them, burns subtitles and
+    // appends the ending card -- that is the artefact a broker can actually post.
+    const finish = document.createElement("div");
+    finish.className = "chain";
+    const btn = chainBtn("ต่อเป็นวิดีโอสมบูรณ์ พร้อมซับ + การ์ดปิดท้าย", async () => {
+      btn.disabled = true;
+      const stop = busyState(out, false);
+      try {
+        const res = await fetch("/api/render-engine", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            property_id: data.property_id,
+            clips: data.clips.map((c) => ({ video_url: c.video_url })),
+            subtitles: data.clips.map((c, i) => ({ start: i * 5, end: (i + 1) * 5, text: c.label })),
+            // Mid-clip "what's nearby" card, straight from the Places lookup.
+            location_card: (data.detail_suggestions?.nearby_places || []).length
+              ? { places: data.detail_suggestions.nearby_places }
+              : undefined,
+            ending_card: {
+              badge: val("rc-badge") || "เจ้าของขายเอง",
+              title: data.detail_suggestions?.address?.split(",").slice(-3, -1).join(",").trim()
+                     || val("sb-address") || "ทรัพย์แนะนำ",
+              size_text: val("rc-size") || "",
+              price_text: val("rc-price") || "",
+              contact_phone: val("rc-phone") || "",
+              line_id: val("rc-line") || "",
+              qr_url: val("rc-qr") || "",
+            },
+            aspects: ["9:16", "16:9"],
+          }),
+        });
+        const body = await res.json();
+        stop();
+        if (!body.ok) return show(out, "err", "รหัสข้อผิดพลาด " + body.code, body.message);
+        let h = '<div class="panel ok"><span class="badge">OK</span><div class="body">' +
+          "<strong>ได้วิดีโอสมบูรณ์แล้ว</strong><span>ต่อคลิป ใส่ซับไทย และการ์ดปิดท้ายเรียบร้อย</span></div></div>";
+        for (const o of body.data.outputs) {
+          h += '<div class="clip"><div class="cap"><b>' + esc(o.aspect_ratio) + "</b>" + esc(o.label) +
+            ' · <a href="' + esc(o.url) + '" download style="color:var(--accent)">ดาวน์โหลด</a></div>' +
+            '<video controls playsinline src="' + esc(o.url) + '"></video></div>';
+        }
+        out.innerHTML = h;
+      } catch (err) {
+        stop();
+        show(out, "err", "เรนเดอร์ไม่สำเร็จ", String(err));
       }
-      h += "</div>";
-    }
+    });
+    finish.appendChild(btn);
+    out.appendChild(finish);
 
-    if (d.picked) {
-      const p = d.picked;
-      const pick = [];
-      if (p.wf1) pick.push("WF1 ← " + p.wf1);
-      if (p.wf2) pick.push("WF2 ← " + p.wf2);
-      if (p.house) pick.push("ภาพบ้าน ← " + p.house);
-      if (pick.length) {
-        h += '<div class="panel ok"><span class="badge">ไฟล์</span><div class="body">' +
-          "<strong>ระบบเลือกไฟล์เหล่านี้ให้เอง</strong><span>" + esc(pick.join(" · ")) + "</span></div></div>";
-      }
-    }
-
-    const rows = [];
-    if (d.wf1) rows.push(["WF1", d.wf1.duration + "s · หมุด " + (d.wf1.pin_composited ? "ปักแล้ว" : "ไม่ปัก") +
-      " · เฟรมสุดท้าย = รูปที่ดินจริง", d.wf1.video_url]);
-    if (d.wf2) rows.push(["WF2", d.wf2.duration + "s · เฟรมสุดท้าย = ภาพบ้าน (ส่งต่อ WF3)", d.wf2.video_url]);
-    if (d.wf3) rows.push(["WF3", d.wf3.duration + "s · โฆษณา 9:16", d.wf3.video_url]);
-    if (d.full) rows.push(["รวม", d.full.duration + "s · " + d.full.parts + " ช่วง", d.full.video_url]);
-
-    h += '<div class="steplog">';
-    for (const [k, v] of rows.map((r) => [r[0], r[1]])) {
-      h += '<div class="logrow ok"><span class="dot"></span><span class="stage">' + esc(k) +
-        '</span><span class="msg">' + esc(v) + "</span></div>";
-    }
-    h += "</div>";
-
-    if (d.wf3 && d.wf3.data_omitted && d.wf3.data_omitted.length) {
-      h += '<div class="panel busy"><span class="badge">เว้นไว้</span><div class="body">' +
-        "<strong>ไม่ได้ใส่ลงโฆษณาเพราะไม่มีข้อมูล</strong><span>" +
-        esc(d.wf3.data_omitted.join(" · ")) + "</span></div></div>";
-    }
-
-    const main = d.full || d.wf3 || d.wf2 || d.wf1;
-    if (main) {
-      h += '<div class="clip"><div class="cap"><b>ผลลัพธ์</b>' +
-        '<a href="' + esc(main.video_url) + '" download style="color:var(--accent)">ดาวน์โหลด</a></div>' +
-        '<video controls playsinline src="' + esc(main.video_url) + '"></video></div>';
-    }
-    if (d.wf3) {
-      h += '<div class="clip"><div class="cap"><b>เฟรมโฆษณา</b>' +
-        '<a href="' + esc(d.wf3.final_frame_url) + '" download style="color:var(--accent)">ดาวน์โหลด</a></div>' +
-        '<img src="' + esc(d.wf3.final_frame_url) + '" style="width:100%;border-radius:10px"></div>';
-    }
-    if (d.caption) h += promptBlock("Caption สำหรับโพสต์", d.caption, "");
-
-    out.innerHTML = h;
-    out.querySelectorAll("[data-copy]").forEach((b) =>
-      b.addEventListener("click", () => {
-        navigator.clipboard.writeText(document.getElementById(b.dataset.copy).textContent);
-        b.textContent = "คัดลอกแล้ว"; setTimeout(() => (b.textContent = "คัดลอก"), 1600);
-      })
-    );
+    // The storyboard already reports its own spend; fold it into the session meter.
+    spent += data.total_cost_usd;
+    addSpend("__none__");
   }
 </script>
 </body>

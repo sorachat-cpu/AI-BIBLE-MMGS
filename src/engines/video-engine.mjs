@@ -4,7 +4,7 @@
 // Neutrality"): nothing that can change -- price, phone, Line ID, branding -- may ever
 // be burned into the video. If it were, a price typo would force a full regeneration at
 // >10x the cost of recompositing in Render Engine.
-import { getVideoEngine, getEndFrameVideoEngine } from "../providers/registry.mjs";
+import { getVideoEngine } from "../providers/registry.mjs";
 import { getByCameraMotion, get as getTemplate } from "../lib/prompt-library.mjs";
 import { sanitizeMediaPrompt, containsSensitiveData } from "../lib/sanitize.mjs";
 import { validateAgainstSchema } from "../lib/validate.mjs";
@@ -67,12 +67,8 @@ export async function runVideoEngine(input, options = {}) {
       `camera_motion must be one of ${CAMERA_MOTIONS.join(", ")} (schemas/video.schema.json)`
     );
   }
-  // Kling's v1-family takes 5 or 10 seconds. The cap used to sit at 5, which quietly
-  // capped every shot -- a multi-beat journey (pin -> clouds -> FPV flight -> land on the
-  // plot) has no room to play out in 5s, so the model either skips beats or smears them
-  // together. 10 is the real provider ceiling, so that is the ceiling here.
-  if (duration_seconds < 3 || duration_seconds > 10) {
-    throw new VideoEngineError("ERR_VID_INPUT", "duration_seconds must be between 3 and 10");
+  if (duration_seconds < 3 || duration_seconds > 5) {
+    throw new VideoEngineError("ERR_VID_INPUT", "duration_seconds must be between 3 and 5");
   }
 
   // An end frame turns the clip into a morph (empty plot -> finished house) rather
@@ -97,15 +93,7 @@ export async function runVideoEngine(input, options = {}) {
 
   // Vendor is chosen by config (VIDEO_ENGINE), never named here -- WF5 §7 requires the
   // engine be swappable without touching this file.
-  //
-  // The MODEL, though, is decided by the shape of this specific call: a request carrying
-  // an end frame needs a model family that accepts one, and Kling 3.0 Turbo does not.
-  // Deciding it here rather than in each caller means construction, the sky descent and
-  // wf5/steps all keep working when the environment's default model is switched to 3.0
-  // for the cheaper single-frame paths -- none of them had to know about it.
-  const provider = imageTail
-    ? getEndFrameVideoEngine(options.providerConfig)
-    : getVideoEngine(options.providerConfig);
+  const provider = getVideoEngine(options.providerConfig);
   let normalized;
   try {
     normalized = await provider.imageToVideo({
@@ -132,7 +120,7 @@ export async function runVideoEngine(input, options = {}) {
       {
         clip_id: clipId(),
         video_url: normalized.result.video_url,
-        duration_seconds: Math.min(10, Math.max(3, normalized.result.duration_seconds)),
+        duration_seconds: Math.min(5, Math.max(3, normalized.result.duration_seconds)),
         camera_motion,
       },
     ],
