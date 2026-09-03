@@ -15,9 +15,9 @@ import { writeFile, access } from "node:fs/promises";
 import path from "node:path";
 import {
   ffmpeg, downloadTo, ensureDirs, cleanTemp, escapeFilterPath, probeDuration,
-  OUTPUT_DIR, TEMP_DIR, ASPECTS,
+  OUTPUT_DIR, TEMP_DIR, ASPECTS, FONT_DIR,
 } from "../lib/ffmpeg.mjs";
-import { buildSubtitleAss } from "../lib/ass.mjs";
+import { buildSubtitleAss, buildKaraokeAss } from "../lib/ass.mjs";
 import { renderLocationCard, renderEndingCard } from "../lib/svg-card.mjs";
 import { renderQrPng } from "./overlay-engine.mjs";
 
@@ -37,8 +37,14 @@ async function normaliseClip(input, output, { w, h }) {
     "-i", input,
     "-f", "lavfi", "-t", "60", "-i", "anullsrc=channel_layout=stereo:sample_rate=44100",
     "-filter_complex",
-    `[0:v]scale=${w}:${h}:force_original_aspect_ratio=decrease,` +
-      `pad=${w}:${h}:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1,fps=${FPS}[v]`,
+    // Fill the frame, don't letterbox it. Kling's image2video returns a 1:1 square clip
+    // no matter what aspect goes in (there is no aspect parameter on its video endpoint),
+    // so `decrease`+`pad` was scaling 1440x1440 into 1080x1080 and stacking 420px of black
+    // above and below it -- 44% of a 9:16 Reel was black bars. WF-REALESTATE-3WF-SPEC.md
+    // "Mobile First" wants the hero image filling a vertical frame, so scale to cover and
+    // crop the overflow instead.
+    `[0:v]scale=${w}:${h}:force_original_aspect_ratio=increase,` +
+      `crop=${w}:${h},setsar=1,fps=${FPS}[v]`,
     "-map", "[v]", "-map", "1:a",
     "-shortest",
     "-c:v", "libx264", "-preset", "medium", "-crf", "22", "-pix_fmt", "yuv420p",
@@ -63,6 +69,7 @@ export async function runRenderEngine(input, _options = {}) {
     property_id,
     clips = [],
     subtitles = [],
+    subtitle_style = "karaoke",
     music_file,
     voiceover_file,
     music_url,
@@ -187,8 +194,23 @@ export async function runRenderEngine(input, _options = {}) {
 
     if (subtitles.length) {
       const assPath = path.join(TEMP_DIR, `subs_${tag}.ass`);
-      await writeFile(assPath, buildSubtitleAss({ width: dims.w, height: dims.h, cues: subtitles }));
-      filters.push(`[${vLabel}]subtitles='${escapeFilterPath(assPath)}'[vs]`);
+      // Karaoke needs per-word timings; a track without them (the macOS `say` backend
+      // measures whole sentences only) falls back to the plain style rather than
+      // rendering a pop effect against guessed word boundaries.
+      const canKaraoke = subtitles.some((c) => c.words?.length);
+      const useKaraoke = subtitle_style === "karaoke" && canKaraoke;
+      await writeFile(
+        assPath,
+        useKaraoke
+          ? buildKaraokeAss({ width: dims.w, height: dims.h, cues: subtitles })
+          : buildSubtitleAss({ width: dims.w, height: dims.h, cues: subtitles })
+      );
+      // fontsdir is what makes the bundled family usable: libass otherwise resolves the
+      // style's font by NAME against installed system fonts, finds nothing called
+      // "Prompt" in a container, and silently substitutes a face with no Thai glyphs.
+      filters.push(
+        `[${vLabel}]subtitles='${escapeFilterPath(assPath)}':fontsdir='${escapeFilterPath(FONT_DIR)}'[vs]`
+      );
       vLabel = "vs";
     }
 
@@ -225,9 +247,25 @@ export async function runRenderEngine(input, _options = {}) {
     // same property_id/stamp/aspect shape, so without a marker a later run cannot tell
     // its own finished clips apart from raw material and re-renders them into itself.
     const outFile = path.join(OUTPUT_DIR, `${property_id}_${stamp}_render_${tag}.mp4`);
+    // No -shortest here, deliberately. `joined` is built to already be >= the voiceover's
+    // length (mapzoom/story engines stretch their flexible scene to cover minDuration), so
+    // in the intended case this would be a no-op -- but construction scenes add a fixed
+    // duration that WASN'T included in that stretch budget, and a real test render proved
+    // -shortest then quietly truncates the tail once voice is the shorter stream: the
+    // "contact" scene (price / phone / LINE ID -- the one thing this stage exists to show,
+    // per the file header) got cut entirely, at a duration ffmpeg didn't even land on the
+    // voice track's own length. The video is the stream whose length should win here; audio
+    // just stops and the remaining seconds play in silence, which is the honest failure mode.
+    //
+    // Which is also why the video's length is stated outright instead of left to -shortest.
+    // Without it the file runs to max(video, audio), so music longer than the footage -- or
+    // a voiceover that outruns it in `--mode clips` -- leaves an audio-only tail past the
+    // last frame, and the duration probe below then reports that inflated length as the
+    // clip's own. -t caps the tail without ever cutting the video the way -shortest did.
+    args.push("-t", duration.toFixed(3));
     args.push(
       "-c:v", "libx264", "-preset", "medium", "-crf", "22", "-pix_fmt", "yuv420p",
-      "-c:a", "aac", "-b:a", "160k", "-movflags", "+faststart", "-shortest",
+      "-c:a", "aac", "-b:a", "160k", "-movflags", "+faststart",
       outFile
     );
 
@@ -261,6 +299,12 @@ export async function runRenderEngine(input, _options = {}) {
       ], { timeoutMs: 600_000 });
     }
 
+    // Re-probe the file that actually landed on disk rather than trusting `duration` (the
+    // pre-composite joined-clip length). They are supposed to match, but that assumption is
+    // exactly what silently broke once -shortest was truncating the composite pass -- this
+    // is the same "measure it, don't compute it" instinct as the resolution field above.
+    const realDuration = (await probeDuration(outFile)) ?? duration;
+
     outputs.push({
       aspect_ratio: aspect,
       label: dims.label,
@@ -269,13 +313,13 @@ export async function runRenderEngine(input, _options = {}) {
       // The real size, not the requested one -- the fallback changes it.
       resolution: `${outW}x${outH}`,
       degraded: Boolean(degraded),
-      duration_seconds: Number(duration.toFixed(2)),
+      duration_seconds: Number(realDuration.toFixed(2)),
     });
     steps.push({
       stage: `render ${aspect}`,
       status: degraded ? "degraded" : "ok",
       detail: degraded
-        ?? `${outW}x${outH} · ${segments.length} คลิป · ${overlayPlan.length} การ์ด · ${duration.toFixed(1)} วิ`,
+        ?? `${outW}x${outH} · ${segments.length} คลิป · ${overlayPlan.length} การ์ด · ${realDuration.toFixed(1)} วิ`,
     });
   }
 

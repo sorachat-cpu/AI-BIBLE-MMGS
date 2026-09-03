@@ -53,6 +53,103 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 }
 
 /**
+ * Karaoke captions -- the whole line stays on screen and the word being spoken pops.
+ *
+ * Built as one Dialogue event PER WORD rather than with ASS's native `\k` tags. `\k`
+ * only sweeps the secondary colour across a line; it cannot scale a word, and scale is
+ * what makes the effect read on a phone. So each event redraws the full line with one
+ * word carrying its own override block, and libass cross-fades nothing -- the swap is
+ * instant, which is what "word-by-word pop" actually looks like.
+ *
+ * The word timings must come from measured audio (voice.mjs derives them from
+ * ElevenLabs' character alignment). Dividing a line's duration by its word count drifts
+ * within the first sentence and is obvious against the voice.
+ *
+ * @param {Array<{start,end,text,words?}>} cues  a cue with no `words` falls back to a
+ *        plain static line, so a `say`-backed track still renders rather than vanishing.
+ * @param {object} [style]
+ * @param {string} [style.active]    colour of the spoken word
+ * @param {string} [style.idle]      colour of the rest of the line
+ * @param {number} [style.pop]       peak scale of the spoken word, percent
+ */
+export function buildKaraokeAss({ width, height, cues, fontSize, style = {} }) {
+  const {
+    active = "#FFE81A",   // high-contrast yellow; reads on almost any footage
+    idle = "#FFFFFF",
+    pop = 122,
+  } = style;
+
+  const size = fontSize ?? Math.round(height * 0.055);
+  // A thick outline plus a hard shadow is what keeps captions legible over bright sky and
+  // dark ground in the same clip -- the usual failure is a thin outline that disappears
+  // against one of them.
+  const outline = Math.max(3, Math.round(size * 0.14));
+  const shadow = Math.max(2, Math.round(size * 0.06));
+
+  const header = `[Script Info]
+ScriptType: v4.00+
+PlayResX: ${width}
+PlayResY: ${height}
+WrapStyle: 0
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Pop,${THAI_FONT_NAME},${size},${toAssColour(idle)},${toAssColour(active)},&H00000000,&H00000000,-1,0,0,0,100,100,0,0,1,${outline},${shadow},2,${Math.round(width * 0.06)},${Math.round(width * 0.06)},${Math.round(height * 0.14)},1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+`;
+
+  const events = [];
+  for (const cue of cues) {
+    // Word timings only describe the line they were measured on. If a caller swapped the
+    // display text and left them behind, highlighting them would render the OLD text --
+    // so fall back to the static line rather than showing something nobody asked for.
+    const describesText =
+      cue.words?.length &&
+      cue.words.map((w) => w.text).join("").replace(/\s+/g, "") ===
+        String(cue.text ?? "").replace(/\s+/g, "");
+    const words = describesText ? cue.words : null;
+    if (!words) {
+      events.push(
+        `Dialogue: 0,${toAssTime(cue.start)},${toAssTime(cue.end)},Pop,,0,0,0,,${escapeText(cue.text)}`
+      );
+      continue;
+    }
+
+    for (const [i, w] of words.entries()) {
+      // Hold the highlight until the next word actually starts, so the gap between words
+      // does not flash the line back to all-idle.
+      const from = w.start;
+      const to = i < words.length - 1 ? words[i + 1].start : cue.end;
+      if (!(to > from)) continue;
+
+      const line = words
+        .map((other, j) => {
+          const text = escapeText(other.text);
+          if (j !== i) return `{\\c${toAssColour(idle)}\\fscx100\\fscy100}${text}`;
+          // Overshoot then settle -- a straight jump to 122% reads as a size change,
+          // the settle is what makes it feel like a bounce.
+          const ms = Math.max(80, Math.round((to - from) * 1000));
+          const up = Math.min(140, Math.round(ms * 0.35));
+          const back = Math.min(ms, up + 140);
+          return (
+            `{\\c${toAssColour(active)}\\fscx100\\fscy100` +
+            `\\t(0,${up},\\fscx${pop}\\fscy${pop})` +
+            `\\t(${up},${back},\\fscx${pop - 8}\\fscy${pop - 8})}${text}`
+          );
+        })
+        .join(" ");
+
+      events.push(`Dialogue: 0,${toAssTime(from)},${toAssTime(to)},Pop,,0,0,0,,${line}`);
+    }
+  }
+
+  return header + events.join("\n") + "\n";
+}
+
+/**
  * Ending card text. This is the only place in the whole pipeline where price and
  * contact details are allowed to appear -- 03_SYSTEM_RULES.md Rule 1 keeps them out of
  * every AI-generated frame so a price change never forces a re-render.

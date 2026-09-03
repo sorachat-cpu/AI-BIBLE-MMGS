@@ -12,11 +12,13 @@
 // categories; a Thai group post with 21 bullet points does not get read. Only the three
 // nearest categories survive, one line each.
 import { randomUUID } from "node:crypto";
+import { writeFile, mkdir } from "node:fs/promises";
+import path from "node:path";
 import Anthropic from "@anthropic-ai/sdk";
 import { fillTemplate } from "../lib/prompt-library.mjs";
 import { parseLocationInput, formatDistance } from "../lib/geo.mjs";
 import { findNearbyPlaces } from "../lib/places.mjs";
-import { readJson, writeJson } from "./store.mjs";
+import { readJson, writeJson, CONTENT_DIR } from "./store.mjs";
 import { toCsv, toTsv, fromCsv } from "./sheet.mjs";
 import { loadArchive } from "./page-archive.mjs";
 
@@ -186,6 +188,14 @@ function formatPrice(listing) {
 export function buildGroupCaption(listing, { profile = {}, includeMap = true } = {}) {
   const lines = [];
   const size = listing.size_text ? ` ${listing.size_text}` : "";
+
+  // A sold plot keeps its post up rather than being deleted -- an old listing that
+  // visibly closed is social proof, but only if the very first line says so. Anything
+  // less than the top line and people still call about a plot that is gone.
+  if (listing.status === "SOLD") {
+    lines.push("🔴 ปิดแปลงแล้ว — ขายเรียบร้อย ขอบคุณครับ");
+    lines.push("");
+  }
 
   lines.push(`📍 ขายที่ดิน${size} ${listing.location ?? ""}`.trim());
   // The owner badge is only printed when the source listing actually claimed it.
@@ -414,6 +424,127 @@ export async function enrichAll({ profile = {}, force = false, onProgress } = {}
   }
   await saveListings(store);
   return done;
+}
+
+// --- photo hosting -----------------------------------------------------------
+
+const GRAPH_API = "https://graph.facebook.com/v21.0";
+const MEDIA_DIR = path.join(CONTENT_DIR, "media");
+const CONTENT_TYPE_EXT = { "image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp" };
+
+async function fetchFreshImageUrl(sourcePostId, token) {
+  const res = await fetch(`${GRAPH_API}/${sourcePostId}?fields=full_picture&access_token=${token}`);
+  const json = await res.json();
+  if (!res.ok) throw new Error(json?.error?.message ?? `Graph API HTTP ${res.status}`);
+  if (!json.full_picture) throw new Error("post has no full_picture (photo may have been removed)");
+  return json.full_picture;
+}
+
+async function downloadImage(url) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`image fetch HTTP ${res.status}`);
+  const contentType = res.headers.get("content-type")?.split(";")[0]?.trim();
+  const ext = CONTENT_TYPE_EXT[contentType] ?? ".jpg";
+  const buffer = Buffer.from(await res.arrayBuffer());
+  return { buffer, ext };
+}
+
+/**
+ * Give every listing a photo that will not expire -- and, unlike the original one-time
+ * rehost migration this replaces, backfill listings that never got a photo_url at all
+ * rather than only refreshing ones that already had a (now-expired) Facebook link.
+ *
+ * Two sources, cheapest first: the page's own local post archive (page-posts.json)
+ * already carries a `picture` field for every post type INCLUDING video -- Meta returns a
+ * still frame as a video post's `picture`, same as a photo post's, so a listing whose
+ * source was a reel/clip gets that frame as its cover for free. Only a listing whose
+ * source post fell outside the archived window falls back to a live Graph API call for
+ * `full_picture`.
+ *
+ * Safe to re-run: a listing whose photo_url is already on our own host is left alone.
+ */
+/**
+ * Re-host listing photos onto our own domain.
+ *
+ * Runs incrementally on purpose. Every image is downloaded over the network inside one HTTP
+ * request, and saving only at the end meant a proxy timeout, a client disconnect or a
+ * restart part-way through left every downloaded file on disk with nothing recorded -- the
+ * next run then re-downloaded all of them. Progress is flushed as it goes, so an interrupted
+ * run resumes instead of repeating, and `limit` lets a caller take it in bites.
+ *
+ * @param {number} [limit]      stop after this many listings are actually re-hosted
+ * @param {number} [saveEvery]  flush progress to disk this often
+ */
+export async function backfillPhotos({
+  token = process.env.FACEBOOK_PAGE_ACCESS_TOKEN,
+  publicBase = process.env.PUBLIC_MEDIA_BASE_URL,
+  limit = Infinity,
+  saveEvery = 10,
+  onProgress,
+} = {}) {
+  if (!token) throw new Error("ต้องมี FACEBOOK_PAGE_ACCESS_TOKEN");
+  if (!publicBase) throw new Error("ต้องมี PUBLIC_MEDIA_BASE_URL");
+
+  await mkdir(MEDIA_DIR, { recursive: true });
+  const data = await loadListings();
+  const { posts } = await loadArchive();
+  const archiveByPostId = new Map(posts.map((p) => [p.post_id, p]));
+
+  let rehosted = 0, skippedAlready = 0, skippedNoSource = 0, failed = 0;
+  let unsaved = 0, stoppedAtLimit = false;
+  const results = [];
+  // Flush what has been done so far; safe to call at any point because `data` is mutated
+  // in place as each listing succeeds.
+  const flush = async () => {
+    if (!unsaved) return;
+    await saveListings(data);
+    unsaved = 0;
+  };
+  for (const [i, listing] of data.items.entries()) {
+    if (rehosted >= limit) { stoppedAtLimit = true; break; }
+    onProgress?.({ index: i + 1, total: data.items.length, id: listing.listing_id });
+    if (listing.photo_url?.startsWith(publicBase)) { skippedAlready++; continue; }
+    if (!listing.source_post_id) { skippedNoSource++; continue; }
+
+    const archived = archiveByPostId.get(listing.source_post_id);
+    let source = archived?.picture ? "archive" : "graph_api";
+    try {
+      let buffer, ext;
+      try {
+        const sourceUrl = archived?.picture ?? await fetchFreshImageUrl(listing.source_post_id, token);
+        ({ buffer, ext } = await downloadImage(sourceUrl));
+      } catch (err) {
+        // The archive's own `picture` link carries the same signed expiry as any other
+        // Facebook CDN URL -- an old archive entry can itself have gone stale. One retry
+        // against the live Graph API (a fresh signed URL, not the cached one) before
+        // actually giving up on this listing.
+        if (source !== "archive") throw err;
+        source = "graph_api_fallback";
+        const sourceUrl = await fetchFreshImageUrl(listing.source_post_id, token);
+        ({ buffer, ext } = await downloadImage(sourceUrl));
+      }
+      const filename = `${listing.listing_id}${ext}`;
+      await writeFile(path.join(MEDIA_DIR, filename), buffer);
+      listing.photo_url = `${publicBase}/media/${filename}`;
+      rehosted++;
+      unsaved++;
+      results.push({ listing_id: listing.listing_id, status: "ok", source });
+      if (unsaved >= saveEvery) await flush();
+    } catch (err) {
+      failed++;
+      results.push({ listing_id: listing.listing_id, status: "failed", error: err.message });
+    }
+  }
+
+  await flush();
+  return {
+    rehosted, skippedAlready, skippedNoSource, failed, results,
+    // So a caller can tell "finished" apart from "there is more to do".
+    stopped_at_limit: stoppedAtLimit,
+    remaining: data.items.filter(
+      (l) => !l.photo_url?.startsWith(publicBase) && l.source_post_id
+    ).length,
+  };
 }
 
 function listingToRow(item) {
