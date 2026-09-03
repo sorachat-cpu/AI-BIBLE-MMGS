@@ -18,44 +18,69 @@ import { getImageEngine } from "../providers/registry.mjs";
 import { runVideoEngine } from "../engines/video-engine.mjs";
 import { sanitizeMediaPrompt, containsSensitiveData } from "../lib/sanitize.mjs";
 
-// Stage definitions copied from WF5-fix §5.4.1/§5.4.2. Stage 0 is the customer's own
-// photo and is never generated.
+// WF2 stage definitions, per WF-REALESTATE-3WF-SPEC.md "WF2 SCENES".
+// Stage 0 is the customer's own photo (= FINAL FRAME WF1) and is never generated.
+//
+// The spec asks for the progression to read as a real time-lapse, not an instant AI
+// transformation, which is why the middle is broken into this many steps: site prep and
+// roof used to be missing entirely, so the sequence jumped bare ground -> foundation and
+// walls -> finished, which is exactly the "โผล่ขึ้นมา" the spec forbids.
 export const CONSTRUCTION_STAGES = [
   {
     id: 1,
-    key: "foundation",
-    label: "ตอกเสาเข็ม / ฐานราก",
+    key: "site_prep",
+    label: "เตรียมพื้นที่",
     prompt:
-      "construction site, concrete pile foundation just poured, excavator on site, " +
-      "exposed rebar, dirt ground, overcast site photo",
+      "site preparation, ground cleared and levelled, foundation footprint marked out " +
+      "with string lines and stakes, bare graded earth, no structure yet",
   },
   {
     id: 2,
-    key: "structure",
-    label: "โครงสร้างเสา-คาน",
+    key: "foundation",
+    label: "ฐานราก / ตอม่อ",
     prompt:
-      "concrete column and beam structure, no walls yet, exposed steel reinforcement, " +
-      "construction in progress",
+      "concrete pile foundation poured, footings and stub columns cast, exposed rebar, " +
+      "ground floor slab forming, dirt ground around it",
   },
   {
     id: 3,
-    key: "walls",
-    label: "ผนัง + หลังคา",
-    prompt: "brick walls being built, roof frame installed, unpainted, scaffolding visible",
+    key: "structure",
+    label: "โครงสร้างเสา-คาน",
+    prompt:
+      "concrete column and beam frame standing, floor slabs cast, no walls yet, " +
+      "exposed steel reinforcement, structural skeleton only",
   },
   {
     id: 4,
-    key: "finishing",
-    label: "ตกแต่งภายนอก",
-    prompt: "exterior painting finished, driveway paved, landscaping in progress, nearly complete",
+    key: "roof",
+    label: "โครงหลังคา + หลังคา",
+    prompt:
+      "roof truss frame erected over the structural frame, roof sheeting and tiles going on, " +
+      "eaves formed, still no walls, scaffolding visible",
   },
   {
     id: 5,
+    key: "walls",
+    label: "ผนัง + ประตูหน้าต่าง",
+    prompt:
+      "brick and block walls built between the columns, window and door openings framed and " +
+      "glazed, facade taking shape, exterior render and paint being applied",
+  },
+  {
+    id: 6,
+    key: "landscape",
+    label: "งานภายนอก + Landscape",
+    prompt:
+      "exterior finished and painted, driveway and walkways paved, lawn laid, garden trees " +
+      "and shrubs planted, parking area formed, fencing complete",
+  },
+  {
+    id: 7,
     key: "complete",
     label: "บ้านเสร็จสมบูรณ์",
     prompt:
-      "completed house, painted, landscaped, golden hour lighting, " +
-      "professional real estate photography",
+      "completed finished house with mature landscaping, clean and fully built, " +
+      "professional real estate photography, warm natural daylight",
   },
 ];
 
@@ -93,13 +118,32 @@ const SAFETY_KEYWORDS = "no people, no vehicles, no animals, no construction wor
  * builder) uses the exact same wording as this file's own image-to-video path rather than
  * assembling a second, drifting copy -- 17_PROMPT_LIBRARY.md §15 rule 2 forbids prompts
  * being inlined anywhere outside a single shared builder.
+ *
+ * @param {object} stage
+ * @param {string} styleTag  closed enum (STYLE_WORDS) -- falls back to "contemporary" and
+ *                            warns rather than failing, since a typo'd tag shouldn't abort
+ *                            a whole render, but silently swallowing it hides the mismatch.
+ * @param {string} [details]  free text describing what the caller actually wants in frame
+ *                            (e.g. a listing's own highlight_features) -- without this the
+ *                            builder only ever had the 5 fixed stage strings below, so a
+ *                            property's own selling points never reached the image model.
  */
-export function buildStagePrompt(stage, styleTag) {
-  const style = STYLE_WORDS[styleTag] ?? "contemporary";
+export function buildStagePrompt(stage, styleTag, details) {
+  const style = STYLE_WORDS[styleTag];
+  if (styleTag && !style) {
+    console.warn(`[construction] unknown style_tag "${styleTag}" -- falling back to "contemporary"`);
+  }
+  // WF-REALESTATE-3WF-SPEC.md "CRITICAL RULE — PRESERVE LAND": the house is built ONTO the
+  // seller's actual plot. The land itself -- its shape, the road, the hills behind it, the
+  // significant trees, the ground level -- must survive every stage unchanged, and the
+  // camera must not wander off the framing the first frame established.
   const base =
-    `same plot of land, same camera angle as original photo, ${style} house, ` +
+    `same plot of land as the original photo, identical camera angle, identical composition, ` +
+    `identical background, keep the existing terrain, road, hills, skyline and major trees ` +
+    `exactly as they are, only the building changes, ${style ?? "contemporary"} house, ` +
     `photorealistic, real estate marketing photo`;
-  return `${base}, ${stage.prompt}. ${NEGATIVE_KEYWORDS}, ${SAFETY_KEYWORDS}.`;
+  const detailClause = details && String(details).trim() ? `, featuring ${String(details).trim()}` : "";
+  return `${base}${detailClause}, ${stage.prompt}. ${NEGATIVE_KEYWORDS}, ${SAFETY_KEYWORDS}.`;
 }
 
 export function estimateConstructionCost(stageCount) {
@@ -126,7 +170,11 @@ function stripDataUri(v) {
  * @param {string} input.style_tag
  * @param {string} [input.land_image_base64] / [input.land_image_url]  stage 0
  * @param {number[]} [input.stages]  which stage ids to generate, default all five
+ * @param {string} [input.details]  free text folded into every stage prompt, see
+ *                                  buildStagePrompt()'s own docstring for why this exists
  * @param {boolean} [input.dry_run]  cost only, generate nothing
+ * @param {boolean} [input.accept_over_budget]  proceed even though the run exceeds the
+ *                                  $0.30-per-video ceiling in 03_SYSTEM_RULES.md rule 4
  */
 export async function generateConstructionSequence(input, options = {}) {
   const {
@@ -134,8 +182,10 @@ export async function generateConstructionSequence(input, options = {}) {
     style_tag = "CONTEMPORARY",
     land_image_base64,
     land_image_url,
-    stages = [1, 2, 3, 4, 5],
+    stages = CONSTRUCTION_STAGES.map((s) => s.id),
+    details,
     dry_run = false,
+    accept_over_budget = false,
   } = input ?? {};
 
   if (!property_id || !/^PROP-TH-\d{4,6}$/.test(property_id)) {
@@ -151,6 +201,19 @@ export async function generateConstructionSequence(input, options = {}) {
   const estimate = estimateConstructionCost(selected.length);
   if (dry_run) return { property_id, estimate, stages: selected.map((s) => ({ id: s.id, label: s.label })) };
 
+  // 03_SYSTEM_RULES.md rule 4 / ERR_RULE_02: stop rather than spend past the per-video
+  // ceiling. The estimate was already being computed and then ignored, so a plain
+  // POST /api/construction spent whatever the default stage list happened to cost -- and
+  // when that list grew from five stages to seven it silently went from $0.87 to $1.22.
+  // Refusing by default puts the decision back with the caller, who can still opt in.
+  if (estimate.exceeds_budget_cap && !accept_over_budget) {
+    throw new ConstructionError(
+      "ERR_RULE_02",
+      `BUDGET_OVERRUN: ${selected.length} สเตจ = $${estimate.total_usd} เกินเพดาน $0.30 ต่อวิดีโอ — ` +
+        "ลดจำนวน stage, ใช้ construction-engine.mjs (ภาพนิ่ง ~$0.10) หรือส่ง accept_over_budget: true ถ้าตั้งใจจ่าย"
+    );
+  }
+
   const reference = stripDataUri(land_image_base64) || land_image_url;
   const imageEngine = getImageEngine(options.providerConfig);
   const steps = [];
@@ -158,7 +221,7 @@ export async function generateConstructionSequence(input, options = {}) {
 
   // ---- 1) still image per stage ----
   for (const stage of selected) {
-    const prompt = sanitizeMediaPrompt(buildStagePrompt(stage, style_tag));
+    const prompt = sanitizeMediaPrompt(buildStagePrompt(stage, style_tag, details));
     if (containsSensitiveData(prompt)) {
       throw new ConstructionError("ERR_RULE_01", `TEXT_INJECTION_DETECTED ใน stage ${stage.id}`);
     }
