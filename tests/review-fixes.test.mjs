@@ -137,3 +137,60 @@ test("image generation stays on a vendor that can actually make images", async (
     else process.env.VIDEO_ENGINE = prev;
   }
 });
+
+// ---- running out of credit is an account state, not a pipeline failure ----------------
+// It surfaced as "fal ปฏิเสธคำขอ (HTTP 403) ... (no fallback provider implemented yet)",
+// which reads like a missing feature and sends people looking through code for a billing
+// state. No amount of failing over to another vendor fixes an empty balance.
+test("an exhausted balance says so, and says what to do instead", async () => {
+  const { FalVeoAdapter } = await import("../src/providers/fal-adapter.mjs");
+  const a = new FalVeoAdapter({ apiKey: "k", pollMs: 1 });
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = async () => ({
+    ok: false, status: 403,
+    text: async () => JSON.stringify({ detail: "User is locked. Reason: Exhausted balance." }),
+  });
+  try {
+    await assert.rejects(
+      () => a.imageToVideo({ image: "https://x/a.jpg", prompt: "p" }),
+      (e) => {
+        assert.equal(e.code, "ERR_PROV_NO_CREDIT", "not a generic provider refusal");
+        assert.match(e.message, /billing/, "points at the thing that fixes it");
+        assert.match(e.message, /Flow/, "and at the route that needs no credit");
+        return true;
+      }
+    );
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+});
+
+test("account-state errors are not dressed up as a missing fallback provider", async () => {
+  const { runVideoEngine } = await import("../src/engines/video-engine.mjs");
+  const { readFile } = await import("node:fs/promises");
+  const prevKey = process.env.FAL_KEY;
+  const prevEngine = process.env.VIDEO_ENGINE;
+  process.env.FAL_KEY = "k";
+  delete process.env.VIDEO_ENGINE;
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = async () => ({
+    ok: false, status: 403,
+    text: async () => JSON.stringify({ detail: "User is locked. Reason: Exhausted balance." }),
+  });
+  try {
+    const b64 =
+      "data:image/jpeg;base64," +
+      (await readFile("content/media/LAND-06A8B922.jpg")).toString("base64");
+    await assert.rejects(
+      () => runVideoEngine({
+        property_id: "PROP-TH-09999", image_base64: b64,
+        template_id: "TPL_WF1_v1", camera_motion: "DRONE_REVEAL", duration_seconds: 8,
+      }, {}),
+      (e) => e.code === "ERR_PROV_NO_CREDIT" && !/no fallback/.test(e.message)
+    );
+  } finally {
+    globalThis.fetch = realFetch;
+    if (prevKey === undefined) delete process.env.FAL_KEY; else process.env.FAL_KEY = prevKey;
+    if (prevEngine !== undefined) process.env.VIDEO_ENGINE = prevEngine;
+  }
+});

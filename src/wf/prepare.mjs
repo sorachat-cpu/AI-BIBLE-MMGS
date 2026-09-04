@@ -347,12 +347,25 @@ export async function runWfAuto(input, options = {}) {
   // WF2: start on the same land photo WF1 ended on. A finished-house plate is optional --
   // supply one and the time-lapse is made to land on it, omit one and Veo builds the house
   // and we take the result from the clip's last frame.
+  //
+  // Failing here must not discard WF1. That clip is already generated and already paid for,
+  // and throwing the whole run away over the second half means paying for it again on the
+  // retry -- which is what running out of credit mid-run used to cost.
   const houseTarget = house_image ?? job.frames.wf2_end ?? null;
-  const wf2 = await clip("WF2", job.frames.wf2_start, houseTarget, WF2_TEMPLATE_ID);
+  let wf2 = null;
+  try {
+    wf2 = await clip("WF2", job.frames.wf2_start, houseTarget, WF2_TEMPLATE_ID);
+  } catch (err) {
+    steps.push({
+      stage: "WF2",
+      status: "failed",
+      detail: `${err.message} — ส่ง WF1 ที่สร้างเสร็จแล้วต่อไป ไม่ทิ้งของที่จ่ายเงินไปแล้ว`,
+    });
+  }
 
   // The house WF3 advertises: whatever WF2 actually ended on, not a guess about it.
   let houseFrame = houseTarget;
-  if (!houseFrame) {
+  if (!houseFrame && wf2) {
     const { ffmpeg: ff, downloadTo: dl, TEMP_DIR: TMP } = await import("../lib/ffmpeg.mjs");
     const stamp = Date.now();
     const local = pathJoin(TMP, `wf2_out_${stamp}.mp4`);
@@ -369,7 +382,7 @@ export async function runWfAuto(input, options = {}) {
   const L = { ...job.listing, ...overrides };
   const results = await runWfFinish(
     {
-      property_id, wf1_clip: wf1, wf2_clip: wf2,
+      property_id, wf1_clip: wf1, wf2_clip: wf2 ?? undefined,
       land_image: job.frames.wf1_end, house_image: houseFrame ?? undefined,
       aspect: job.aspect ?? "9:16",
       title: L.title, price_thb: L.price_thb, price_text: L.price_text,

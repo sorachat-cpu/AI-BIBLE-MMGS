@@ -124,9 +124,21 @@ export class FalVeoAdapter {
     }
     if (!res.ok) {
       const detail = body?.detail ?? body?.error ?? JSON.stringify(body).slice(0, 200);
+      const text = typeof detail === "string" ? detail : JSON.stringify(detail);
+      // Out of credit is not a broken key and not a broken pipeline, so say what it is and
+      // what to do -- the generic "provider refused" reads like a bug and sends people
+      // looking through code for something that is a billing state.
+      if (/exhausted balance|insufficient|locked/i.test(text)) {
+        throw new FalAdapterError(
+          "ERR_PROV_NO_CREDIT",
+          "เครดิต fal หมด — เติมที่ fal.ai/dashboard/billing (~$0.80 ต่อทรัพย์) " +
+            "หรือใช้เส้นทาง Google Flow แทน ซึ่งรวมอยู่ใน Google AI Plus ที่สมัครไว้แล้ว: " +
+            "กด \"เริ่มงาน\" เพื่อรับ prompt แล้วเอาคลิปมาวางใน output/flow/"
+        );
+      }
       throw new FalAdapterError(
         res.status === 401 || res.status === 403 ? "ERR_PROV_NO_KEY" : "ERR_PROV_04",
-        `fal ปฏิเสธคำขอ (HTTP ${res.status}): ${typeof detail === "string" ? detail : JSON.stringify(detail)}`
+        `fal ปฏิเสธคำขอ (HTTP ${res.status}): ${text}`
       );
     }
     return body;
