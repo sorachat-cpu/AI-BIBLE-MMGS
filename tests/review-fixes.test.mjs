@@ -103,3 +103,37 @@ test("image generation stays on the standard host whatever the video model is", 
     else process.env.KLING_API_KEY = prevKey;
   }
 });
+
+// ---- the default video vendor ---------------------------------------------------------
+// The 3-WF path named fal explicitly, but everything that did NOT name a vendor still got
+// Kling, so the system disagreed with itself about which model it was using.
+test("video defaults to Veo, and Kling is still selectable", async () => {
+  const { getVideoEngine, getEndFrameVideoEngine, describeEngines } =
+    await import("../src/providers/registry.mjs");
+  const prev = process.env.VIDEO_ENGINE;
+  delete process.env.VIDEO_ENGINE;
+  try {
+    assert.equal(getVideoEngine().providerName, "FAL_VEO31");
+    assert.equal(getEndFrameVideoEngine().providerName, "FAL_VEO31");
+    assert.equal(describeEngines().video.selected, "fal");
+
+    process.env.VIDEO_ENGINE = "kling";
+    assert.equal(getVideoEngine().providerName, "KLING_V2", "opting back out still works");
+  } finally {
+    if (prev === undefined) delete process.env.VIDEO_ENGINE;
+    else process.env.VIDEO_ENGINE = prev;
+  }
+});
+
+// fal's adapter is video-only, so images must not follow the video default.
+test("image generation stays on a vendor that can actually make images", async () => {
+  const { getImageEngine } = await import("../src/providers/registry.mjs");
+  const prev = process.env.VIDEO_ENGINE;
+  process.env.VIDEO_ENGINE = "fal";
+  try {
+    assert.equal(getImageEngine().providerName, "KLING_V2");
+  } finally {
+    if (prev === undefined) delete process.env.VIDEO_ENGINE;
+    else process.env.VIDEO_ENGINE = prev;
+  }
+});

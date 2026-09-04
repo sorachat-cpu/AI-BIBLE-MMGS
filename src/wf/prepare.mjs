@@ -303,7 +303,7 @@ export async function runWfAuto(input, options = {}) {
     ...options,
     providerConfig: {
       ...(options.providerConfig ?? {}),
-      engine: options.providerConfig?.engine ?? process.env.WF_AUTO_ENGINE ?? "fal",
+      engine: options.providerConfig?.engine ?? process.env.WF_AUTO_ENGINE ?? "fal",  // named, not inherited
       aspectRatio: job.aspect ?? "9:16",
     },
   };

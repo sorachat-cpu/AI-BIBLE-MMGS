@@ -15,6 +15,7 @@
 // video only), which is a top-up away rather than a new vendor account. Default is
 // therefore kling; set IMAGE_ENGINE=sdxl to follow the doc's original routing.
 import { KlingAdapter, KlingAdapterError } from "./kling-adapter.mjs";
+import { falProvider } from "./fal-adapter.mjs";
 
 export class ProviderNotConfiguredError extends Error {
   constructor(engine, capability, hint) {
@@ -42,8 +43,13 @@ function klingProvider(config) {
   };
 }
 
+const DEFAULT_VIDEO_ENGINE = "fal";
+
 const VIDEO_ENGINES = {
   kling: klingProvider,
+  // Veo 3.1 through fal -- the only API-reachable route that takes BOTH a first and a last
+  // frame, which is what wf/'s FINAL FRAME = NEXT FIRST FRAME rule needs. Needs FAL_KEY.
+  fal: falProvider,
   higgsfield: () =>
     stub("higgsfield", "image-to-video", "ยังไม่ได้เขียน adapter และยังไม่ได้เติมเครดิต Higgsfield (ดู WF5 §3)"),
   runway: () =>
@@ -71,8 +77,35 @@ function resolve(table, name, envVar, config) {
   return factory(config);
 }
 
+// `config.engine` lets one caller pick a vendor without changing the deployment default --
+// needed because a capability can be vendor-specific (only fal's Veo takes a first AND last
+// frame), and the caller that depends on it should say so rather than hope the environment
+// happens to be set that way.
+// Veo via fal is the default video engine. Kling stays available (VIDEO_ENGINE=kling) but
+// is no longer what you get by not choosing: it returns 1:1 clips whatever aspect goes in,
+// which costs 44% of a 9:16 frame to crop back, and its descent shots kept reading as a flat
+// drift over a map. The 3-WF path already named fal explicitly; leaving the default on kling
+// only meant everything that DIDN'T name a vendor quietly disagreed with it.
 export function getVideoEngine(config = {}) {
-  return resolve(VIDEO_ENGINES, process.env.VIDEO_ENGINE ?? "kling", "VIDEO_ENGINE", config);
+  return resolve(VIDEO_ENGINES, config.engine ?? process.env.VIDEO_ENGINE ?? DEFAULT_VIDEO_ENGINE, "VIDEO_ENGINE", config);
+}
+
+/**
+ * A video engine for shots that morph toward a specified END frame.
+ *
+ * Kling 3.0 Turbo cannot do this -- it takes a first frame only -- so a deployment that
+ * switches KLING_MODEL to 3.0 for the newer, cheaper, 1080p path would otherwise break
+ * the construction sequence and the sky descent, whose entire premise is "start here,
+ * end on this exact picture". Those callers ask for this instead of the general engine
+ * and get a v1-family model regardless of what the environment prefers.
+ *
+ * KLING_MODEL_ENDFRAME overrides it, for when a future model gains the capability.
+ */
+export function getEndFrameVideoEngine(config = {}) {
+  return resolve(VIDEO_ENGINES, config.engine ?? process.env.VIDEO_ENGINE ?? DEFAULT_VIDEO_ENGINE, "VIDEO_ENGINE", {
+    ...config,
+    modelName: config.modelName ?? process.env.KLING_MODEL_ENDFRAME ?? "kling-v1-6",
+  });
 }
 
 export function getImageEngine(config = {}) {
@@ -81,7 +114,7 @@ export function getImageEngine(config = {}) {
 
 export function describeEngines() {
   return {
-    video: { selected: process.env.VIDEO_ENGINE ?? "kling", available: Object.keys(VIDEO_ENGINES) },
+    video: { selected: process.env.VIDEO_ENGINE ?? DEFAULT_VIDEO_ENGINE, available: Object.keys(VIDEO_ENGINES) },
     image: { selected: process.env.IMAGE_ENGINE ?? "kling", available: Object.keys(IMAGE_ENGINES) },
   };
 }
