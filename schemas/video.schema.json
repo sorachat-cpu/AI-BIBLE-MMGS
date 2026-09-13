@@ -23,7 +23,7 @@
         "properties": {
           "clip_id": { "type": "string", "pattern": "^vid_" },
           "video_url": { "type": "string", "format": "uri" },
-          "duration_seconds": { "type": "number", "minimum": 3, "maximum": 5 },
+          "duration_seconds": { "type": "number", "minimum": 3, "maximum": 10 },
           "camera_motion": { "type": "string", "enum": ["PAN_RIGHT", "ZOOM_IN", "DRONE_REVEAL", "TILT_UP"] }
         },
         "additionalProperties": false

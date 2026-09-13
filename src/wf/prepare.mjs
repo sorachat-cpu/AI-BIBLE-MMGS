@@ -190,11 +190,20 @@ export async function prepareFlowInputs(input, options = {}) {
  */
 export async function startWfJob(input, options = {}) {
   const { saveJob } = await import("./job.mjs");
+  const { planCreativeDirection, buildWf2Prompt } = await import("../lib/director.mjs");
   const prep = await prepareFlowInputs(input, options);
   const {
     title, price_thb, price_text, size_text, features = [], location, contact, cta,
-    raw_address, aspect = "9:16",
+    raw_address, aspect = "9:16", style_tag,
   } = input ?? {};
+
+  // One Director decision per property, made here and saved on the job so continueWfJob
+  // and runWfAuto reuse the SAME plan later instead of re-asking (which could drift the
+  // house WF2 builds away from what WF3's copy or a later call would independently guess).
+  const creative_plan = await planCreativeDirection(
+    { property_id: prep.property_id, style_tag, title, price_thb, size_text, features },
+    { anthropicApiKey: (options.env ?? process.env).ANTHROPIC_API_KEY }
+  );
 
   const job = {
     property_id: prep.property_id,
@@ -208,9 +217,17 @@ export async function startWfJob(input, options = {}) {
       wf2_start: prep.frames.wf2_start,
     },
     listing: { title, price_thb, price_text, size_text, features, location, contact, cta },
+    creative_plan,
   };
   await saveJob(job);
-  return { ...prep, job_saved: true };
+  return {
+    ...prep,
+    job_saved: true,
+    creative_plan,
+    // Surfaced so the manual Flow route can paste this property-specific WF2 prompt into
+    // Flow's own prompt box too -- the Director should not only benefit the auto route.
+    prompts: { ...prep.prompts, wf2_video: buildWf2Prompt(creative_plan).text },
+  };
 }
 
 /**
@@ -288,10 +305,12 @@ export async function runWfAuto(input, options = {}) {
       `ไม่พบงานของ ${property_id} — ทำขั้นที่ 1 ก่อน (ใส่รูปที่ดิน + รายละเอียด)`
     );
   }
-  if (!job.frames?.wf1_start) {
+  // WF1 no longer starts from a separately generated satellite plate -- see the note at the
+  // clip() call below. The land photo (wf1_end) is the only image this workflow needs.
+  if (!job.frames?.wf1_end) {
     throw new WfPrepareError(
       "ERR_WFPREP_NOSTART",
-      "ไม่มีเฟรมดาวเทียมสำหรับ WF1 — ตอนขั้นที่ 1 ต้องใส่ที่อยู่ และต้องมี GOOGLE_MAPS_API_KEY"
+      "ไม่มีรูปที่ดินจริงสำหรับ WF1 — ทำขั้นที่ 1 ก่อน (อัปโหลดรูปที่ดิน)"
     );
   }
 
@@ -311,7 +330,7 @@ export async function runWfAuto(input, options = {}) {
   // filesystem path through it only worked by accident.
   const asDataUri = async (file) =>
     `data:image/png;base64,${(await readFile(file)).toString("base64")}`;
-  const clip = async (label, imageFile, tailFile, templateId) => {
+  const clip = async (label, imageFile, tailFile, templateId, promptText) => {
     const t0 = Date.now();
     if (!imageFile) {
       throw new WfPrepareError("ERR_WFPREP_NOSTART", `${label}: ไม่มีเฟรมแรก`);
@@ -327,7 +346,10 @@ export async function runWfAuto(input, options = {}) {
         property_id,
         image_base64: image,
         image_tail_base64: image_tail,
-        template_id: templateId,
+        // promptText (Director-produced, property-specific wording) wins over the static
+        // template when present -- see runVideoEngine's prompt_text handling.
+        template_id: promptText ? undefined : templateId,
+        prompt_text: promptText,
         camera_motion: "DRONE_REVEAL",
         duration_seconds,
       },
@@ -341,8 +363,13 @@ export async function runWfAuto(input, options = {}) {
     return c.video_url;
   };
 
-  // WF1: clean satellite plate -> the seller's real land photo.
-  const wf1 = await clip("WF1", job.frames.wf1_start, job.frames.wf1_end, WF1_TEMPLATE_ID);
+  // WF1: a round trip on the SAME land photo -- start and end anchor are the identical
+  // file, not a separately generated satellite plate. The spec owner's reference clip
+  // starts ON the input image, pulls out to a satellite view, dives back through cloud, and
+  // lands back on that exact photo (see TPL_WF1_v1's comment in prompt-library.mjs); feeding
+  // fal's first-last-frame endpoint the same image on both anchors enforces that loop
+  // structurally, so it does not depend on the prompt alone to bring the camera home.
+  const wf1 = await clip("WF1", job.frames.wf1_end, job.frames.wf1_end, WF1_TEMPLATE_ID);
 
   // WF2: start on the same land photo WF1 ended on. A finished-house plate is optional --
   // supply one and the time-lapse is made to land on it, omit one and Veo builds the house
@@ -352,9 +379,22 @@ export async function runWfAuto(input, options = {}) {
   // and throwing the whole run away over the second half means paying for it again on the
   // retry -- which is what running out of credit mid-run used to cost.
   const houseTarget = house_image ?? job.frames.wf2_end ?? null;
+  // Reuse the Director plan saved at step 1 (startWfJob) rather than deciding again here --
+  // same plan, same house, whether WF2 runs minutes or days after the job was created.
+  const { buildWf2Prompt } = await import("../lib/director.mjs");
+  const wf2Prompt = job.creative_plan ? buildWf2Prompt(job.creative_plan) : null;
+  if (wf2Prompt) {
+    steps.push({
+      stage: "director",
+      status: "ok",
+      detail: `WF2 house style: ${job.creative_plan.style_tag} (${job.creative_plan.source}${
+        job.creative_plan.degraded ? `, degraded: ${job.creative_plan.degraded}` : ""
+      })`,
+    });
+  }
   let wf2 = null;
   try {
-    wf2 = await clip("WF2", job.frames.wf2_start, houseTarget, WF2_TEMPLATE_ID);
+    wf2 = await clip("WF2", job.frames.wf2_start, houseTarget, WF2_TEMPLATE_ID, wf2Prompt?.text);
   } catch (err) {
     steps.push({
       stage: "WF2",
@@ -391,5 +431,5 @@ export async function runWfAuto(input, options = {}) {
     },
     options
   );
-  return { ...results, generated: steps, auto: true };
+  return { ...results, generated: steps, auto: true, creative_plan: job.creative_plan ?? null };
 }

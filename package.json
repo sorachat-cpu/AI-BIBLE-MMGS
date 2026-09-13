@@ -4,16 +4,21 @@
   "private": true,
   "type": "module",
   "description": "MMGS -- Modular Media Generation System, real-estate video pipeline (see AI_BIBLE/*.md)",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
+    "start": "node --env-file-if-exists=.env src/server.mjs",
     "property:run": "node --env-file-if-exists=.env src/cli/run-property-engine.mjs",
     "web": "node --env-file-if-exists=.env src/server.mjs",
+    "wf8b": "node --env-file-if-exists=.env src/cli/wf8b.mjs",
     "publish": "node --env-file-if-exists=.env src/cli/publish.mjs",
     "daily": "node --env-file-if-exists=.env src/cli/publish.mjs run",
     "test": "node --test tests/*.test.mjs",
     "render": "node --env-file-if-exists=.env src/cli/render.mjs"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.32.1",
+    "@anthropic-ai/sdk": "^0.120.0",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
     "ffmpeg-static": "^5.3.0",

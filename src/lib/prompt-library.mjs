@@ -143,18 +143,264 @@ Very smooth continuous forward motion, no shake, no rotation, no cuts.
 Clean digital cartography look, crisp edges, even lighting.
 Do not add, move or duplicate any marker, label or icon.`,
   },
+  // Replaces _v1's flat map-push with a full space-to-ground dive -- user's exact prompt,
+  // 2026-08-20. Rule #1 (immutable history): _v1 stays as-is, this is a new id, not an edit.
+  TPL_VID_009_v2: {
+    engine: "Video Engine",
+    operation: "IMAGE_TO_VIDEO",
+    camera: "ZOOM_IN",
+    useCase: "Shot 1 -- opens in orbit, dives down through the atmosphere onto the pinned map",
+    static: true,
+    text: `A cinematic continuous fast zoom-in shot starting from deep space showing planet Earth,
+rapidly diving through the atmosphere, passing clouds, zooming down into the property's
+district as shown on the map, narrowing in on the exact land parcel from the input photo,
+and finally dropping a digital Google Maps red location pin on the exact spot.
+4k resolution, smooth camera movement, photorealistic.
+No text, no extra markers, no watermark.`,
+  },
+  // WF8b §3 -- the preservation-first listing shot. Every other video template in this
+  // file asks the model to CREATE something; this one exists to stop it creating anything.
+  // The negative list is long and specific on purpose: WF8b's whole premise is that a
+  // generated house, road or mountain that is not on the real plot is a false claim about
+  // property being sold, not a stylistic choice.
+  TPL_VID_011_v1: {
+    engine: "Video Engine",
+    operation: "IMAGE_TO_VIDEO",
+    camera: "ZOOM_IN",
+    useCase: "WF8b -- one verified listing photo becomes a 4-6s clip that adds nothing",
+    static: false,
+    text: `Create a realistic cinematic real-estate video from this exact reference image.
+
+Preserve the land, terrain, road, trees, buildings, boundaries, weather, and all visible details exactly as shown. Do not add, remove, repair, or change any land feature. Do not add houses, people, vehicles, roads, water, mountains, utility poles, signs, or objects that are absent from the original image.
+
+Camera movement: {{camera_motion}}. Add only subtle natural movement to existing grass, leaves, and clouds where visible. Use realistic Thai daylight, stable professional real-estate footage, and truthful natural colours.
+
+No text, captions, logo, watermark, fantasy effect, time lapse, scene transition, aerial view, or invented details.`,
+    defaults: {
+      camera_motion: "stable cinematic hold with subtle natural environmental movement",
+    },
+  },
+  // ---- 3-WF (wf/WF1.md, wf/WF2.md) ----
+  // Active voice throughout: both Flow and Veo take direction from a stated motion vector,
+  // not from a description of a scene. These are the single source for that wording -- the
+  // console, the CLI and the auto runner all read them from here, because keeping a second
+  // copy next to the console is what let the page drift onto a different prompt before.
+  TPL_WF1_v1: {
+    engine: "Video Engine",
+    operation: "IMAGE_TO_VIDEO",
+    camera: "DRONE_REVEAL",
+    useCase: "WF1 -- a round trip: starts ON the seller's real land photo, pulls out to a satellite view, dives back through cloud, and lands on the exact same photo",
+    static: true,
+    // Second rewrite -- the first version (satellite -> zoom -> cloud -> land) still put a
+    // SEPARATELY GENERATED satellite plate as the start anchor, which is not what the
+    // reference clip the spec owner tested in Google Flow actually does. The real shot runs
+    // the other direction: it starts ON the input photo, pulls OUT to reveal the satellite
+    // view, dives back down through cloud, and returns to that exact same photo -- a round
+    // trip, not a one-way descent. That is why runWfAuto (src/wf/prepare.mjs) now feeds the
+    // SAME land photo as both the start and end anchor for this clip instead of a generated
+    // satellite plate: the loop is enforced structurally by Veo's first-last-frame endpoint,
+    // not left to the prompt alone. Wording is the spec owner's own, confirmed against a
+    // real clip -- kept verbatim rather than paraphrased.
+    text: `A single continuous cinematic aerial journey that begins from the provided input image
+of the property.
+
+The video MUST begin on the exact provided input image. Hold the original image naturally
+for a brief moment before the camera begins to move.
+
+The camera then smoothly pulls backward and rises away from the property, gradually
+revealing more of the surrounding landscape. The movement accelerates naturally as the
+camera climbs higher and higher, transitioning from the original ground-level view into
+a wide aerial view of the surrounding countryside.
+
+Continue rising and pulling back until the property becomes a small part of the larger
+landscape. The camera reaches a high aerial / satellite-like perspective showing the
+surrounding fields, roads, trees and terrain.
+
+A simple location pin appears naturally over the property location during the high
+aerial view.
+
+The camera then begins a fast, smooth push-in toward the exact same property location.
+
+The descent accelerates continuously toward the marked location, moving through the
+aerial landscape and gradually transitioning back toward the property.
+
+As the camera descends, it passes naturally through realistic soft white clouds and thin
+atmospheric haze.
+
+The ground gradually becomes clearer beneath the clouds.
+
+The camera continues descending and smoothly transitions from the high aerial perspective
+back into the original ground-level viewpoint.
+
+The final approach must return to the EXACT SAME VIEWPOINT, FRAMING, CAMERA HEIGHT,
+ORIENTATION AND COMPOSITION as the provided input image.
+
+The final frame must match the original input image as closely as possible.
+
+The beginning and ending frames should feel like the same physical camera position,
+creating a seamless visual loop.
+
+The camera movement must remain continuous throughout the entire shot.
+
+No cuts.
+No hard transitions.
+No teleportation.
+No camera reset.
+No sudden change of location.
+No sudden change of perspective.
+No abrupt stop.
+
+The entire sequence should feel like one continuous drone flight:
+starting from the property,
+pulling away into the sky,
+revealing the surrounding landscape,
+reaching a satellite-like aerial view,
+marking the location,
+then diving back through the clouds
+and returning precisely to the original property view.
+
+Photorealistic cinematic drone footage.
+Natural daylight.
+Realistic aerial perspective.
+Realistic terrain.
+Realistic atmospheric haze.
+Realistic volumetric clouds.
+Natural motion blur.
+Smooth physically believable acceleration and deceleration.
+
+The original property, surrounding landscape and existing structures must remain visually
+consistent when the camera returns to the property.
+
+No text.
+No map labels.
+No additional UI.
+No decorative overlays.
+No watermark.`,
+  },
+  TPL_WF2_v1: {
+    engine: "Video Engine",
+    operation: "IMAGE_TO_VIDEO",
+    camera: "DRONE_REVEAL",
+    useCase: "WF2 -- construction time-lapse on the seller's own plot, ending at warm evening",
+    static: true,
+    // Every ABSOLUTE RULE in wf/WF2.md is stated here explicitly, including the negatives:
+    // the model reliably drifts toward a resort or a two-storey build without them.
+    //
+    // Opening line is the spec owner's own wording, matched to WF1's rewrite above: WF1 no
+    // longer "eases to a stop" like a drone landing -- it settles back into the exact input
+    // photo it started on (a loop), so WF2 has to pick up from THAT settling motion, not
+    // from an arrival that no longer happens.
+    text: `The video begins from the exact final frame of WF1, which is the original input image.
+The camera continues naturally from the final settling motion of WF1 before construction
+begins. A construction time-lapse then begins on this exact plot of land. The camera holds
+the same viewpoint throughout -- it never cuts, never jumps, never restarts from a
+different angle. The land itself never changes -- the terrain, the road, the tree line, the
+mountains and the shape of the plot stay exactly as they are. Only the house is built.
+
+Workers clear and level the ground, then footings and a concrete foundation are poured.
+The single-storey frame rises post by post, the sloped roof structure goes on and is
+covered, walls are built and rendered in warm earth tones, wooden doors and windows are
+fitted, the covered front porch takes shape, and a matching roofed carport is built beside
+the house. Natural wood accents are added, then the garden fills in around it -- lawn is
+laid, mature trees and shrubs are planted, a stone footpath is set, potted plants and a
+seating corner appear.
+
+The light moves through the day as the house rises: late afternoon warms into golden hour,
+golden hour cools into blue hour, and blue hour settles into early evening. The change is
+gradual and continuous, never jumping from day to night.
+
+As evening arrives, warm white and warm amber lights switch on one part of the house at a
+time -- windows, front door, porch, living room, kitchen, carport -- glowing softly onto the
+garden. Soft path lights come on along the walkway. The sky deepens to a rich blue evening
+sky while the mountains, trees and road stay visible behind the house.
+
+The camera pushes in very slowly with a gentle parallax, then eases back at the end to
+reveal the finished house, the garden, the carport and the natural landscape behind them.
+
+One continuous time-lapse. The house is built step by step and never appears instantly.
+Photorealistic, cozy, homely, warm and natural. No text, no watermark, no overlays.`,
+  },
+  // TPL_WF2_v2 -- same proven skeleton as v1 (continuity rule, time-lapse structure,
+  // negative list all unchanged), except the house description is a placeholder instead of
+  // one hardcoded style. v1 gave every property the identical cozy single-storey garden
+  // house regardless of its real style_tag -- a LUXURY_CLASSIC mansion listing and a
+  // MINIMALIST condo both got the same build. src/lib/director.mjs fills
+  // {{style_directive}} with a paragraph derived from the property's actual style_tag and
+  // features; `defaults.style_directive` below is v1's own wording, reworded to fit this
+  // slot, so a caller that never runs the Director (or Director degrades) gets output
+  // equivalent to v1, not a broken prompt.
+  TPL_WF2_v2: {
+    engine: "Video Engine",
+    operation: "IMAGE_TO_VIDEO",
+    camera: "DRONE_REVEAL",
+    useCase: "WF2 -- construction time-lapse, house style driven by the listing's style_tag",
+    static: false,
+    text: `The video begins from the exact final frame of WF1, which is the original input image.
+The camera continues naturally from the final settling motion of WF1 before construction
+begins. A construction time-lapse then begins on this exact plot of land. The camera holds
+the same viewpoint throughout -- it never cuts, never jumps, never restarts from a
+different angle. The land itself never changes -- the terrain, the road, the tree line, the
+mountains and the shape of the plot stay exactly as they are. Only the house is built.
+
+Workers clear and level the ground, then footings and a concrete foundation are poured.
+{{style_directive}} A matching carport is built beside the house in the same material
+language, then the garden fills in around it -- lawn is laid, mature trees and shrubs are
+planted, a stone footpath is set, potted plants and a seating corner appear.
+
+The light moves through the day as the house rises: late afternoon warms into golden hour,
+golden hour cools into blue hour, and blue hour settles into early evening. The change is
+gradual and continuous, never jumping from day to night.
+
+As evening arrives, warm lights switch on one part of the house at a time -- windows, front
+door, porch, living room, kitchen, carport -- glowing softly onto the garden. Soft path
+lights come on along the walkway. The sky deepens to a rich blue evening sky while the
+mountains, trees and road stay visible behind the house.
+
+The camera pushes in very slowly with a gentle parallax, then eases back at the end to
+reveal the finished house, the garden, the carport and the natural landscape behind them.
+
+One continuous time-lapse. The house is built step by step and never appears instantly.
+Photorealistic, warm and natural, matching the described style exactly.
+No text, no watermark, no overlays.`,
+    defaults: {
+      style_directive:
+        "The single-storey frame rises post by post, the sloped roof structure goes on and " +
+        "is covered, walls are built and rendered in warm earth tones, wooden doors and " +
+        "windows are fitted, the covered front porch takes shape, and natural wood accents " +
+        "are added throughout.",
+    },
+  },
   TPL_VID_010_v1: {
     engine: "Video Engine",
     operation: "IMAGE_TO_VIDEO",
     camera: "DRONE_REVEAL",
-    useCase: "Shot 2 -- falls out of the sky from the map view onto the real plot photo",
-    static: true,
+    useCase: "WF1 -- aerial descent from high above, down through the sky, onto the real plot",
+    // History, so nobody re-breaks this: two rewrites chasing EXTRA BEATS (an FPV dive, a
+    // pin-drop narrative) each made the shot worse -- the model starts inventing motion when
+    // handed a multi-beat story. Do not add beats.
+    //
+    // But the original wording had its own bug, found by reading it back translated: it said
+    // "from a flat overhead perspective" and "one unbroken FALLING move", which instructed a
+    // flat top-down drift straight down -- the exact "sliding across a map" look that kept
+    // getting rejected. WF-REALESTATE-3WF-SPEC.md SCENE 2 asks for the opposite: perspective
+    // INCREASING with speed, and the camera FLYING down, not falling. Those two lines now say
+    // that. Describing the camera's attitude is not the same as adding a beat.
+    //
+    // Separately, and still true: the start frame MUST be clean satellite photography
+    // (maptype=satellite, no markers). Feeding a labelled map in -- roadmap/hybrid, POI
+    // icons, a red pin -- makes the model read the pin and POI glyphs as physical objects
+    // and animate them as balloons drifting through the sky, and no amount of "no pins, no
+    // text" here removes what is baked into the input image. The WF1 location marker is
+    // composited afterwards by compositeWf1Pin() instead.
     text: `Continuous aerial descent from high above the ground down to the site.
-Camera drops steadily through open sky and thin haze,
-the view transitioning from a flat overhead perspective into a real photographic
-ground-level view of the same location as it descends.
-One unbroken falling move that eases to a stop, no cuts, no shake.
-Photorealistic drone footage, natural daylight.
+Camera drops steadily through open sky, down through a layer of real white clouds and
+thin haze, the ground gradually appearing below as it emerges under the cloud base,
+the camera tilting forward as it descends so the perspective deepens from a high
+looking-down angle into a low forward-facing view, arriving at a real photographic
+ground-level view of the same location.
+One unbroken accelerating flight that eases to a stop, no cuts, no shake.
+Photorealistic drone footage, natural daylight, realistic volumetric clouds,
+natural motion blur.
 No text, no map labels, no pins, no overlays, no watermark.`,
   },
   TPL_VID_008_v1: {

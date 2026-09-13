@@ -16,6 +16,7 @@
 // therefore kling; set IMAGE_ENGINE=sdxl to follow the doc's original routing.
 import { KlingAdapter, KlingAdapterError } from "./kling-adapter.mjs";
 import { falProvider } from "./fal-adapter.mjs";
+import { higgsfieldOmniProvider } from "./higgsfield-adapter.mjs";
 
 export class ProviderNotConfiguredError extends Error {
   constructor(engine, capability, hint) {
@@ -50,8 +51,16 @@ const VIDEO_ENGINES = {
   // Veo 3.1 through fal -- the only API-reachable route that takes BOTH a first and a last
   // frame, which is what wf/'s FINAL FRAME = NEXT FIRST FRAME rule needs. Needs FAL_KEY.
   fal: falProvider,
-  higgsfield: () =>
-    stub("higgsfield", "image-to-video", "ยังไม่ได้เขียน adapter และยังไม่ได้เติมเครดิต Higgsfield (ดู WF5 §3)"),
+  // Google Gemini Omni Flash 1.1 -- also takes both anchor frames (unlike Veo through the
+  // Higgsfield MCP connector, which takes a start frame only). NOT the default, and not a
+  // direct REST call: its real HTTP contract turned out to be unreachable by guessing (see
+  // higgsfield-adapter.mjs's header comment), so this adapter shells out to the official
+  // `higgsfield` CLI instead, which means the machine running this needs that CLI installed
+  // AND already logged in (`higgsfield auth login` -- no headless/API-key login mode found).
+  // Opt in with VIDEO_ENGINE=higgsfield once that's done. Also: this account's free-trial
+  // credits (10) are short of what this model costs per generation (24, per `generate
+  // cost`), so a real call isn't affordable on this account without a top-up.
+  higgsfield: higgsfieldOmniProvider,
   runway: () =>
     stub("runway", "image-to-video", "ยังไม่ได้เขียน adapter ต้องมี RUNWAY_API_KEY"),
 };

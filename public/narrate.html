@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>คลิปพากย์เสียง · MMGS</title>
+<style>
+  :root {
+    --bg: #eff2f6; --surface: #ffffff; --surface-2: #f7f9fb; --border: #dce3ea;
+    --border-strong: #bcc7d3; --text: #111b25; --text-2: #4c5b6a; --text-3: #7c8b9a;
+    --accent: #a9661f; --accent-2: #c78436; --accent-soft: #fbf1e3;
+    --ok: #16714a; --ok-soft: #e1f1e8; --err: #9d2b22; --err-soft: #fbe5e2;
+    --wait: #2a5b98; --wait-soft: #e5edf7;
+    --shadow: 0 1px 2px rgba(17,27,37,.05), 0 8px 24px -12px rgba(17,27,37,.18);
+    --mono: ui-monospace, "SF Mono", Menlo, monospace;
+    --sans: "Sukhumvit Set", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0a121a; --surface: #111d27; --surface-2: #16232e; --border: #21313e;
+      --border-strong: #354959; --text: #e2eaf1; --text-2: #9cafbf; --text-3: #6a7f92;
+      --accent: #dda062; --accent-2: #e8b57f; --accent-soft: #2a1c0e;
+      --ok: #4ac68a; --ok-soft: #0e2a1d; --err: #e5786b; --err-soft: #2d1411;
+      --wait: #6da6de; --wait-soft: #0f2337;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 28px -14px rgba(0,0,0,.7);
+      color-scheme: dark;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: var(--sans); font-size: 15px; line-height: 1.6;
+  }
+  .shell { max-width: 900px; margin: 0 auto; padding: 32px 20px 80px; }
+  .kicker {
+    font-size: 12px; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--accent); font-weight: 700;
+  }
+  h1 { font-size: clamp(26px, 4vw, 38px); margin: 6px 0 8px; letter-spacing: -.02em; }
+  .standfirst { color: var(--text-2); font-size: 15.5px; max-width: 62ch; margin: 0 0 8px; }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 22px; box-shadow: var(--shadow); margin-top: 22px;
+  }
+  h2 { font-size: 17px; margin: 0 0 4px; }
+  .card > p.hint { color: var(--text-2); font-size: 13px; margin: 0 0 16px; }
+
+  .field { margin-bottom: 15px; }
+  .field label {
+    display: block; font-size: 12.5px; font-weight: 600; color: var(--text-2);
+    margin-bottom: 5px;
+  }
+  input[type="text"], textarea, select {
+    width: 100%; padding: 10px 12px; border-radius: 9px;
+    border: 1px solid var(--border-strong); background: var(--surface-2);
+    color: var(--text); font-family: var(--sans); font-size: 14px;
+  }
+  textarea { min-height: 110px; resize: vertical; line-height: 1.65; }
+  input:focus-visible, textarea:focus-visible, select:focus-visible, button:focus-visible,
+  .drop:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 2px;
+  }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 620px) { .pair { grid-template-columns: 1fr; } }
+
+  .drop {
+    border: 1.5px dashed var(--border-strong); border-radius: 11px; padding: 26px 18px;
+    text-align: center; cursor: pointer; background: var(--surface-2);
+  }
+  .drop.over { border-color: var(--accent); background: var(--accent-soft); }
+  .drop .icon { font-size: 24px; color: var(--text-3); }
+  .drop p { margin: 6px 0 0; font-size: 13.5px; }
+  .drop p.small { color: var(--text-3); font-size: 12px; }
+  .drop input[type="file"] { display: none; }
+
+  .thumbs { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 12px; }
+  .thumb { position: relative; width: 78px; }
+  .thumb img {
+    width: 78px; height: 78px; object-fit: cover; border-radius: 8px;
+    border: 1px solid var(--border); display: block;
+  }
+  .thumb .ord {
+    position: absolute; top: 3px; inset-inline-start: 3px;
+    background: rgba(0,0,0,.72); color: #fff; font-family: var(--mono);
+    font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 5px;
+  }
+  .thumb button {
+    position: absolute; top: -6px; inset-inline-end: -6px; width: 20px; height: 20px;
+    border-radius: 50%; border: 1px solid var(--border); background: var(--surface);
+    color: var(--text-2); font-size: 13px; line-height: 1; cursor: pointer; padding: 0;
+  }
+
+  .actions { display: flex; align-items: center; gap: 13px; flex-wrap: wrap; margin-top: 6px; }
+  button.primary {
+    background: var(--accent); color: var(--surface); border: 0; border-radius: 9px;
+    padding: 11px 20px; font-family: var(--sans); font-size: 14.5px; font-weight: 700;
+    cursor: pointer;
+  }
+  button.primary:disabled { opacity: .55; cursor: not-allowed; }
+  .cost-chip {
+    font-size: 12px; color: var(--text-2); background: var(--surface-2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 11px;
+  }
+
+  .panel {
+    margin-top: 15px; padding: 13px 15px; border-radius: 10px; font-size: 13.5px;
+    border: 1px solid; display: flex; gap: 12px; align-items: flex-start;
+  }
+  .panel .badge {
+    font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .05em;
+    padding: 3px 7px; border-radius: 5px; flex-shrink: 0; margin-top: 1px;
+  }
+  .panel.ok { background: var(--ok-soft); border-color: color-mix(in srgb, var(--ok) 35%, transparent); }
+  .panel.ok .badge { background: var(--ok); color: var(--surface); }
+  .panel.err { background: var(--err-soft); border-color: color-mix(in srgb, var(--err) 35%, transparent); }
+  .panel.err .badge { background: var(--err); color: #fff; }
+  .panel.busy { background: var(--wait-soft); border-color: color-mix(in srgb, var(--wait) 35%, transparent); }
+  .panel .body { flex: 1; min-width: 0; }
+  .panel .body strong { display: block; margin-bottom: 3px; }
+  .panel .body span { color: var(--text-2); font-size: 12.5px; }
+
+  .progress-ring { position: relative; width: 32px; height: 32px; flex-shrink: 0; }
+  .progress-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .progress-ring circle { fill: none; stroke-width: 4; }
+  .progress-ring .track { stroke: color-mix(in srgb, var(--wait) 22%, transparent); }
+  .progress-ring .bar { stroke: var(--wait); stroke-linecap: round; transition: stroke-dashoffset .25s linear; }
+  .progress-ring .pct {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 9px; font-weight: 700; color: var(--wait);
+    font-variant-numeric: tabular-nums;
+  }
+  .elapsed { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  }
+
+  ol.script { margin: 14px 0 0; padding-inline-start: 22px; }
+  ol.script li { font-size: 13.5px; color: var(--text-2); margin-bottom: 4px; }
+  video { width: 100%; margin-top: 13px; border-radius: 9px; border: 1px solid var(--border); display: block; }
+  .clip .cap {
+    display: flex; gap: 9px; align-items: baseline; font-size: 12.5px;
+    color: var(--text-2); margin-top: 14px;
+  }
+  .clip .cap b { color: var(--text); font-family: var(--mono); font-size: 11.5px; }
+</style>
+  <script src="/nav.js" defer></script>
+</head>
+<body>
+<main class="shell">
+
+  <header>
+    <div class="kicker">WF8 · Photo Narration</div>
+    <h1>รูปหลายรูป + แคปชั่น → คลิปพากย์ไทย</h1>
+    <p class="standfirst">
+      อัปโหลดรูปแปลง วางแคปชั่น แล้วระบบเขียนบทพูดให้เอง พากย์เป็นเสียงไทย
+      ขยับภาพแบบ Ken Burns ให้ตรงกับจังหวะเสียง แล้วฝังซับให้ตรงคำพูดทุกประโยค
+    </p>
+  </header>
+
+  <section class="card">
+    <h2>รูปที่จะใช้</h2>
+    <p class="hint">เรียงตามลำดับที่จะปรากฏในคลิป · 3–20 รูป · ด้านสั้นสุดควรเกิน 600px</p>
+
+    <div class="drop" id="drop" tabindex="0" role="button" aria-label="เลือกรูป">
+      <div class="icon">◳</div>
+      <p><b>คลิกเพื่อเลือกรูป</b> หรือลากมาวาง</p>
+      <p class="small">เลือกหลายรูปพร้อมกันได้</p>
+      <input type="file" id="file" accept="image/jpeg,image/png,image/webp" multiple>
+    </div>
+    <div class="thumbs" id="thumbs"></div>
+  </section>
+
+  <section class="card">
+    <h2>เสียงพากย์</h2>
+    <p class="hint">ไม่อัปโหลดอะไรก็ใช้เสียงมาตรฐานได้เลย · อัปโหลดคลิปเสียงตัวเองเพื่อโคลนเป็นเสียงพากย์</p>
+
+    <div class="drop" id="v-drop" tabindex="0" role="button" aria-label="เลือกไฟล์เสียงตัวอย่าง">
+      <div class="icon">🎙️</div>
+      <p><b>คลิกเพื่อเลือกไฟล์เสียง</b> หรือลากมาวาง</p>
+      <p class="small">รับทั้งไฟล์เสียงและวิดีโอ (ระบบดึงเสียงออกให้เอง) · ควรมีเสียงพูดต่อเนื่องอย่างน้อย 30 วินาที</p>
+      <input type="file" id="v-file" accept="audio/*,video/mp4,video/quicktime">
+    </div>
+    <div id="v-status"></div>
+
+    <div class="pair" style="margin-top:14px">
+      <div class="field">
+        <label for="motion">การเคลื่อนกล้อง</label>
+        <select id="motion">
+          <option value="pan" selected>แพนพาโนรามา (เหมาะกับที่ดิน)</option>
+          <option value="zoom">ซูมเข้า-ออก</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="aspect">สัดส่วนภาพ</label>
+        <select id="aspect">
+          <option value="9:16" selected>9:16 แนวตั้ง (Reels/TikTok/Shorts)</option>
+          <option value="16:9">16:9 แนวนอน (Facebook/YouTube)</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>แคปชั่น</h2>
+    <p class="hint">ระบบจะแปลงเป็นบทพูดให้เอง ประโยคละหนึ่งรูป ไม่ต้องเขียนเป็นบทเอง</p>
+
+    <div class="field">
+      <label for="caption">ข้อความประกาศ</label>
+      <textarea id="caption" placeholder="ขายที่ดิน 2 ไร่ องครักษ์ นครนายก ถมแล้ว ติดถนนลาดยาง&#10;ราคา 2.8 ล้าน เจ้าของขายเอง"></textarea>
+    </div>
+
+    <div class="field">
+      <label for="pid">รหัสแปลง</label>
+      <input type="text" id="pid" value="PROP-TH-01029">
+    </div>
+
+    <div class="actions">
+      <button class="primary" id="run">สร้างคลิปพากย์เสียง</button>
+      <span class="cost-chip">≈ $0.01 ต่อคลิป · เสียงพากย์ไม่มีค่าใช้จ่าย</span>
+    </div>
+    <div id="out"></div>
+  </section>
+
+</main>
+
+<script>
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+  const MAX_BYTES = 8 * 1024 * 1024;
+  const MAX_PHOTOS = 20;
+  let photos = [];   // { name, dataUri }
+
+  /* ---------- upload ---------- */
+  const drop = document.getElementById("drop");
+  const fileInput = document.getElementById("file");
+  const out = document.getElementById("out");
+
+  drop.addEventListener("click", () => fileInput.click());
+  drop.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileInput.click(); }
+  });
+  drop.addEventListener("dragover", (e) => { e.preventDefault(); drop.classList.add("over"); });
+  drop.addEventListener("dragleave", () => drop.classList.remove("over"));
+  drop.addEventListener("drop", (e) => {
+    e.preventDefault(); drop.classList.remove("over");
+    addFiles(e.dataTransfer.files);
+  });
+  fileInput.addEventListener("change", () => { addFiles(fileInput.files); fileInput.value = ""; });
+
+  function addFiles(fileList) {
+    for (const file of fileList) {
+      if (photos.length >= MAX_PHOTOS) {
+        show("err", "รูปครบจำนวนแล้ว", "ใส่ได้สูงสุด " + MAX_PHOTOS + " รูป");
+        break;
+      }
+      if (!file.type.startsWith("image/")) continue;
+      if (file.size > MAX_BYTES) {
+        show("err", "รูปใหญ่เกินไป", esc(file.name) + " มีขนาด " +
+          (file.size / 1048576).toFixed(1) + "MB เกิน 8MB");
+        continue;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        photos.push({ name: file.name, dataUri: reader.result });
+        paintThumbs();
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  function paintThumbs() {
+    const box = document.getElementById("thumbs");
+    box.innerHTML = photos.map((p, i) =>
+      '<div class="thumb"><span class="ord">' + (i + 1) + '</span>' +
+      '<img src="' + p.dataUri + '" alt="' + esc(p.name) + '">' +
+      '<button type="button" data-i="' + i + '" aria-label="เอารูปที่ ' + (i + 1) + ' ออก">×</button></div>'
+    ).join("");
+    box.querySelectorAll("button").forEach((b) =>
+      b.addEventListener("click", () => { photos.splice(Number(b.dataset.i), 1); paintThumbs(); })
+    );
+  }
+
+  /* ---------- voice clone ---------- */
+  // The cloned voice id is held for the session and reused for every render: a clone is a
+  // one-off, and re-uploading the same person would just create a second identical voice
+  // on the ElevenLabs account.
+  let clonedVoiceId = null;
+  const vDrop = document.getElementById("v-drop");
+  const vFile = document.getElementById("v-file");
+  const vStatus = document.getElementById("v-status");
+
+  vDrop.addEventListener("click", () => vFile.click());
+  vDrop.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); vFile.click(); }
+  });
+  vDrop.addEventListener("dragover", (e) => { e.preventDefault(); vDrop.classList.add("over"); });
+  vDrop.addEventListener("dragleave", () => vDrop.classList.remove("over"));
+  vDrop.addEventListener("drop", (e) => {
+    e.preventDefault(); vDrop.classList.remove("over");
+    if (e.dataTransfer.files[0]) cloneFrom(e.dataTransfer.files[0]);
+  });
+  vFile.addEventListener("change", () => { if (vFile.files[0]) cloneFrom(vFile.files[0]); vFile.value = ""; });
+
+  function panel(target, kind, title, detail) {
+    target.innerHTML =
+      '<div class="panel ' + kind + '"><span class="badge">' +
+      (kind === "err" ? "ERROR" : "OK") + '</span><div class="body"><strong>' +
+      esc(title) + "</strong><span>" + esc(detail) + "</span></div></div>";
+  }
+
+  async function cloneFrom(file) {
+    if (file.size > 40 * 1024 * 1024) {
+      return panel(vStatus, "err", "ไฟล์ใหญ่เกินไป",
+        (file.size / 1048576).toFixed(1) + "MB เกิน 40MB — ตัดให้สั้นลงก่อนนะครับ");
+    }
+    const stop = busyState(vStatus, 45);
+    try {
+      const dataUri = await new Promise((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = () => resolve(r.result);
+        r.onerror = () => reject(new Error("อ่านไฟล์ไม่สำเร็จ"));
+        r.readAsDataURL(file);
+      });
+      const res = await fetch("/api/voice-clone", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sample: dataUri, filename: file.name, name: "MMGS " + file.name }),
+      });
+      const body = await res.json();
+      stop();
+      if (!body.ok) return panel(vStatus, "err", "โคลนเสียงไม่สำเร็จ", body.message);
+      clonedVoiceId = body.data.voice_id;
+      panel(vStatus, "ok", "โคลนเสียงสำเร็จ",
+        "ใช้ตัวอย่างยาว " + body.data.sample_seconds + " วินาที · คลิปที่สร้างต่อจากนี้จะใช้เสียงนี้");
+    } catch (err) {
+      stop();
+      panel(vStatus, "err", "โคลนเสียงไม่สำเร็จ", String(err.message || err));
+    }
+  }
+
+  /* ---------- progress ---------- */
+  // Same estimate-based ring as the console: the server answers once, at the end, so the
+  // curve eases toward 92% and only a real result panel replaces it at 100%.
+  function busyState(target, expectedSeconds) {
+    const t0 = Date.now();
+    const CIRC = 2 * Math.PI * 14;
+    target.innerHTML =
+      '<div class="panel busy"><div class="progress-ring">' +
+      '<svg viewBox="0 0 32 32"><circle class="track" cx="16" cy="16" r="14"></circle>' +
+      '<circle class="bar" cx="16" cy="16" r="14" stroke-dasharray="' + CIRC + '" stroke-dashoffset="' + CIRC + '"></circle></svg>' +
+      '<span class="pct">0%</span></div><div class="body">' +
+      "<strong>กำลังสร้างคลิป…</strong>" +
+      '<span>ผ่านไป <span class="elapsed">0:00</span> · เขียนบท → พากย์เสียง → ขยับภาพ → ฝังซับ</span>' +
+      "</div></div>";
+    const el = target.querySelector(".elapsed");
+    const bar = target.querySelector(".bar");
+    const pctEl = target.querySelector(".pct");
+    const pace = expectedSeconds * 0.6;
+    const id = setInterval(() => {
+      const s = (Date.now() - t0) / 1000;
+      el.textContent = Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0");
+      const pct = 92 * (1 - Math.exp(-s / pace));
+      pctEl.textContent = Math.round(pct) + "%";
+      bar.setAttribute("stroke-dashoffset", String(CIRC * (1 - pct / 100)));
+    }, 200);
+    return () => clearInterval(id);
+  }
+
+  function show(kind, title, detail) {
+    out.innerHTML =
+      '<div class="panel ' + kind + '"><span class="badge">' +
+      (kind === "err" ? "ERROR" : "OK") + '</span><div class="body"><strong>' +
+      esc(title) + "</strong><span>" + esc(detail) + "</span></div></div>";
+  }
+
+  /* ---------- run ---------- */
+  const runBtn = document.getElementById("run");
+  runBtn.addEventListener("click", async () => {
+    const caption = document.getElementById("caption").value.trim();
+    if (photos.length < 1) return show("err", "ยังไปต่อไม่ได้", "เลือกรูปอย่างน้อยหนึ่งรูปก่อนนะครับ");
+    if (!caption) return show("err", "ยังไปต่อไม่ได้", "วางแคปชั่นก่อนนะครับ ระบบใช้เขียนบทพูด");
+
+    runBtn.disabled = true;
+    // Roughly 8s of work per photo (Ken Burns pass) plus a fixed script+voice+render cost.
+    const stop = busyState(out, 40 + photos.length * 8);
+    try {
+      const res = await fetch("/api/photo-narration", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          property_id: document.getElementById("pid").value.trim() || "PROP-TH-01029",
+          photos: photos.map((p) => p.dataUri),
+          caption,
+          aspect: document.getElementById("aspect").value,
+          motion: document.getElementById("motion").value,
+          voice_id: clonedVoiceId || undefined,
+        }),
+      });
+      const body = await res.json();
+      stop();
+      if (!body.ok) return show("err", "รหัสข้อผิดพลาด " + body.code, body.message);
+
+      const d = body.data;
+      const voiceLabel = clonedVoiceId ? "เสียงที่โคลนไว้" :
+        d.voice_backend === "elevenlabs" ? "เสียงมาตรฐาน ElevenLabs" : "เสียงระบบ macOS";
+      let h = '<div class="panel ok"><span class="badge">OK</span><div class="body">' +
+        "<strong>ได้คลิปพากย์เสียงแล้ว</strong><span>เสียงยาว " + d.voice_seconds +
+        " วิ · " + d.sentences.length + " ประโยค · " + esc(voiceLabel) +
+        (d.voice_continuous ? " · พากย์รวดเดียวทั้งบท" : "") +
+        " · $" + d.cost_usd.toFixed(3) + "</span></div></div>";
+      // Show what is spoken next to what appears on screen -- they are different text on
+      // purpose, and seeing both is how you tell the subtitle is doing its job.
+      h += '<ol class="script">' + d.sentences.map((s, i) =>
+        "<li>" + esc(d.subs?.[i] ?? s) +
+        '<br><span style="color:var(--text-3);font-size:12px">พูดว่า: ' + esc(s) + "</span></li>"
+      ).join("") + "</ol>";
+      for (const o of d.outputs) {
+        h += '<div class="clip"><div class="cap"><b>' + esc(o.aspect_ratio) + "</b>" + esc(o.label) +
+          " · " + o.duration_seconds + " วิ · " +
+          '<a href="' + esc(o.url) + '" download style="color:var(--accent)">ดาวน์โหลด</a></div>' +
+          '<video controls playsinline src="' + esc(o.url) + '"></video></div>';
+      }
+      out.innerHTML = h;
+    } catch (err) {
+      stop();
+      show("err", "ติดต่อเซิร์ฟเวอร์ไม่ได้", String(err));
+    } finally {
+      runBtn.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>

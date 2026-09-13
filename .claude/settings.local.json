@@ -1,4 +1,31 @@
 {
+  "skillOverrides": {
+    "captions-overlay": "off",
+    "changelog-video": "off",
+    "cut-the-curve": "off",
+    "embedded-captions": "off",
+    "faceless-explainer": "off",
+    "figma": "off",
+    "general-video": "off",
+    "hyperframes": "off",
+    "hyperframes-animation": "off",
+    "hyperframes-cli": "off",
+    "hyperframes-core": "off",
+    "hyperframes-creative": "off",
+    "hyperframes-keyframes": "off",
+    "hyperframes-registry": "off",
+    "media-use": "off",
+    "motion-doctrine": "off",
+    "motion-graphics": "off",
+    "music-to-video": "off",
+    "oversized-cursor": "off",
+    "pr-to-video": "off",
+    "product-launch-video": "off",
+    "remotion-to-hyperframes": "off",
+    "seam-craft": "off",
+    "slideshow": "off",
+    "talking-head-recut": "off"
+  },
   "permissions": {
     "allow": [
       "Bash(node:*)",
@@ -51,7 +78,11 @@
       "Bash(pkill -f 'main.py')",
       "Bash(./run.sh)",
       "Bash(chmod +x run.sh)",
-      "Bash(.venv/bin/python -m pytest tests/test_signal_watch.py -q)"
+      "Bash(.venv/bin/python -m pytest tests/test_signal_watch.py -q)",
+      "Artifact",
+      "WebFetch(domain:ai-bible-mmgs-production.up.railway.app)",
+      "Bash(railway status)",
+      "mcp__trader-dev__whoami"
     ]
   }
 }

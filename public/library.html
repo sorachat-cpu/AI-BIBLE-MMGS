@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>คลังแปลงที่ดิน · MMGS</title>
+<style>
+  :root {
+    --bg: #eff2f6; --surface: #ffffff; --surface-2: #f7f9fb; --border: #dce3ea;
+    --border-strong: #bcc7d3; --text: #111b25; --text-2: #4c5b6a; --text-3: #7c8b9a;
+    --accent: #a9661f; --accent-2: #c78436; --accent-soft: #fbf1e3;
+    --ok: #16714a; --ok-soft: #e1f1e8; --err: #9d2b22; --err-soft: #fbe5e2;
+    --wait: #2a5b98; --wait-soft: #e5edf7;
+    --shadow: 0 1px 2px rgba(17,27,37,.05), 0 8px 24px -12px rgba(17,27,37,.18);
+    --mono: ui-monospace, "SF Mono", Menlo, monospace;
+    --sans: "Sukhumvit Set", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0a121a; --surface: #111d27; --surface-2: #16232e; --border: #21313e;
+      --border-strong: #354959; --text: #e2eaf1; --text-2: #9cafbf; --text-3: #6a7f92;
+      --accent: #dda062; --accent-2: #e8b57f; --accent-soft: #2a1c0e;
+      --ok: #4ac68a; --ok-soft: #0e2a1d; --err: #e5786b; --err-soft: #2d1411;
+      --wait: #6da6de; --wait-soft: #0f2337;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 28px -14px rgba(0,0,0,.7);
+      color-scheme: dark;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: var(--sans); font-size: 15px; line-height: 1.6;
+  }
+  .shell { max-width: 1180px; margin: 0 auto; padding: 32px 20px 80px; }
+  .kicker {
+    font-size: 12px; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--accent); font-weight: 700;
+  }
+  h1 { font-size: clamp(24px, 4vw, 34px); margin: 6px 0 8px; letter-spacing: -.02em; }
+  p.lede { color: var(--text-2); margin: 0 0 4px; max-width: 62ch; }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 18px 20px; box-shadow: var(--shadow); margin-bottom: 20px;
+  }
+
+  .filters { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; }
+  .f-group { display: flex; flex-direction: column; gap: 4px; }
+  .f-group label {
+    font-size: 11.5px; font-weight: 600; color: var(--text-3);
+    text-transform: uppercase; letter-spacing: .05em;
+  }
+  select, input[type=search] {
+    font: inherit; padding: 8px 11px; border-radius: 9px;
+    border: 1px solid var(--border-strong); background: var(--surface-2); color: var(--text);
+    min-width: 160px;
+  }
+  input[type=search] { min-width: 220px; }
+  button.reset {
+    font: inherit; font-weight: 600; cursor: pointer; border-radius: 9px;
+    border: 1px solid var(--border-strong); padding: 8px 15px;
+    background: transparent; color: var(--text-2);
+  }
+  button.reset:hover { color: var(--text); }
+
+  .count { color: var(--text-3); font-size: 13px; margin-top: 10px; }
+  .count b { color: var(--text-2); font-variant-numeric: tabular-nums; }
+
+  .grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px;
+    margin-top: 4px;
+  }
+  .plot {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    overflow: hidden; box-shadow: var(--shadow); display: flex; flex-direction: column;
+  }
+  .plot .photo {
+    width: 100%; aspect-ratio: 20 / 13; object-fit: cover; background: var(--surface-2);
+    display: block;
+  }
+  .plot .photo.none {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-3); font-size: 12.5px;
+  }
+  .plot .body { padding: 13px 15px; display: flex; flex-direction: column; gap: 5px; flex: 1; }
+  .plot .title { font-weight: 700; font-size: 14.5px; line-height: 1.35; }
+  .plot .price { font-weight: 700; font-size: 16px; color: var(--accent); }
+  .plot .loc { font-size: 12.5px; color: var(--text-2); }
+  .plot .tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 2px; }
+  .plot .tag {
+    font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 999px;
+    background: var(--surface-2); border: 1px solid var(--border); color: var(--text-3);
+  }
+  .plot .tag.owner { background: var(--ok-soft); color: var(--ok); border-color: transparent; }
+  .plot .highlights { margin: 4px 0 0; padding: 0; list-style: none; font-size: 12px; color: var(--text-3); }
+  .plot .highlights li { padding: 1px 0; }
+  .plot .foot {
+    margin-top: auto; padding-top: 9px; display: flex; gap: 10px; align-items: center;
+    font-size: 12px;
+  }
+  .plot .foot a { color: var(--accent); text-decoration: none; font-weight: 600; }
+  .plot .foot a:hover { text-decoration: underline; }
+  .plot .foot .id { color: var(--text-3); font-family: var(--mono); margin-inline-start: auto; }
+
+  .empty { text-align: center; padding: 60px 20px; color: var(--text-3); }
+</style>
+</head>
+<body>
+<script src="/nav.js" defer></script>
+<div class="shell">
+  <div class="kicker">คลัง</div>
+  <h1>คลังแปลงที่ดิน</h1>
+  <p class="lede">ทุกแปลงในชีท เป็นการ์ดเดียวกับที่ลูกค้าเห็นในไลน์ — กรองตามจังหวัดและทำเลได้เหมือนเมนู "เลือกทำเล" ในบอท</p>
+
+  <section class="card">
+    <div class="filters">
+      <div class="f-group">
+        <label for="f-province">จังหวัด</label>
+        <select id="f-province"><option value="">ทั้งหมด</option></select>
+      </div>
+      <div class="f-group">
+        <label for="f-area">ทำเล</label>
+        <select id="f-area"><option value="">ทั้งหมด</option></select>
+      </div>
+      <div class="f-group">
+        <label for="f-q">ค้นหา</label>
+        <input type="search" id="f-q" placeholder="ชื่อแปลง, จุดเด่น...">
+      </div>
+      <button class="reset" id="f-reset">ล้างตัวกรอง</button>
+    </div>
+    <div class="count" id="count"></div>
+  </section>
+
+  <div id="grid" class="grid"></div>
+  <div id="empty" class="empty" style="display:none">ไม่พบแปลงที่ตรงกับตัวกรอง</div>
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+  let all = [];
+
+  function priceOf(l) {
+    return l.price_text || (l.price_thb != null ? Number(l.price_thb).toLocaleString("th-TH") + " บาท" : "สอบถามราคา");
+  }
+
+  function plotCard(l) {
+    const photo = l.photo_url
+      ? `<img class="photo" src="${esc(l.photo_url)}" alt="" loading="lazy">`
+      : `<div class="photo none">ไม่มีรูป</div>`;
+    const tags = [
+      l.owner_sale ? `<span class="tag owner">เจ้าของขายเอง</span>` : "",
+      l.province ? `<span class="tag">${esc(l.province)}</span>` : "",
+      l.area ? `<span class="tag">${esc(l.area)}</span>` : "",
+    ].filter(Boolean).join("");
+    const highlights = (l.highlights ?? []).slice(0, 2)
+      .map((h) => `<li>• ${esc(h)}</li>`).join("");
+    const postLink = l.source_post_url
+      ? `<a href="${esc(l.source_post_url)}" target="_blank" rel="noopener">โพสต์ต้นฉบับ</a>` : "";
+    return `<div class="plot">
+      ${photo}
+      <div class="body">
+        <div class="title">${esc(l.title || "ที่ดิน")}</div>
+        <div class="price">${esc(priceOf(l))}</div>
+        <div class="loc">${esc(l.location || "-")}</div>
+        <div class="tags">${tags}</div>
+        ${highlights ? `<ul class="highlights">${highlights}</ul>` : ""}
+        <div class="foot">${postLink}<span class="id">${esc(l.listing_id)}</span></div>
+      </div>
+    </div>`;
+  }
+
+  function populateSelect(sel, values, current) {
+    sel.innerHTML = `<option value="">ทั้งหมด</option>` +
+      values.map((v) => `<option value="${esc(v)}"${v === current ? " selected" : ""}>${esc(v)}</option>`).join("");
+  }
+
+  function render() {
+    const province = $("f-province").value;
+    const area = $("f-area").value;
+    const q = $("f-q").value.trim().toLowerCase();
+
+    // The area dropdown always reflects the CHOSEN province, not the full set -- otherwise
+    // it lists areas from every province at once and a tap can silently produce zero
+    // results because that area only exists elsewhere.
+    const areaPool = province ? all.filter((l) => l.province === province) : all;
+    const areaValues = [...new Set(areaPool.map((l) => l.area))].sort((a, b) => a.localeCompare(b, "th"));
+    if (![...$("f-area").options].some((o) => o.value === area)) {
+      populateSelect($("f-area"), areaValues, "");
+    } else {
+      populateSelect($("f-area"), areaValues, area);
+    }
+
+    const filtered = all.filter((l) => {
+      if (l.status === "HIDDEN") return false;
+      if (province && l.province !== province) return false;
+      if (area && l.area !== area) return false;
+      if (q) {
+        const hay = [l.title, l.location, ...(l.highlights ?? [])].join(" ").toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+
+    $("count").innerHTML = `พบ <b>${filtered.length}</b> แปลง จากทั้งหมด <b>${all.filter((l) => l.status !== "HIDDEN").length}</b>`;
+    $("grid").innerHTML = filtered.map(plotCard).join("");
+    $("grid").style.display = filtered.length ? "grid" : "none";
+    $("empty").style.display = filtered.length ? "none" : "block";
+  }
+
+  async function load() {
+    const res = await fetch("/api/listings").then((r) => r.json());
+    all = res.data?.items ?? [];
+    const provinces = [...new Set(all.filter((l) => l.status !== "HIDDEN").map((l) => l.province))]
+      .sort((a, b) => a.localeCompare(b, "th"));
+    populateSelect($("f-province"), provinces, "");
+    render();
+  }
+
+  $("f-province").addEventListener("change", render);
+  $("f-area").addEventListener("change", render);
+  $("f-q").addEventListener("input", render);
+  $("f-reset").addEventListener("click", () => {
+    $("f-province").value = ""; $("f-area").value = ""; $("f-q").value = "";
+    render();
+  });
+
+  load().catch((err) => {
+    $("count").innerHTML = `<span style="color:var(--err)">โหลดไม่สำเร็จ: ${esc(err.message)}</span>`;
+  });
+</script>
+</body>
+</html>

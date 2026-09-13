@@ -116,6 +116,38 @@ async function reverseGeocode(lat, lng, apiKey) {
 }
 
 /**
+ * Geocode + retry-with-coarser-input + bounds check, shared by runGoogleEngine() and the
+ * property_id-free checkLocation() below -- both need exactly this, neither should
+ * duplicate the retry logic.
+ */
+async function resolveGeocode(rawAddress, apiKey) {
+  const parsed = await parseLocationInput(rawAddress);
+  let geocoded;
+
+  if (parsed.kind === "coords") {
+    geocoded = {
+      lat: parsed.lat,
+      lng: parsed.lng,
+      formatted_address: await reverseGeocode(parsed.lat, parsed.lng, apiKey),
+    };
+  } else {
+    geocoded = await callGeocodingApi(parsed.address, apiKey);
+    if (!geocoded) {
+      const coarser = coarsenAddress(parsed.address);
+      if (coarser) geocoded = await callGeocodingApi(coarser, apiKey);
+    }
+    if (!geocoded) {
+      throw new GoogleEngineError("ERR_GOOG_01", `Could not geocode address after retry: "${parsed.address}"`);
+    }
+  }
+
+  if (!isPlausibleCoordinate(geocoded.lat, geocoded.lng)) {
+    throw new GoogleEngineError("ERR_GOOG_01", `Geocoded coordinates out of bounds: ${geocoded.lat},${geocoded.lng}`);
+  }
+  return { ...geocoded, input_kind: parsed.kind };
+}
+
+/**
  * @param {object} input
  * @param {string} input.property_id
  * @param {string} [input.raw_address]  address, coordinates, or a Google Maps link
@@ -141,33 +173,11 @@ export async function runGoogleEngine(
   // A pasted map link or coordinate pair already carries the exact pin. Using it directly
   // is both free and more accurate than geocoding a text address, which can land on the
   // wrong side of a road or on the district centroid.
-  const parsed = await parseLocationInput(raw_address);
-  let geocoded;
-  let input_kind = parsed.kind;
-
-  if (parsed.kind === "coords") {
-    geocoded = {
-      lat: parsed.lat,
-      lng: parsed.lng,
-      formatted_address: await reverseGeocode(parsed.lat, parsed.lng, apiKey),
-    };
-  } else {
-    geocoded = await callGeocodingApi(parsed.address, apiKey);
-    if (!geocoded) {
-      const coarser = coarsenAddress(parsed.address);
-      if (coarser) geocoded = await callGeocodingApi(coarser, apiKey);
-    }
-    if (!geocoded) {
-      // No "default coordinates per province" table exists yet (needs Phase 1 DB) -- fail
-      // loudly instead of hallucinating a location, per the No Hallucination rule.
-      throw new GoogleEngineError("ERR_GOOG_01", `Could not geocode address after retry: "${parsed.address}"`);
-    }
-  }
-
-  if (!isPlausibleCoordinate(geocoded.lat, geocoded.lng)) {
-    throw new GoogleEngineError("ERR_GOOG_01", `Geocoded coordinates out of bounds: ${geocoded.lat},${geocoded.lng}`);
-  }
-
+  //
+  // No "default coordinates per province" table exists yet (needs Phase 1 DB) -- resolveGeocode
+  // fails loudly instead of hallucinating a location, per the No Hallucination rule.
+  const geocoded = await resolveGeocode(raw_address, apiKey);
+  const input_kind = geocoded.input_kind;
   const { lat, lng } = geocoded;
   // TODO(Phase 0/1): sign these URLs once a GOOGLE_MAPS_URL_SIGNING_SECRET is configured --
   // the spec requires signed static map URLs before they're used publicly.
@@ -227,4 +237,41 @@ export async function runGoogleEngine(
   }
 
   return googleOut;
+}
+
+/**
+ * Free-form "check this location" lookup for the LINE bot (23_PAGE_STUDIO.md §3.6) -- no
+ * property_id, no schema validation against the full PROPERTY_OUT-adjacent contract,
+ * just geocode + nearby highlights for whatever address, map link, or coordinate pair a
+ * customer pastes into chat. runGoogleEngine() stays the one used by the video pipeline,
+ * where a property_id always exists; this is the one path in the system that legitimately
+ * doesn't have one.
+ *
+ * @param {string} rawInput  address, coordinates, or a Google Maps link
+ */
+export async function checkLocation(rawInput, { googleMapsApiKey, radius_m = 5000 } = {}) {
+  if (!rawInput || !rawInput.trim()) {
+    throw new GoogleEngineError("ERR_GOOG_INPUT", "ต้องระบุที่อยู่ ลิงก์แผนที่ หรือพิกัด");
+  }
+  const apiKey = googleMapsApiKey || process.env.GOOGLE_MAPS_API_KEY;
+  if (!apiKey) {
+    throw new GoogleEngineError("ERR_GOOG_NO_API_KEY", "GOOGLE_MAPS_API_KEY is not set -- see .env.example");
+  }
+
+  const { lat, lng, formatted_address, input_kind } = await resolveGeocode(rawInput, apiKey);
+
+  let nearby = { radius_m, groups: [], highlight_lines: [], errors: [] };
+  try {
+    const found = await findNearbyPlaces({ lat, lng, radius: radius_m, apiKey });
+    nearby = {
+      radius_m: found.radius_m,
+      groups: found.groups,
+      highlight_lines: toHighlightLines(found.groups),
+      errors: found.errors,
+    };
+  } catch (err) {
+    nearby.errors = [{ category: "all", message: err.message }];
+  }
+
+  return { lat, lng, formatted_address, input_kind, nearby };
 }

@@ -1,0 +1,47 @@
+<!--
+  WF1 SCENE 3 cloud sheet : WF-REALESTATE-3WF-SPEC.md "CLOUD TRANSITION".
+
+  A tall band of procedural cloud, composited over the descent by FFmpeg and swept downward
+  past the lens so the camera reads as passing through a cloud layer. Generated rather than
+  shipped as an asset: feTurbulence is deterministic for a given seed, so the same listing
+  renders the same clouds every time, and there is no binary to keep in the repo.
+
+  Nothing here fades. The sheet enters and leaves the frame by moving, and its top and bottom
+  edges are feathered by the mask so the band has no visible straight edge.
+
+  Placeholders filled by renderWf1Clouds() in src/lib/svg-card.mjs:
+    {{W}} {{H}}      sheet size (taller than the video frame, on purpose)
+    {{SEED}}         turbulence seed
+    {{FREQ}}         base frequency : lower is bigger, softer cloud masses
+    {{OCT}}          octaves : more is wispier
+    {{GAIN}} {{BIAS}} alpha curve : how much of the noise becomes solid cloud
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="{{W}}" height="{{H}}" viewBox="0 0 {{W}} {{H}}">
+  <defs>
+    <filter id="cloud" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="{{FREQ}}" numOctaves="{{OCT}}"
+                    seed="{{SEED}}" stitchTiles="stitch" result="noise"/>
+      <!-- force every channel to white, then shape the noise's own alpha into cloud masses -->
+      <feColorMatrix in="noise" type="matrix"
+        values="0 0 0 0 1
+                0 0 0 0 1
+                0 0 0 0 1
+                0 0 0 {{GAIN}} {{BIAS}}"/>
+    </filter>
+
+    <!-- feather the band's top and bottom so it never shows a straight edge as it sweeps -->
+    <linearGradient id="feather" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#000000"/>
+      <stop offset="18%"  stop-color="#FFFFFF"/>
+      <stop offset="82%"  stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#000000"/>
+    </linearGradient>
+    <mask id="band">
+      <rect x="0" y="0" width="{{W}}" height="{{H}}" fill="url(#feather)"/>
+    </mask>
+  </defs>
+
+  <g mask="url(#band)">
+    <rect x="0" y="0" width="{{W}}" height="{{H}}" filter="url(#cloud)"/>
+  </g>
+</svg>

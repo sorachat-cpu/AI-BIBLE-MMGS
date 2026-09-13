@@ -1,8 +1,17 @@
 # ความลับ — ห้ามเข้า git เด็ดขาด
 .env
 .env.local
+*.env
+!.env.example
 *.pem
 *.key
+
+# ไฟล์สำเนาชนกันที่ OneDrive สร้างเองตอน sync ข้ามเครื่อง (ชื่อจะมี -DESKTOP-XXXXXXX ต่อท้าย)
+# ไม่ใช่ไฟล์โปรเจกต์จริง และบางตัวมีคีย์ลับจริงติดมาด้วย (เจอ -DESKTOP-MJQV2BH.env มีคีย์จริง 2026-09-13)
+*-DESKTOP-*
+
+# โปรเจกต์อื่นที่แยกกันอยู่คนละ repo อยู่แล้ว (มี remote + .env ของตัวเอง) ไม่ใช่ส่วนหนึ่งของ AI_BIBLE
+lineao/
 
 # dependencies
 node_modules/

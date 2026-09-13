@@ -22,7 +22,8 @@ import { pushIn, cardOverImage } from "../lib/kenburns.mjs";
 import { runGoogleEngine } from "./google-engine.mjs";
 import { runMapZoom } from "./mapzoom-engine.mjs";
 import { renderLocationCard, renderEndingCard } from "../lib/svg-card.mjs";
-import { runConstructionScene, estimateSceneCost } from "./construction-engine.mjs";
+import { runConstructionScene, estimateSceneCost, estimateSceneDuration } from "./construction-engine.mjs";
+import { CONSTRUCTION_STAGES } from "../wf5/construction.mjs";
 
 const PLOT_SECONDS = 4.5;    // the property photo -- the thing being sold
 const NEARBY_SECONDS = 5.5;  // a list, so it needs reading time
@@ -59,6 +60,10 @@ function nearbyRows(nearby, limit = 5) {
  * @param {string} [input.aspect]
  * @param {number} [input.minDuration]  narration length, so the picture outlasts it
  * @param {string[]} [input.scenes]     override the running order
+ * @param {string} [input.constructionDetails]  free text for the construction scene's
+ *                                               image prompt -- a scene description, not
+ *                                               sales copy; listing.highlights is not used
+ *                                               here (see caption / scriptFromListing instead)
  * @returns {{file, duration, aspect, scenes, geo, cost_usd, skipped}}
  */
 export async function runStory(input, options = {}) {
@@ -97,10 +102,20 @@ export async function runStory(input, options = {}) {
 
   // The descent is the only scene that can stretch, so it absorbs whatever the fixed
   // scenes do not cover. Handing it a flat fraction of the narration leaves the film
-  // short whenever the card scenes are present, and -shortest then cuts the closing
-  // sentences -- the price and the phone number.
+  // short whenever the card scenes are present, and the render's final composite would
+  // then cut the closing sentences -- the price and the phone number.
+  //
+  // construction has to be counted here too even though it runs later in this function:
+  // it was left out before, so its ~12s was never part of the budget at all, and total
+  // film length silently exceeded minDuration by exactly construction's duration on every
+  // --construction run. That only looked harmless because render-engine used to have a
+  // -shortest flag papering over it by truncating the tail instead -- which is what was
+  // actually cutting the contact card. Now that -shortest is gone, an unbudgeted 12s here
+  // just means 12s of extra silent tail after the narration ends, so it still has to be
+  // counted for the space scene to size itself sensibly.
   const fixedSeconds =
     (scenes.includes("plot") && photo ? PLOT_SECONDS : 0) +
+    (scenes.includes("construction") ? estimateSceneDuration(CONSTRUCTION_STAGES.length) : 0) +
     (scenes.includes("nearby") ? NEARBY_SECONDS : 0) +
     (scenes.includes("detail") ? DETAIL_SECONDS : 0) +
     (scenes.includes("contact") ? CONTACT_SECONDS : 0);
@@ -146,7 +161,17 @@ export async function runStory(input, options = {}) {
   if (scenes.includes("construction")) {
     try {
       const cons = await runConstructionScene(
-        { property_id, landImageBase64: input.landImageBase64, styleTag: listing.style_tag, aspect },
+        {
+          property_id,
+          landImageBase64: input.landImageBase64,
+          styleTag: listing.style_tag,
+          // Explicit opt-in only -- listing.highlights ("ติดถนนลาดยาง" etc.) is sales
+          // copy, not a scene description, and belongs in the caption / voiceover script
+          // (scriptFromListing() in src/cli/render.mjs already speaks it), not stuffed
+          // into the image prompt where it would just add noise the model can't act on.
+          details: input.constructionDetails,
+          aspect,
+        },
         options
       );
       built.push({ scene: "construction", file: cons.file, seconds: cons.duration });

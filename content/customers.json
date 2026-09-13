@@ -1,0 +1,14 @@
+{
+  "items": [
+    {
+      "customer_id": "CUST-31BE9D1A",
+      "line_user_id": "U_TEST_NOTIFY_APPT2",
+      "display_name": "วิชัย",
+      "phone": "0891234567",
+      "interested_listing_id": null,
+      "note": null,
+      "created_at": "2026-08-16T17:33:42.514Z",
+      "updated_at": "2026-08-16T17:33:42.514Z"
+    }
+  ]
+}

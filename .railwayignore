@@ -1,0 +1,7 @@
+# Railway's own persistent volume is mounted over content/ in production, and node_modules
+# gets reinstalled by the build -- uploading either just adds hundreds of MB to every
+# deploy for no benefit. output/ is local render scratch (179MB and growing) that never
+# needs to leave this machine at all.
+node_modules/
+output/
+.git/

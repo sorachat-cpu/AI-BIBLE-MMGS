@@ -12,6 +12,7 @@ import path from "node:path";
 import { readFile, readdir } from "node:fs/promises";
 import { runMapZoom, MapZoomError } from "../engines/mapzoom-engine.mjs";
 import { runStory, StoryError } from "../engines/story-engine.mjs";
+import { runPhotoNarration, PhotoNarrationError } from "../engines/photo-narration-engine.mjs";
 import { runRenderEngine, RenderEngineError } from "../engines/render-engine.mjs";
 import { speakThai, toSentences, VoiceError, DEFAULT_VOICE } from "../lib/voice.mjs";
 import { loadListings } from "../content/listings.mjs";
@@ -37,12 +38,15 @@ function usage() {
   --mode story              คลิปเต็มเรื่อง: นอกโลก → หมุด → แปลง → สถานที่ใกล้เคียง → ดีเทล → ป้ายติดต่อ
   --mode mapzoom            เฉพาะท่อนหมุดแผนที่ซูมลงมาที่แปลง
   --mode clips              ต่อคลิปที่มีอยู่แล้วใส่เสียงกับซับ
+  --mode photos             รูปหลายรูป + แคปชั่น -> คลิปพากย์เสียงบรรยาย (WF8-lite, เสียง AI ไม่ใช่เสียงโคลน)
 
 ตัวเลือก
   --listing <LAND-xxxx>     ดึงข้อมูลแปลงจากชีท ใช้ทำสคริปต์พูดและการ์ดปิดท้าย
   --property <PROP-TH-xxx>  รหัสงาน (ค่าเริ่มต้น PROP-TH-01029)
   --address "<ที่อยู่>"      ระบุที่ตั้งเอง ถ้าไม่ได้ใช้ --listing
   --photo <ไฟล์รูป>          รูปแปลงที่ถ่ายมา (โหมด story) ใช้เป็นฉาก "ซูมมาที่แปลง"
+  --photos a.jpg,b.jpg      รูปหลายรูปเรียงตามลำดับ (โหมด photos) หนึ่งรูปต่อหนึ่งท่อนบท
+  --caption "<ข้อความ>"     แคปชั่นดิบใช้เขียนบทพากย์ (โหมด photos) · ไม่ใส่ + มี --listing = สร้างจากข้อมูลแปลง
   --clips a.mp4,b.mp4       ระบุไฟล์เอง · ไม่ใส่ = ใช้คลิปต้นทางใน output/ ที่ตรงอัตราส่วน
   --script <ไฟล์.txt>        บทพูด บรรทัดละประโยค · ไม่ใส่ = สร้างจากข้อมูลแปลง
   --aspect 9:16|16:9        ค่าเริ่มต้น 9:16
@@ -53,6 +57,7 @@ function usage() {
 ตัวอย่าง
   npm run render -- --mode mapzoom --listing LAND-52C14A8C
   npm run render -- --mode clips --script bot.txt
+  npm run render -- --mode photos --listing LAND-52C14A8C --photos a.jpg,b.jpg,c.jpg
 `);
 }
 
@@ -71,6 +76,23 @@ function scriptFromListing(listing) {
   if (listing.price_text) lines.push(`ราคา ${listing.price_text}`);
   lines.push(listing.contact ? `สนใจติดต่อ ${listing.contact}` : "สนใจทักแชทเพจได้เลยครับ");
   return lines;
+}
+
+/**
+ * Fallback caption text for --mode photos when --caption is omitted but --listing isn't.
+ * Joined prose, not one-sentence-per-line -- generateNarrationScript() does the splitting
+ * and pacing itself, the same job it does on a real Facebook caption.
+ */
+function captionFromListing(listing) {
+  const parts = [
+    listing.title,
+    listing.location ? `ตั้งอยู่ที่ ${listing.location}` : null,
+    listing.size_text ? `เนื้อที่ ${listing.size_text}` : null,
+    ...(listing.highlights ?? []),
+    listing.price_text ? `ราคา ${listing.price_text}` : null,
+    listing.contact ? `สนใจติดต่อ ${listing.contact}` : "สนใจทักแชทเพจได้เลยครับ",
+  ];
+  return parts.filter(Boolean).join(" ");
 }
 
 function endingCardFromListing(listing) {
@@ -120,9 +142,13 @@ async function main() {
     console.log(dim(`แปลง: ${listing.title ?? listing.listing_id}`));
   }
 
-  // ---- voice + subtitles, shared by every mode ----
+  // ---- voice + subtitles, shared by every mode except photos ----
+  //
+  // photos builds its own voice track further down: the script has to be split into
+  // exactly one segment per photo, which this generic script-or-listing block knows
+  // nothing about.
   let voice = null;
-  if (!has("no-voice")) {
+  if (mode !== "photos" && !has("no-voice")) {
     const scriptFile = flag("script");
     let sentences;
     if (scriptFile && scriptFile !== true) {
@@ -184,6 +210,29 @@ async function main() {
     // The story already ends on its own contact plate; an overlay here would stack a
     // second card on top of it.
     storyOwnsEndingCard = true;
+  } else if (mode === "photos") {
+    const given = flag("photos");
+    if (!given || given === true) throw new Error("โหมด photos ต้องมี --photos a.jpg,b.jpg,...");
+    const photoFiles = String(given).split(",").map((f) => path.resolve(f.trim()));
+    const captionFlag = flag("caption");
+    const caption = captionFlag && captionFlag !== true
+      ? String(captionFlag)
+      : listing
+        ? captionFromListing(listing)
+        : null;
+    if (!caption) throw new Error("โหมด photos ต้องมี --caption หรือ --listing");
+    process.stdout.write(dim(`กำลังเขียนบทพากย์ ${photoFiles.length} ท่อนจากแคปชั่น… `));
+    const pn = await runPhotoNarration({
+      property_id,
+      photos: photoFiles,
+      caption,
+      aspect,
+      voice: flag("voice") && flag("voice") !== true ? String(flag("voice")) : undefined,
+    });
+    console.log(ok(`${pn.voice.duration} วิ · $${pn.cost_usd}`));
+    for (const [i, s] of pn.sentences.entries()) console.log(`   ${ok("•")} [${i + 1}] ${s}`);
+    voice = pn.voice;
+    clips = pn.clips;
   } else if (mode === "clips") {
     const given = flag("clips");
     const files = given && given !== true
@@ -193,7 +242,7 @@ async function main() {
     console.log(dim(`ใช้คลิป ${files.length} ไฟล์`));
     clips = files.map((file) => ({ file }));
   } else {
-    throw new Error(`ไม่รู้จักโหมด "${mode}" — มี mapzoom กับ clips`);
+    throw new Error(`ไม่รู้จักโหมด "${mode}" — มี story, mapzoom, clips, photos`);
   }
 
   // ---- final render ----
@@ -232,7 +281,8 @@ async function main() {
 main().catch((err) => {
   const known =
     err instanceof VoiceError || err instanceof MapZoomError ||
-    err instanceof StoryError || err instanceof RenderEngineError;
+    err instanceof StoryError || err instanceof PhotoNarrationError ||
+    err instanceof RenderEngineError;
   console.error(bad(`ผิดพลาด: ${err?.message ?? err}`));
   // A domain error already says what to do about it. Anything else is a bug here, and the
   // stack is the only thing that locates it.

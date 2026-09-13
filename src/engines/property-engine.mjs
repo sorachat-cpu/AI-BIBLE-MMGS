@@ -18,6 +18,12 @@ Required fields to extract:
 - title: Clean property title. Remove all promotional language ("ด่วน", "ถูกมาก", "!!!"), phone numbers, and Line IDs.
 - price_thb: Price as integer only. No commas. No currency symbols.
   Convert: "5ล้าน" -> 5000000 | "5.5M" -> 5500000 | "12.9ล้านบาท" -> 12900000
+  If the text mentions multiple prices for the same listing (a range, a per-rai price plus
+  a total price, land price plus house price, etc.) so no single price is clearly "the"
+  price, use the LOWEST price mentioned as price_thb, and prepend "เริ่มต้น {lowest price
+  formatted with comma thousand-separators} บาท " to the title (before the cleaned title
+  text). Example: prices 3900000 and 4500000 both appear -> price_thb: 3900000, title
+  starts with "เริ่มต้น 3,900,000 บาท ...".
 - style_tag: Must be EXACTLY one of: MODERN_NORDIC | MINIMALIST | LUXURY_CLASSIC | CONTEMPORARY | LOFT
 - raw_address: The address exactly as written in the listing. Do not geocode or infer.
 - highlight_features: Array of 3-5 key selling features. Rules for highlight_features:
@@ -27,7 +33,9 @@ Required fields to extract:
   - Keep factual and descriptive only
 
 Critical rules:
-- If price cannot be determined -> set price_thb to null
+- If no price is mentioned anywhere in the text -> set price_thb to null
+- If multiple prices are mentioned, use the lowest one for price_thb and prefix the title
+  with "เริ่มต้น {price} บาท " as described above
 - If style cannot be determined -> set style_tag to "CONTEMPORARY"
 - If address is missing -> set raw_address to null
 - Do NOT invent data that is not present in the input text

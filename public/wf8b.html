@@ -1,0 +1,658 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>วิดีโอยึดข้อมูลจริง · MMGS</title>
+<style>
+  :root {
+    --bg: #eff2f6; --surface: #ffffff; --surface-2: #f7f9fb; --border: #dce3ea;
+    --border-strong: #bcc7d3; --text: #111b25; --text-2: #4c5b6a; --text-3: #7c8b9a;
+    --accent: #a9661f; --accent-2: #c78436; --accent-soft: #fbf1e3;
+    --ok: #16714a; --ok-soft: #e1f1e8; --err: #9d2b22; --err-soft: #fbe5e2;
+    --wait: #2a5b98; --wait-soft: #e5edf7;
+    --shadow: 0 1px 2px rgba(17,27,37,.05), 0 8px 24px -12px rgba(17,27,37,.18);
+    --mono: ui-monospace, "SF Mono", Menlo, monospace;
+    --sans: "Sukhumvit Set", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0a121a; --surface: #111d27; --surface-2: #16232e; --border: #21313e;
+      --border-strong: #354959; --text: #e2eaf1; --text-2: #9cafbf; --text-3: #6a7f92;
+      --accent: #dda062; --accent-2: #e8b57f; --accent-soft: #2a1c0e;
+      --ok: #4ac68a; --ok-soft: #0e2a1d; --err: #e5786b; --err-soft: #2d1411;
+      --wait: #6da6de; --wait-soft: #0f2337;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 28px -14px rgba(0,0,0,.7);
+      color-scheme: dark;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: var(--sans); font-size: 15px; line-height: 1.6;
+  }
+  .shell { max-width: 1000px; margin: 0 auto; padding: 32px 20px 90px; }
+  .kicker { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-weight: 700; }
+  h1 { font-size: clamp(26px, 4vw, 36px); margin: 6px 0 8px; letter-spacing: -.02em; }
+  .standfirst { color: var(--text-2); font-size: 15.5px; max-width: 64ch; margin: 0; }
+
+  /* The rule the whole page exists to enforce, stated once at the top. */
+  .doctrine {
+    margin-top: 18px; padding: 14px 16px; border-radius: 11px;
+    background: var(--accent-soft); border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
+    font-size: 13.5px; color: var(--text);
+  }
+  .doctrine b { color: var(--accent); }
+  .doctrine ol { margin: 8px 0 0; padding-inline-start: 20px; }
+  .doctrine li { margin-bottom: 2px; }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 22px; box-shadow: var(--shadow); margin-top: 20px;
+  }
+  .card.done { border-color: color-mix(in srgb, var(--ok) 40%, transparent); }
+  .step-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px; }
+  .step-no {
+    font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .06em;
+    color: var(--surface); background: var(--text-3); border-radius: 999px; padding: 3px 9px;
+  }
+  .card.done .step-no { background: var(--ok); }
+  h2 { font-size: 17px; margin: 0; }
+  .hint { color: var(--text-2); font-size: 13px; margin: 2px 0 16px; }
+
+  label { display: block; font-size: 12.5px; font-weight: 600; color: var(--text-2); margin-bottom: 5px; }
+  input[type="text"], textarea, select {
+    width: 100%; padding: 10px 12px; border-radius: 9px;
+    border: 1px solid var(--border-strong); background: var(--surface-2);
+    color: var(--text); font-family: var(--sans); font-size: 14px;
+  }
+  textarea { min-height: 96px; resize: vertical; line-height: 1.65; }
+  input:focus-visible, textarea:focus-visible, select:focus-visible,
+  button:focus-visible, .drop:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .field { margin-bottom: 14px; }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 640px) { .pair { grid-template-columns: 1fr; } }
+
+  .drop {
+    border: 1.5px dashed var(--border-strong); border-radius: 11px; padding: 26px 18px;
+    text-align: center; cursor: pointer; background: var(--surface-2);
+  }
+  .drop.over { border-color: var(--accent); background: var(--accent-soft); }
+  .drop .icon { font-size: 24px; color: var(--text-3); }
+  .drop p { margin: 6px 0 0; font-size: 13.5px; }
+  .drop p.small { color: var(--text-3); font-size: 12px; }
+  .drop input[type="file"] { display: none; }
+
+  .thumbs { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 12px; }
+  .thumb { position: relative; width: 84px; }
+  .thumb img {
+    width: 84px; height: 84px; object-fit: cover; border-radius: 8px;
+    border: 1px solid var(--border); display: block;
+  }
+  .thumb .ord {
+    position: absolute; top: 3px; inset-inline-start: 3px; background: rgba(0,0,0,.72);
+    color: #fff; font-family: var(--mono); font-size: 10px; font-weight: 700;
+    padding: 1px 5px; border-radius: 5px;
+  }
+  .thumb button.x {
+    position: absolute; top: -6px; inset-inline-end: -6px; width: 20px; height: 20px;
+    border-radius: 50%; border: 1px solid var(--border); background: var(--surface);
+    color: var(--text-2); font-size: 13px; line-height: 1; cursor: pointer; padding: 0;
+  }
+
+  /* --- classification result: the table §1 requires before anything else --- */
+  .photo-row {
+    display: grid; grid-template-columns: 96px 1fr; gap: 14px;
+    padding: 14px 0; border-top: 1px solid var(--border);
+  }
+  .photo-row:first-of-type { border-top: 0; }
+  .photo-row.dropped { opacity: .55; }
+  .photo-row img { width: 96px; height: 96px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); }
+  .photo-row .cat { font-weight: 700; font-size: 14px; }
+  .photo-row .pill {
+    display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px;
+    border-radius: 999px; margin-inline-start: 8px; vertical-align: 1px;
+  }
+  .pill.use { background: var(--ok-soft); color: var(--ok); }
+  .pill.skip { background: var(--err-soft); color: var(--err); }
+  .facts { margin: 8px 0 0; padding: 0; list-style: none; font-size: 13px; }
+  .facts li { padding-inline-start: 20px; position: relative; margin-bottom: 2px; color: var(--text-2); }
+  .facts li.see::before { content: "👁"; position: absolute; inset-inline-start: 0; }
+  .facts li.no::before { content: "⚠"; position: absolute; inset-inline-start: 0; }
+  .facts li.no { color: var(--err); }
+  .order-note {
+    margin-top: 14px; padding: 11px 14px; border-radius: 9px;
+    background: var(--surface-2); border: 1px solid var(--border); font-size: 13px;
+  }
+  .order-note b { color: var(--text); }
+
+  /* --- the script, and the gate --- */
+  .line { padding: 13px 0; border-top: 1px solid var(--border); }
+  .line:first-of-type { border-top: 0; }
+  .line .meta { font-size: 11.5px; color: var(--text-3); font-family: var(--mono); margin-bottom: 4px; }
+  .line .speak { font-size: 15px; line-height: 1.75; }
+  .line .cam { font-size: 11.5px; color: var(--text-3); margin-top: 5px; font-family: var(--mono); }
+
+  .gate {
+    margin-top: 18px; padding: 15px 17px; border-radius: 11px;
+    background: var(--wait-soft); border: 1px solid color-mix(in srgb, var(--wait) 35%, transparent);
+  }
+  .gate strong { display: block; margin-bottom: 4px; }
+  .gate span { font-size: 13px; color: var(--text-2); }
+
+  .actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
+  button.primary {
+    background: var(--accent); color: var(--surface); border: 0; border-radius: 9px;
+    padding: 11px 20px; font-family: var(--sans); font-size: 14.5px; font-weight: 700; cursor: pointer;
+  }
+  button.ghost {
+    background: transparent; color: var(--text-2); border: 1px solid var(--border-strong);
+    border-radius: 9px; padding: 10px 17px; font-family: var(--sans); font-size: 14px;
+    font-weight: 600; cursor: pointer;
+  }
+  button:disabled { opacity: .55; cursor: not-allowed; }
+  .chip {
+    font-size: 12px; color: var(--text-2); background: var(--surface-2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 11px;
+  }
+
+  .panel {
+    margin-top: 15px; padding: 13px 15px; border-radius: 10px; font-size: 13.5px;
+    border: 1px solid; display: flex; gap: 12px; align-items: flex-start;
+  }
+  .panel .badge {
+    font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .05em;
+    padding: 3px 7px; border-radius: 5px; flex-shrink: 0; margin-top: 1px;
+  }
+  .panel.ok { background: var(--ok-soft); border-color: color-mix(in srgb, var(--ok) 35%, transparent); }
+  .panel.ok .badge { background: var(--ok); color: var(--surface); }
+  .panel.err { background: var(--err-soft); border-color: color-mix(in srgb, var(--err) 35%, transparent); }
+  .panel.err .badge { background: var(--err); color: #fff; }
+  .panel.warn { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 35%, transparent); }
+  .panel.warn .badge { background: var(--accent); color: var(--surface); }
+  .panel.busy { background: var(--wait-soft); border-color: color-mix(in srgb, var(--wait) 35%, transparent); }
+  .panel .body { flex: 1; min-width: 0; }
+  .panel .body strong { display: block; margin-bottom: 3px; }
+  .panel .body span { color: var(--text-2); font-size: 12.5px; }
+
+  .violation { margin-top: 10px; padding-inline-start: 14px; border-inline-start: 3px solid var(--err); }
+  .violation b { color: var(--err); font-size: 13px; }
+  .violation p { margin: 3px 0 0; font-size: 13px; color: var(--text-2); line-height: 1.6; }
+
+  .progress-ring { position: relative; width: 32px; height: 32px; flex-shrink: 0; }
+  .progress-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .progress-ring circle { fill: none; stroke-width: 4; }
+  .progress-ring .track { stroke: color-mix(in srgb, var(--wait) 22%, transparent); }
+  .progress-ring .bar { stroke: var(--wait); stroke-linecap: round; transition: stroke-dashoffset .25s linear; }
+  .progress-ring .pct {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 9px; font-weight: 700; color: var(--wait);
+    font-variant-numeric: tabular-nums;
+  }
+  .elapsed { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  @media (prefers-reduced-motion: reduce) { * { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+
+  .hidden { display: none; }
+</style>
+  <script src="/nav.js" defer></script>
+</head>
+<body>
+<main class="shell">
+
+  <header>
+    <div class="kicker">WF8b · Verified Listing Video</div>
+    <h1>วิดีโอประกาศขายที่ดิน — ยึดข้อมูลจริง</h1>
+    <p class="standfirst">
+      ระบบตรวจรูปทีละใบก่อนว่าเห็นอะไรจริงบ้าง แล้วเขียนบทจากข้อมูลที่ผู้ขายให้มาเท่านั้น
+      สิ่งที่ไม่มีทั้งในแคปชั่นและไม่มีทั้งในรูป จะไม่ถูกพูดออกไป
+    </p>
+
+    <div class="doctrine">
+      <b>ลำดับความน่าเชื่อถือ</b> — รูปมักถ่ายไม่ครบทุกมุม ตรงไหนขาดให้ยึดแคปชั่น
+      <ol>
+        <li>ข้อมูลที่ผู้ขายกรอกยืนยัน</li>
+        <li>แคปชั่นของผู้ขาย — เติมส่วนที่ข้อ 1 ไม่มี</li>
+        <li>สิ่งที่เห็นในรูป — ใช้บรรยายบรรยากาศ</li>
+      </ol>
+    </div>
+  </header>
+
+  <!-- ============ 1. photos ============ -->
+  <section class="card" id="card-photos">
+    <div class="step-head"><span class="step-no">1</span><h2>รูปที่ดิน</h2></div>
+    <p class="hint">อัปโหลด 5–7 รูปคนละมุม · ระบบจะตรวจทีละใบและตัดรูปที่อาจทำให้เข้าใจผิดออกเอง</p>
+
+    <div class="drop" id="drop" tabindex="0" role="button" aria-label="เลือกรูปที่ดิน">
+      <div class="icon">◳</div>
+      <p><b>คลิกเพื่อเลือกรูป</b> หรือลากมาวาง</p>
+      <p class="small">เลือกหลายรูปพร้อมกันได้ · สูงสุด 20 รูป</p>
+      <input type="file" id="file" accept="image/jpeg,image/png,image/webp" multiple>
+    </div>
+    <div class="thumbs" id="thumbs"></div>
+  </section>
+
+  <!-- ============ 2. seller's own information ============ -->
+  <section class="card" id="card-info">
+    <div class="step-head"><span class="step-no">2</span><h2>ข้อมูลจากผู้ขาย</h2></div>
+    <p class="hint">ดึงจากชีทที่ดินได้ หรือกรอกเอง · ช่องที่เว้นว่างจะไม่ถูกพูดถึงในคลิป</p>
+
+    <div class="field">
+      <label for="listing">ดึงจากชีทที่ดิน</label>
+      <select id="listing"><option value="">— กรอกเอง —</option></select>
+    </div>
+
+    <div class="field">
+      <label for="caption">แคปชั่นของผู้ขาย</label>
+      <textarea id="caption" placeholder="ขายที่ดิน 2 ไร่ ปากพลี นครนายก ไร่ละ 2.6 ล้าน ถมแล้ว ติดถนนลาดยาง ไฟฟ้าเข้าถึงแล้ว"></textarea>
+      <p class="hint" style="margin:6px 0 0">จุดเด่นที่เขียนไว้ตรงนี้ ถึงไม่มีในรูปก็จะถูกพูดถึง</p>
+    </div>
+
+    <div class="pair">
+      <div class="field"><label for="location">ทำเล</label><input type="text" id="location" placeholder="ปากพลี นครนายก"></div>
+      <div class="field"><label for="size">ขนาดที่ดิน</label><input type="text" id="size" placeholder="2 ไร่"></div>
+    </div>
+    <div class="pair">
+      <div class="field"><label for="price">ราคา</label><input type="text" id="price" placeholder="ไร่ละ 2.6 ล้านบาท"></div>
+      <div class="field"><label for="contact">ประโยคปิดท้าย</label><input type="text" id="contact" placeholder="สนใจทักไลน์ หรือโทร 094-887-4343"></div>
+    </div>
+
+    <div class="actions">
+      <button class="primary" id="btn-classify">ตรวจรูป แล้วดูผล</button>
+      <span class="chip">≈ $0.07 · ยังไม่เขียนบทในขั้นนี้</span>
+    </div>
+    <div id="out-classify"></div>
+  </section>
+
+  <!-- ============ 3. classification result ============ -->
+  <section class="card hidden" id="card-result">
+    <div class="step-head"><span class="step-no">3</span><h2>ผลตรวจรูป</h2></div>
+    <p class="hint">👁 คือสิ่งที่กล้องเห็นจริง · ⚠ คือสิ่งที่ห้ามกล่าวอ้างจากรูปนี้</p>
+    <div id="photo-rows"></div>
+    <div class="order-note" id="order-note"></div>
+
+    <div class="actions">
+      <button class="primary" id="btn-script">เขียนบทพากย์</button>
+      <span class="chip">≈ $0.04</span>
+    </div>
+    <div id="out-script"></div>
+  </section>
+
+  <!-- ============ 4. script + approval gate ============ -->
+  <section class="card hidden" id="card-script">
+    <div class="step-head"><span class="step-no">4</span><h2>บทพากย์</h2></div>
+    <p class="hint">ผ่านการตรวจคำกล่าวอ้างต้องห้ามแล้ว · อ่านให้ครบก่อนอนุมัติ</p>
+    <div id="script-lines"></div>
+
+    <div class="gate">
+      <strong>อ่านบทให้ครบก่อนไปต่อ</strong>
+      <span>
+        WF8b กำหนดให้คนอนุมัติก่อน เพราะบทนี้คือสิ่งที่จะพูดทับรูปที่ดิน
+        ที่มีคนกำลังตัดสินใจซื้อ — แก้ข้อมูลด้านบนแล้วกดเขียนใหม่ได้ถ้ายังไม่ถูก
+      </span>
+      <div class="actions">
+        <button class="primary" id="btn-approve">อนุมัติบทนี้ ไปขั้นเรนเดอร์</button>
+        <button class="ghost" id="btn-copy">คัดลอกบท</button>
+      </div>
+      <div id="out-approve"></div>
+    </div>
+  </section>
+
+  <!-- ============ 5. render ============ -->
+  <section class="card hidden" id="card-render">
+    <div class="step-head"><span class="step-no">5</span><h2>เรนเดอร์เป็นวิดีโอ</h2></div>
+    <p class="hint">รูปละ 1 คลิป 5 วินาที แล้วเชื่อมด้วยการเฟด 0.3 วินาที</p>
+
+    <div class="field">
+      <label for="style">สไตล์การเคลื่อนกล้อง</label>
+      <select id="style">
+        <option value="preserve" selected>ยึดภาพจริง — กล้องขยับเท่าที่ถ่ายจริงได้ (แนะนำ)</option>
+        <option value="cinematic">ซีเนมาติก — โดรนบิน/หมุน ดูอลังการกว่า</option>
+      </select>
+    </div>
+
+    <div class="pair">
+      <div class="field">
+        <label for="aspect">สัดส่วน</label>
+        <select id="aspect">
+          <option value="9:16" selected>9:16 แนวตั้ง (Reels/TikTok/Shorts)</option>
+          <option value="16:9">16:9 แนวนอน (Facebook/YouTube)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="pid">รหัสแปลง</label>
+        <input type="text" id="pid" value="PROP-TH-01029">
+      </div>
+    </div>
+
+    <div id="plan-box"></div>
+
+    <div class="actions">
+      <button class="primary" id="btn-render">เรนเดอร์จริง</button>
+      <span class="chip" id="plan-chip">—</span>
+    </div>
+    <div id="out-render"></div>
+  </section>
+
+</main>
+
+<script>
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const $ = (id) => document.getElementById(id);
+
+  const MAX_BYTES = 8 * 1024 * 1024;
+  const MAX_PHOTOS = 20;
+  let photos = [];       // { name, dataUri }
+  let lastResult = null; // classify response
+  let lastScript = null;
+
+  /* ---------- upload ---------- */
+  const drop = $("drop");
+  const fileInput = $("file");
+
+  drop.addEventListener("click", () => fileInput.click());
+  drop.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileInput.click(); }
+  });
+  drop.addEventListener("dragover", (e) => { e.preventDefault(); drop.classList.add("over"); });
+  drop.addEventListener("dragleave", () => drop.classList.remove("over"));
+  drop.addEventListener("drop", (e) => {
+    e.preventDefault(); drop.classList.remove("over");
+    addFiles(e.dataTransfer.files);
+  });
+  fileInput.addEventListener("change", () => { addFiles(fileInput.files); fileInput.value = ""; });
+
+  function addFiles(list) {
+    for (const file of list) {
+      if (photos.length >= MAX_PHOTOS) { show("out-classify", "err", "รูปครบจำนวนแล้ว", "ใส่ได้สูงสุด " + MAX_PHOTOS + " รูป"); break; }
+      if (!file.type.startsWith("image/")) continue;
+      if (file.size > MAX_BYTES) {
+        show("out-classify", "err", "รูปใหญ่เกินไป",
+          esc(file.name) + " มีขนาด " + (file.size / 1048576).toFixed(1) + "MB เกิน 8MB");
+        continue;
+      }
+      const reader = new FileReader();
+      reader.onload = () => { photos.push({ name: file.name, dataUri: reader.result }); paintThumbs(); };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  function paintThumbs() {
+    $("thumbs").innerHTML = photos.map((p, i) =>
+      '<div class="thumb"><span class="ord">' + (i + 1) + '</span>' +
+      '<img src="' + p.dataUri + '" alt="' + esc(p.name) + '">' +
+      '<button type="button" class="x" data-i="' + i + '" aria-label="เอารูปที่ ' + (i + 1) + ' ออก">×</button></div>'
+    ).join("");
+    $("thumbs").querySelectorAll("button.x").forEach((b) =>
+      b.addEventListener("click", () => { photos.splice(Number(b.dataset.i), 1); paintThumbs(); })
+    );
+  }
+
+  /* ---------- listing dropdown ---------- */
+  let LISTINGS = [];
+  (async () => {
+    try {
+      const res = await fetch("/api/listings");
+      const body = await res.json();
+      if (!body.ok) return;
+      // Only plots that can still be sold: a video advertising a closed plot costs real
+      // render credit and cannot convert. Same guard the CLI applies.
+      LISTINGS = (body.data.items || []).filter((i) => !["SOLD", "HIDDEN"].includes(i.status));
+      $("listing").innerHTML = '<option value="">— กรอกเอง —</option>' +
+        LISTINGS.map((i) => '<option value="' + esc(i.listing_id) + '">' +
+          esc((i.title || i.listing_id).slice(0, 60)) + "</option>").join("");
+    } catch { /* dropdown is a convenience; typing the fields always works */ }
+  })();
+
+  $("listing").addEventListener("change", () => {
+    const row = LISTINGS.find((i) => i.listing_id === $("listing").value);
+    if (!row) return;
+    $("caption").value = row.caption || "";
+    $("location").value = row.location || "";
+    $("size").value = row.size_text || "";
+    $("price").value = row.price_text || "";
+    $("contact").value = row.contact ? "สนใจติดต่อ " + row.contact : "";
+  });
+
+  /* ---------- progress ---------- */
+  function busy(targetId, expectedSeconds, label) {
+    const target = $(targetId);
+    const t0 = Date.now();
+    const CIRC = 2 * Math.PI * 14;
+    target.innerHTML =
+      '<div class="panel busy"><div class="progress-ring">' +
+      '<svg viewBox="0 0 32 32"><circle class="track" cx="16" cy="16" r="14"></circle>' +
+      '<circle class="bar" cx="16" cy="16" r="14" stroke-dasharray="' + CIRC + '" stroke-dashoffset="' + CIRC + '"></circle></svg>' +
+      '<span class="pct">0%</span></div><div class="body"><strong>' + esc(label) + "</strong>" +
+      '<span>ผ่านไป <span class="elapsed">0:00</span></span></div></div>';
+    const el = target.querySelector(".elapsed");
+    const bar = target.querySelector(".bar");
+    const pctEl = target.querySelector(".pct");
+    const pace = expectedSeconds * 0.6;
+    const id = setInterval(() => {
+      const s = (Date.now() - t0) / 1000;
+      el.textContent = Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0");
+      const pct = 92 * (1 - Math.exp(-s / pace));
+      pctEl.textContent = Math.round(pct) + "%";
+      bar.setAttribute("stroke-dashoffset", String(CIRC * (1 - pct / 100)));
+    }, 200);
+    return () => clearInterval(id);
+  }
+
+  function show(targetId, kind, title, detail) {
+    $(targetId).innerHTML =
+      '<div class="panel ' + kind + '"><span class="badge">' +
+      (kind === "err" ? "ERROR" : kind === "warn" ? "เตือน" : "OK") +
+      '</span><div class="body"><strong>' + esc(title) + "</strong>" +
+      (detail ? "<span>" + esc(detail) + "</span>" : "") + "</div></div>";
+  }
+
+  /* ---------- step 1+2: classify ---------- */
+  $("btn-classify").addEventListener("click", async () => {
+    if (!photos.length) return show("out-classify", "err", "ยังไปต่อไม่ได้", "เลือกรูปอย่างน้อยหนึ่งรูปก่อนนะครับ");
+    const btn = $("btn-classify");
+    btn.disabled = true;
+    const stop = busy("out-classify", 20 + photos.length * 6, "กำลังตรวจรูปทีละใบ…");
+    try {
+      const res = await fetch("/api/wf8b/classify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ photos: photos.map((p) => p.dataUri) }),
+      });
+      const body = await res.json();
+      stop();
+      if (!body.ok) return show("out-classify", "err", "ตรวจรูปไม่สำเร็จ (" + esc(body.code) + ")", body.message);
+      lastResult = body.data;
+      renderClassification(body.data);
+      show("out-classify", "ok", "ตรวจรูปเสร็จแล้ว",
+        "ใช้ได้ " + body.data.selected.length + " ตัดออก " + body.data.dropped.length + " · $" + body.data.cost_usd);
+      $("card-photos").classList.add("done");
+      $("card-info").classList.add("done");
+      $("card-result").classList.remove("hidden");
+      $("card-result").scrollIntoView({ behavior: "smooth", block: "start" });
+    } catch (err) {
+      stop();
+      show("out-classify", "err", "ติดต่อเซิร์ฟเวอร์ไม่ได้", String(err));
+    } finally { btn.disabled = false; }
+  });
+
+  function renderClassification(d) {
+    const chosen = new Set(d.selected.map((s) => s.upload_index));
+    $("photo-rows").innerHTML = d.classified.map((c) => {
+      const src = photos[c.upload_index]?.dataUri ?? "";
+      const used = chosen.has(c.upload_index);
+      return '<div class="photo-row' + (used ? "" : " dropped") + '">' +
+        '<img src="' + src + '" alt="' + esc(c.name) + '">' +
+        "<div><div class='cat'>" + esc(c.category_label) +
+        '<span class="pill ' + (used ? "use" : "skip") + '">' + (used ? "ใช้" : "ไม่ใช้") + "</span></div>" +
+        '<ul class="facts">' +
+        c.visible.slice(0, 5).map((v) => '<li class="see">' + esc(v) + "</li>").join("") +
+        c.unverified.slice(0, 4).map((u) => '<li class="no">' + esc(u) + "</li>").join("") +
+        "</ul>" +
+        (!used && c.note ? '<p class="hint" style="margin:6px 0 0">' + esc(c.note) + "</p>" : "") +
+        "</div></div>";
+    }).join("");
+
+    let note = "<b>ลำดับในคลิป:</b> " +
+      d.selected.map((s, i) => (i + 1) + ". " + esc(s.category_label)).join(" → ");
+    if (d.warning) note += '<br><span style="color:var(--accent)">⚠ ' + esc(d.warning) + "</span>";
+    $("order-note").innerHTML = note;
+  }
+
+  /* ---------- step 3: script ---------- */
+  $("btn-script").addEventListener("click", async () => {
+    if (!lastResult?.selected?.length) return;
+    const btn = $("btn-script");
+    btn.disabled = true;
+    const stop = busy("out-script", 30, "กำลังเขียนบท แล้วตรวจคำกล่าวอ้าง…");
+    try {
+      const res = await fetch("/api/wf8b/script", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          caption: $("caption").value.trim(),
+          verified: {
+            location: $("location").value.trim(),
+            land_size: $("size").value.trim(),
+            asking_price: $("price").value.trim(),
+            confirmed_highlights: [],
+            contact_call_to_action: $("contact").value.trim(),
+          },
+          selected: lastResult.selected,
+        }),
+      });
+      const body = await res.json();
+      stop();
+
+      if (!body.ok) {
+        if (body.code === "ERR_SCR_FORBIDDEN" && body.violations?.length) {
+          // The gate firing is the product working, so it gets an explanation and a fix,
+          // not a bare error string.
+          let h = '<div class="panel err"><span class="badge">ถูกปฏิเสธ</span><div class="body">' +
+            "<strong>บทมีคำกล่าวอ้างที่ไม่มีใครยืนยัน " + body.violations.length + " จุด</strong>" +
+            "<span>ระบบไม่ส่งบทนี้ออกไป เพราะจะกลายเป็นการอ้างเรื่องที่ตรวจสอบไม่ได้</span></div></div>";
+          for (const v of body.violations) {
+            h += '<div class="violation"><b>' + esc(v.why) + "</b><p>" + esc(v.line) + "</p></div>";
+          }
+          h += '<div class="panel warn"><span class="badge">วิธีแก้</span><div class="body">' +
+            "<strong>ถ้าข้อมูลนี้ถูกต้องจริง ให้ใส่ไว้ในแคปชั่น</strong>" +
+            "<span>แคปชั่นคือคำพูดของผู้ขายเอง ระบบจะยอมให้พูดทันที — แล้วกดเขียนบทใหม่</span></div></div>";
+          $("out-script").innerHTML = h;
+          return;
+        }
+        return show("out-script", "err", "เขียนบทไม่สำเร็จ (" + esc(body.code) + ")", body.message);
+      }
+
+      lastScript = body.data;
+      renderScript(body.data);
+      show("out-script", "ok", "ผ่านการตรวจคำกล่าวอ้างต้องห้าม", "$" + body.data.cost_usd);
+      $("card-result").classList.add("done");
+      $("card-script").classList.remove("hidden");
+      $("card-script").scrollIntoView({ behavior: "smooth", block: "start" });
+    } catch (err) {
+      stop();
+      show("out-script", "err", "ติดต่อเซิร์ฟเวอร์ไม่ได้", String(err));
+    } finally { btn.disabled = false; }
+  });
+
+  function renderScript(s) {
+    $("script-lines").innerHTML = s.sentences.map((line, i) => {
+      const clip = lastResult.selected[i] ?? {};
+      return '<div class="line"><div class="meta">คลิป ' + (i + 1) + " · " + esc(clip.name ?? "") + "</div>" +
+        '<div class="speak">' + esc(line) + "</div>" +
+        '<div class="cam">' + esc(clip.camera_motion ?? "") + "</div></div>";
+    }).join("");
+  }
+
+  /* ---------- step 4: the gate ---------- */
+  $("btn-copy").addEventListener("click", async () => {
+    if (!lastScript) return;
+    try {
+      await navigator.clipboard.writeText(lastScript.sentences.join("\n"));
+      show("out-approve", "ok", "คัดลอกบทแล้ว", lastScript.sentences.length + " ท่อน");
+    } catch {
+      show("out-approve", "err", "คัดลอกไม่สำเร็จ", "เบราว์เซอร์ไม่อนุญาต — เลือกข้อความแล้วคัดลอกเองได้ครับ");
+    }
+  });
+
+  $("btn-approve").addEventListener("click", () => {
+    if (!lastScript) return;
+    $("card-script").classList.add("done");
+    $("card-render").classList.remove("hidden");
+    refreshPlan();
+    $("card-render").scrollIntoView({ behavior: "smooth", block: "start" });
+    show("out-approve", "ok", "อนุมัติบทแล้ว", "ไปขั้นเรนเดอร์ด้านล่างได้เลย");
+  });
+
+  /* ---------- step 5: plan then render ---------- */
+  // The plan call is free and runs on every style change, so the price and the exact
+  // camera moves are on screen before anything is spent -- not discovered afterwards.
+  async function refreshPlan() {
+    if (!lastResult?.selected?.length) return;
+    try {
+      const res = await fetch("/api/wf8b/plan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ selected: lastResult.selected, style: $("style").value }),
+      });
+      const body = await res.json();
+      if (!body.ok) return;
+      const p = body.data;
+      $("plan-chip").textContent = p.clips.length + " คลิป · " + p.duration_seconds + " วิ · ≈ $" + p.cost_usd;
+
+      let h = '<div class="order-note"><b>คลิปที่จะสร้าง:</b><br>' +
+        p.clips.map((c) => c.index + ". " + esc(c.name) + " — " + esc(c.motion_label)).join("<br>") +
+        "</div>";
+      if (p.risky.length) {
+        // Naming the specific clip and the specific problem, because "cinematic mode has
+        // caveats" is not something anyone can act on.
+        h += '<div class="panel warn"><span class="badge">ระวัง</span><div class="body">' +
+          "<strong>" + p.risky.length + " คลิปจะให้ AI สร้างสิ่งที่กล้องไม่เคยเห็น</strong><span>" +
+          p.risky.map((c) => "คลิป " + c.index + " (" + esc(c.motion_label) + "): " + esc(c.risk)).join("<br>") +
+          "<br><br>วิดีโอที่ได้จะโชว์พื้นที่ที่ AI แต่งขึ้น ไม่ใช่ที่ดินจริงทั้งหมด</span></div></div>";
+      }
+      $("plan-box").innerHTML = h;
+    } catch { /* the plan is a preview; the render button still works without it */ }
+  }
+  $("style").addEventListener("change", refreshPlan);
+
+  $("btn-render").addEventListener("click", async () => {
+    if (!lastResult?.selected?.length) return;
+    const btn = $("btn-render");
+    btn.disabled = true;
+    // Kling runs ~5 min per clip and they are generated one at a time.
+    const stop = busy("out-render", 300 * lastResult.selected.length, "กำลังสร้างคลิปทีละใบ…");
+    try {
+      const res = await fetch("/api/wf8b/render", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          property_id: $("pid").value.trim() || "PROP-TH-01029",
+          selected: lastResult.selected,
+          style: $("style").value,
+          aspect: $("aspect").value,
+        }),
+      });
+      const body = await res.json();
+      stop();
+      if (!body.ok) {
+        const spent = body.spent ? " (สร้างไปแล้ว " + body.built + " คลิป $" + Number(body.spent).toFixed(2) + ")" : "";
+        return show("out-render", "err", "เรนเดอร์ไม่สำเร็จ (" + esc(body.code) + ")", body.message + spent);
+      }
+      const d = body.data;
+      $("out-render").innerHTML =
+        '<div class="panel ok"><span class="badge">OK</span><div class="body">' +
+        "<strong>ได้วิดีโอแล้ว " + d.duration_seconds + " วินาที</strong>" +
+        "<span>" + d.clips.length + " คลิป · $" + d.cost_usd + " · " + esc(d.style) + "</span></div></div>" +
+        '<video controls playsinline src="' + esc(d.url) + '" style="width:100%;margin-top:13px;border-radius:9px;border:1px solid var(--border)"></video>' +
+        '<p class="hint" style="margin-top:8px"><a href="' + esc(d.url) + '" download style="color:var(--accent)">ดาวน์โหลด</a></p>';
+      $("card-render").classList.add("done");
+    } catch (err) {
+      stop();
+      show("out-render", "err", "ติดต่อเซิร์ฟเวอร์ไม่ได้", String(err));
+    } finally { btn.disabled = false; }
+  });
+</script>
+</body>
+</html>

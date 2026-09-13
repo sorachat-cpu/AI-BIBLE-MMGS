@@ -23,14 +23,14 @@
     <rect x="0" y="0" width="{{ACCENT_BAR}}" height="{{CARD_H}}" rx="{{RADIUS}}" fill="#E0A05C"/>
     <rect x="{{ACCENT_BAR}}" y="0" width="{{ACCENT_BAR}}" height="{{CARD_H}}" fill="url(#cardbg)"/>
 
-    <text x="{{TEXT_X}}" y="{{HEAD_Y}}" font-family="Sathu" font-size="{{HEAD_SIZE}}"
+    <text x="{{TEXT_X}}" y="{{HEAD_Y}}" font-family="{{FONT}}" font-size="{{HEAD_SIZE}}"
           font-weight="bold" fill="#FFFFFF">{{HEADLINE}}</text>
-    <text x="{{TEXT_X}}" y="{{SUB_Y}}" font-family="Sathu" font-size="{{SUB_SIZE}}"
+    <text x="{{TEXT_X}}" y="{{SUB_Y}}" font-family="{{FONT}}" font-size="{{SUB_SIZE}}"
           fill="#93A7B7">{{SUBHEADLINE}}</text>
 
     {{ROWS}}
 
-    <text x="{{TEXT_X}}" y="{{FOOTER_Y}}" font-family="Sathu" font-size="{{SUB_SIZE}}"
+    <text x="{{TEXT_X}}" y="{{FOOTER_Y}}" font-family="{{FONT}}" font-size="{{SUB_SIZE}}"
           fill="#E0A05C">{{FOOTER}}</text>
   </g>
 </svg>

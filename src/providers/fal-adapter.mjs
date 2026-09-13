@@ -55,6 +55,30 @@ export class FalAdapterError extends Error {
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+// WF2's polling loop alone can run for minutes and make dozens of requests -- one transient
+// network blip (a DNS hiccup, a reset connection) anywhere in there used to throw a raw
+// "fetch failed" and discard a generation fal was already running (and billing for). fetch()
+// only throws for a failed *connection*, never for an HTTP error response (that resolves
+// normally and is handled below), so retrying here is safe: it cannot mask a real rejection
+// from fal, only a request that never reached it.
+const NETWORK_RETRIES = Number(process.env.FAL_NETWORK_RETRIES ?? 5);
+const NETWORK_RETRY_BASE_MS = 2_000;
+
+async function fetchWithRetry(url, init) {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await fetch(url, init);
+    } catch (err) {
+      // fetch() only ever throws TypeError for a failed connection (Node/undici's own
+      // "fetch failed", with the real cause -- ENOTFOUND, ECONNRESET, a TLS error -- on
+      // `.cause`). Anything else thrown here is a bug upstream of the network, not a blip,
+      // and retrying it would just hide it behind a minute of silent backoff.
+      if (!(err instanceof TypeError) || attempt >= NETWORK_RETRIES) throw err;
+      await sleep(NETWORK_RETRY_BASE_MS * 2 ** attempt);
+    }
+  }
+}
+
 function nearestDuration(seconds) {
   const n = Number(seconds);
   if (!Number.isFinite(n)) return 8;
@@ -114,7 +138,7 @@ export class FalVeoAdapter {
   }
 
   async #request(url, init = {}) {
-    const res = await fetch(url, { ...init, headers: { ...this.#headers(), ...(init.headers ?? {}) } });
+    const res = await fetchWithRetry(url, { ...init, headers: { ...this.#headers(), ...(init.headers ?? {}) } });
     const text = await res.text();
     let body;
     try {

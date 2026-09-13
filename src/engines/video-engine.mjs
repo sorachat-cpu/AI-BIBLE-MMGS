@@ -44,6 +44,7 @@ export async function runVideoEngine(input, options = {}) {
     image_tail_url,
     image_tail_base64,
     template_id,
+    prompt_text,
     camera_motion = "PAN_RIGHT",
     duration_seconds = 5,
   } = input ?? {};
@@ -82,9 +83,15 @@ export async function runVideoEngine(input, options = {}) {
   const cached = await checkVideoLibrary(property_id, camera_motion);
   if (cached) return cached;
 
-  // An explicit template_id wins, so storyboard shots can request a specific look
-  // (cosmic descent, construction reveal) instead of the default motion mapping.
-  const template = template_id ? { template_id, ...getTemplate(template_id) } : getByCameraMotion(camera_motion);
+  // An explicit prompt_text wins over everything -- used when the caller (src/lib/director.mjs)
+  // has already computed final, property-specific wording and there is no static template id
+  // to name for it. An explicit template_id otherwise wins, so storyboard shots can request a
+  // specific look (cosmic descent, construction reveal) instead of the default motion mapping.
+  const template = prompt_text
+    ? { template_id: template_id ?? "CUSTOM", text: prompt_text }
+    : template_id
+      ? { template_id, ...getTemplate(template_id) }
+      : getByCameraMotion(camera_motion);
   const prompt = sanitizeMediaPrompt(template.text);
 
   // Fail loudly rather than shipping a price or phone number into a paid render.

@@ -118,7 +118,46 @@
   }
   label.field { display: grid; gap: 4px; font-size: 12.5px; color: var(--text-3); font-weight: 600; }
 
+  /* ---- listing filters + inline editing ---- */
+  .filters {
+    display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end;
+    margin-top: 14px; padding: 13px 15px; border-radius: 11px;
+    background: var(--surface-2); border: 1px solid var(--border);
+  }
+  .filters .f-group { display: flex; flex-direction: column; gap: 4px; }
+  .filters label {
+    font-size: 11.5px; font-weight: 600; color: var(--text-3);
+    text-transform: uppercase; letter-spacing: .05em;
+  }
+  .filters input, .filters select {
+    padding: 7px 10px; border-radius: 8px; border: 1px solid var(--border-strong);
+    background: var(--surface); color: var(--text); font-family: var(--sans); font-size: 13px;
+  }
+  .filters input { min-width: 200px; }
+  .filters button { align-self: flex-end; }
+
+  .map-cell { display: flex; gap: 6px; align-items: center; }
+  .map-cell input {
+    width: 100%; min-width: 150px; padding: 6px 9px; border-radius: 7px;
+    border: 1px solid var(--border-strong); background: var(--surface);
+    color: var(--text); font-family: var(--mono); font-size: 11.5px;
+  }
+  .map-cell input.dirty { border-color: var(--accent); background: var(--accent-soft); }
+  .row-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+  button.tiny {
+    font-size: 11.5px; padding: 5px 10px; border-radius: 7px; font-weight: 600;
+    border: 1px solid var(--border-strong); background: var(--surface);
+    color: var(--text-2); cursor: pointer; font-family: var(--sans); white-space: nowrap;
+  }
+  button.tiny:hover { border-color: var(--accent); color: var(--accent); }
+  button.tiny:disabled { opacity: .5; cursor: not-allowed; }
+  button.tiny.danger:hover { border-color: var(--err); color: var(--err); }
+  button.tiny.go { background: var(--accent); color: var(--surface); border-color: var(--accent); }
+  button.tiny.go:hover { opacity: .88; color: var(--surface); }
+  td.actions-col { min-width: 168px; }
+
   .status { font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 999px; }
+  .status.NEW { background: var(--wait-soft); color: var(--wait); }
   .status.DRAFT { background: var(--wait-soft); color: var(--wait); }
   .status.READY { background: var(--accent-soft); color: var(--accent); }
   .status.POSTED { background: var(--ok-soft); color: var(--ok); }
@@ -132,6 +171,7 @@
     background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px;
     padding: 12px 14px; margin-top: 10px; max-height: 320px; overflow: auto;
   }
+  .log.err { background: var(--err-soft); border-color: color-mix(in srgb, var(--err) 35%, transparent); color: var(--err); }
   .note { font-size: 13px; color: var(--text-3); }
   .warn { background: var(--err-soft); color: var(--err); border-radius: 10px; padding: 12px 14px; font-size: 13.5px; }
   footer { margin-top: 40px; color: var(--text-3); font-size: 13px; display: flex; gap: 18px; flex-wrap: wrap; }
@@ -194,6 +234,7 @@
       <div class="row">
         <button class="ghost small" id="btn-listings-page">ดึงจากโพสต์เพจ</button>
         <button class="ghost small" id="btn-listings-enrich">เติมสถานที่ใกล้เคียง</button>
+        <button class="ghost small" id="btn-listings-dedupe">ลบรายการซ้ำ</button>
       </div>
     </div>
 
@@ -216,6 +257,50 @@
       </label>
     </div>
     <div id="listing-log"></div>
+
+    <div class="filters" id="listing-filters">
+      <div class="f-group">
+        <label for="f-text">ค้นหา</label>
+        <input type="text" id="f-text" placeholder="ชื่อแปลง ทำเล หรือรหัส">
+      </div>
+      <div class="f-group">
+        <label for="f-status">สถานะ</label>
+        <select id="f-status">
+          <option value="">ทั้งหมด</option>
+          <option value="NEW">NEW — ยังไม่ได้จัดการ</option>
+          <option value="READY">READY — พร้อมโพสต์</option>
+          <option value="POSTED">POSTED — โพสต์แล้ว</option>
+          <option value="SOLD">SOLD — ปิดแปลงแล้ว</option>
+          <option value="HIDDEN">HIDDEN — ซ่อนไว้</option>
+        </select>
+      </div>
+      <div class="f-group">
+        <label for="f-map">ลิงก์แผนที่</label>
+        <select id="f-map">
+          <option value="">ทั้งหมด</option>
+          <option value="no">ยังไม่มีลิงก์</option>
+          <option value="yes">มีลิงก์แล้ว</option>
+        </select>
+      </div>
+      <div class="f-group">
+        <label for="f-fb">โพสต์เฟซบุ๊ก</label>
+        <select id="f-fb">
+          <option value="">ทั้งหมด</option>
+          <option value="yes">มีลิงก์โพสต์</option>
+          <option value="no">ไม่มีลิงก์โพสต์</option>
+        </select>
+      </div>
+      <div class="f-group">
+        <label for="f-photo">รูป</label>
+        <select id="f-photo">
+          <option value="">ทั้งหมด</option>
+          <option value="yes">มีรูป</option>
+          <option value="no">ไม่มีรูป</option>
+        </select>
+      </div>
+      <button class="ghost small" id="f-reset">ล้างตัวกรอง</button>
+    </div>
+
     <div id="listing-table" style="margin-top:14px"></div>
   </section>
 
@@ -415,36 +500,178 @@
     renderCalendar();
   });
 
-  function renderListings(items) {
-    if (!items.length) {
+  let LISTINGS = [];
+
+  /** Every filter is AND-ed; an unset control contributes nothing. */
+  function filterListings(items) {
+    const q = $("f-text").value.trim().toLowerCase();
+    const status = $("f-status").value;
+    const map = $("f-map").value;
+    const fb = $("f-fb").value;
+    const photo = $("f-photo").value;
+
+    return items.filter((i) => {
+      if (status && i.status !== status) return false;
+      if (map === "yes" && !i.maps_url) return false;
+      if (map === "no" && i.maps_url) return false;
+      if (fb === "yes" && !i.source_post_url) return false;
+      if (fb === "no" && i.source_post_url) return false;
+      if (photo === "yes" && !i.photo_url) return false;
+      if (photo === "no" && i.photo_url) return false;
+      if (q) {
+        const hay = [i.title, i.location, i.listing_id, i.price_text, i.size_text]
+          .filter(Boolean).join(" ").toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+  }
+
+  function renderListings() {
+    if (!LISTINGS.length) {
       $("listing-table").innerHTML =
         '<p class="note">ชีทยังว่าง — วางข้อความโพสต์เก่าด้านบน หรือกด "ดึงจากโพสต์เพจ" (ต้องมี token Facebook ก่อน)</p>';
       return;
     }
-    const rows = items.map((i) => `
-      <tr>
+    const items = filterListings(LISTINGS);
+    if (!items.length) {
+      $("listing-table").innerHTML =
+        `<p class="note">ไม่มีแปลงที่ตรงกับตัวกรอง — มีทั้งหมด ${LISTINGS.length} แปลง</p>`;
+      return;
+    }
+
+    const rows = items.map((i) => {
+      const sold = i.status === "SOLD";
+      return `
+      <tr data-id="${esc(i.listing_id)}">
         <td><span class="status ${esc(i.status)}">${esc(i.status)}</span></td>
         <td>${esc(i.title || "-")}<br><span class="note">${esc(i.location || "")}</span></td>
         <td class="num">${esc(i.size_text || "-")}</td>
         <td class="num">${esc(i.price_text || (i.price_thb ? Number(i.price_thb).toLocaleString("th-TH") : "-"))}</td>
-        <td>${i.maps_url
-          ? `<a href="${esc(i.maps_url)}" target="_blank" rel="noopener">เปิดแผนที่</a>`
+        <td>
+          <div class="map-cell">
+            <input type="text" class="map-in" value="${esc(i.maps_url || "")}"
+                   placeholder="วางลิงก์ Google Maps หรือพิกัด" aria-label="ลิงก์แผนที่ของ ${esc(i.title || i.listing_id)}">
+            <button class="tiny act-map" type="button" disabled>บันทึก</button>
+          </div>
+          ${i.maps_url ? `<a class="note" href="${esc(i.maps_url)}" target="_blank" rel="noopener">เปิดแผนที่ ↗</a>` : ""}
+        </td>
+        <td>${i.source_post_url
+          ? `<a href="${esc(i.source_post_url)}" target="_blank" rel="noopener">เปิดโพสต์ ↗</a>`
           : '<span class="note">ไม่มีลิงก์</span>'}</td>
         <td>${(i.nearby || []).length
           ? (i.nearby || []).map((n) => esc(n.line)).join("<br>")
           : `<span class="note">${esc(i.enrich_note || "ยังไม่ได้เติม")}</span>`}</td>
-        <td class="num">${esc(i.last_group_post || "-")}</td>
-      </tr>`).join("");
+        <td class="actions-col">
+          <div class="row-actions">
+            <button class="tiny act-sold ${sold ? "" : "danger"}" type="button">
+              ${sold ? "กลับมาขายต่อ" : "ปิดแปลงแล้ว"}
+            </button>
+            <button class="tiny go act-line" type="button">ส่งเข้า LINE OA</button>
+          </div>
+          <span class="note">${i.last_line_push ? "ส่ง LINE ล่าสุด " + esc(i.last_line_push) : ""}</span>
+        </td>
+      </tr>`;
+    }).join("");
 
     $("listing-table").innerHTML = `<div class="scroll-x"><table class="grid">
-      <thead><tr><th>สถานะ</th><th>ที่ดิน</th><th>ขนาด</th><th>ราคา</th><th>แผนที่</th><th>ใกล้เคียง</th><th>ลงกลุ่มล่าสุด</th></tr></thead>
+      <thead><tr><th>สถานะ</th><th>ที่ดิน</th><th>ขนาด</th><th>ราคา</th><th>แผนที่ / พิกัด</th><th>โพสต์เฟซบุ๊ก</th><th>ใกล้เคียง</th><th>จัดการ</th></tr></thead>
       <tbody>${rows}</tbody></table></div>
-      <p class="note" style="margin-top:8px">${items.length} แปลง · แก้รายละเอียดได้ในไฟล์ชีท แล้วนำเข้ากลับ</p>`;
+      <p class="note" style="margin-top:8px">แสดง ${items.length} จาก ${LISTINGS.length} แปลง</p>`;
+
+    wireListingRows();
   }
+
+  function wireListingRows() {
+    const table = $("listing-table");
+
+    // Enable Save only once the value actually differs from what is stored.
+    table.querySelectorAll("tr[data-id]").forEach((tr) => {
+      const id = tr.dataset.id;
+      const original = (LISTINGS.find((l) => l.listing_id === id)?.maps_url) || "";
+      const input = tr.querySelector(".map-in");
+      const saveBtn = tr.querySelector(".act-map");
+
+      const sync = () => {
+        const changed = input.value.trim() !== original.trim();
+        saveBtn.disabled = !changed;
+        input.classList.toggle("dirty", changed);
+      };
+      input.addEventListener("input", sync);
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !saveBtn.disabled) { e.preventDefault(); saveBtn.click(); }
+      });
+
+      saveBtn.addEventListener("click", () => saveMap(id, input.value.trim(), saveBtn));
+      tr.querySelector(".act-sold").addEventListener("click", (e) => toggleSold(id, e.target));
+      tr.querySelector(".act-line").addEventListener("click", (e) => pushToLine(id, e.target));
+    });
+  }
+
+  async function saveMap(id, mapsUrl, btn) {
+    btn.disabled = true;
+    btn.textContent = "กำลังบันทึก…";
+    try {
+      // rebuild_caption so the map link actually reaches the caption people will paste,
+      // rather than sitting in the sheet only.
+      await api("/api/listings/item", { id, patch: { maps_url: mapsUrl || null }, rebuild_caption: true });
+      $("listing-log").innerHTML = `<div class="log">บันทึกลิงก์แผนที่ของ ${esc(id)} แล้ว · กด "เติมสถานที่ใกล้เคียง" เพื่อดึง POI รอบแปลง</div>`;
+      await loadListings();
+    } catch (err) {
+      $("listing-log").innerHTML = `<div class="log err">บันทึกไม่สำเร็จ: ${esc(String(err.message || err))}</div>`;
+      btn.disabled = false;
+      btn.textContent = "บันทึก";
+    }
+  }
+
+  async function toggleSold(id, btn) {
+    const current = LISTINGS.find((l) => l.listing_id === id);
+    const next = current?.status === "SOLD" ? "READY" : "SOLD";
+    btn.disabled = true;
+    try {
+      // The caption carries the "ปิดแปลงแล้ว" banner, so it has to be rebuilt on both
+      // directions of the toggle -- otherwise a re-listed plot keeps announcing it sold.
+      await api("/api/listings/item", { id, patch: { status: next }, rebuild_caption: true });
+      $("listing-log").innerHTML =
+        `<div class="log">${esc(id)} → ${next === "SOLD" ? "ปิดแปลงแล้ว (แคปชั่นขึ้นหัวข้อให้แล้ว)" : "กลับมาขายต่อ"}</div>`;
+      await loadListings();
+    } catch (err) {
+      $("listing-log").innerHTML = `<div class="log err">เปลี่ยนสถานะไม่สำเร็จ: ${esc(String(err.message || err))}</div>`;
+      btn.disabled = false;
+    }
+  }
+
+  async function pushToLine(id, btn) {
+    const listing = LISTINGS.find((l) => l.listing_id === id);
+    if (!confirm(`ส่ง "${listing?.title || id}" เข้า LINE OA ให้ผู้ติดตามทุกคนตอนนี้เลยไหม?\n\nนับโควตาข้อความของ LINE ตามจำนวนผู้ติดตาม และยกเลิกไม่ได้`)) return;
+    btn.disabled = true;
+    btn.textContent = "กำลังส่ง…";
+    try {
+      const res = await api("/api/listings/line-push", { id });
+      $("listing-log").innerHTML =
+        `<div class="log">ส่ง ${esc(id)} เข้า LINE OA แล้ว${res.image_sent ? " (พร้อมรูป)" : " (ข้อความล้วน — แปลงนี้ยังไม่มีรูปบนเซิร์ฟเวอร์)"}</div>`;
+      await loadListings();
+    } catch (err) {
+      $("listing-log").innerHTML = `<div class="log err">ส่งเข้า LINE ไม่สำเร็จ: ${esc(String(err.message || err))}</div>`;
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "ส่งเข้า LINE OA";
+    }
+  }
+
+  ["f-text", "f-status", "f-map", "f-fb", "f-photo"].forEach((id) =>
+    $(id).addEventListener("input", renderListings)
+  );
+  $("f-reset").addEventListener("click", () => {
+    $("f-text").value = "";
+    ["f-status", "f-map", "f-fb", "f-photo"].forEach((id) => { $(id).value = ""; });
+    renderListings();
+  });
 
   async function loadListings() {
     const data = await api("/api/listings");
-    renderListings(data.items);
+    LISTINGS = data.items;
+    renderListings();
   }
 
   async function load() {
@@ -493,6 +720,19 @@
       const res = await api("/api/listings/enrich", {});
       $("listing-log").innerHTML = `<div class="log">เติมแล้ว ${res.length} แปลง\n` +
         res.map((d) => `${d.listing_id}: ${d.nearby} รายการ${d.note ? ` (${d.note})` : ""}`).join("\n") + "</div>";
+      await loadListings();
+    } catch (err) {
+      $("listing-log").innerHTML = `<div class="warn">${esc(err.message)}</div>`;
+    } finally { e.target.disabled = false; }
+  });
+
+  $("btn-listings-dedupe").addEventListener("click", async (e) => {
+    listingBusy(e.target, "กำลังหาแปลงที่ซ้ำกัน (ชื่อ+ขนาด+ราคาเดียวกัน)...");
+    try {
+      const res = await api("/api/listings/dedupe", {});
+      $("listing-log").innerHTML = res.groups
+        ? `<div class="log">พบซ้ำ ${res.groups} กลุ่ม · ซ่อนแล้ว ${res.hidden.length} แปลง (เก็บฉบับโพสต์ล่าสุดของแต่ละกลุ่มไว้ ที่เหลือตั้งสถานะ HIDDEN ไม่หายไปจากชีท)</div>`
+        : `<div class="log">ไม่พบแปลงซ้ำ</div>`;
       await loadListings();
     } catch (err) {
       $("listing-log").innerHTML = `<div class="warn">${esc(err.message)}</div>`;

@@ -74,12 +74,14 @@ test("auto refuses a property with no saved job", async () => {
   );
 });
 
-// A job saved without an address has no satellite plate, so WF1 has nothing to start from.
-// Caught up front rather than as an fs error partway through a paid run.
-test("auto refuses a job that has no WF1 start plate", async () => {
+// WF1 now runs as a round trip on the land photo alone (start and end anchor are the same
+// file -- see prepare.mjs's runWfAuto) -- so wf1_end, not the satellite plate, is what it
+// has nothing to start from without. Caught up front rather than as an fs error partway
+// through a paid run.
+test("auto refuses a job that has no land photo for WF1", async () => {
   const { runWfAuto, WfPrepareError } = await import("../src/wf/prepare.mjs");
   const id = "PROP-TH-09997";
-  await saveJob({ property_id: id, aspect: "9:16", frames: { wf1_start: null, wf1_end: "/x.png" }, listing: {} });
+  await saveJob({ property_id: id, aspect: "9:16", frames: { wf1_start: null, wf1_end: null }, listing: {} });
   await assert.rejects(
     () => runWfAuto({ property_id: id }),
     (e) => e instanceof WfPrepareError && e.code === "ERR_WFPREP_NOSTART"

@@ -2,8 +2,9 @@
 // because no sudo was available -- same binary, no system changes.
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { mkdir, writeFile, rm } from "node:fs/promises";
+import { mkdir, writeFile, rm, readdir, copyFile, access } from "node:fs/promises";
 import path from "node:path";
+import { homedir } from "node:os";
 import { fileURLToPath } from "node:url";
 import ffmpegPath from "ffmpeg-static";
 
@@ -17,12 +18,73 @@ export const TEMP_DIR = path.join(PROJECT_ROOT, "output", ".tmp");
 // Thai needs a font with proper complex-script shaping. drawtext renders combining
 // vowels and tone marks in the wrong place because it does no shaping, so all text in
 // this pipeline goes through libass (the `subtitles` filter) instead.
-export const THAI_FONT_FILE = "/System/Library/Fonts/Supplemental/Sathu.ttf";
-export const THAI_FONT_NAME = "Sathu";
+//
+// The font is SHIPPED WITH THE REPO rather than looked up in the system. The previous
+// value was an absolute macOS path (/System/Library/Fonts/.../Sathu.ttf) which simply
+// does not exist on Linux, so every render on Railway was silently falling back to
+// whatever libass could find -- usually a font with no Thai coverage, which is how you
+// get tofu boxes in a finished clip nobody re-checked. A bundled family renders the same
+// on a laptop and in a container.
+export const FONT_DIR = path.join(PROJECT_ROOT, "assets", "fonts");
+export const THAI_FONT_FILE = path.join(FONT_DIR, "Prompt-Regular.ttf");
+export const THAI_FONT_NAME = "Prompt";
+/** Weight -> bundled file, for callers that embed a specific face (SVG, @font-face). */
+export const THAI_FONT_FILES = {
+  regular: path.join(FONT_DIR, "Prompt-Regular.ttf"),
+  medium: path.join(FONT_DIR, "Prompt-Medium.ttf"),
+  semibold: path.join(FONT_DIR, "Prompt-SemiBold.ttf"),
+  bold: path.join(FONT_DIR, "Prompt-Bold.ttf"),
+};
+
+/**
+ * Make the bundled family visible to sharp's SVG renderer.
+ *
+ * libass takes a `fontsdir` and reads our .ttf straight from the repo, but sharp's
+ * renderer resolves fonts by NAME through fontconfig and offers no equivalent: it ignores
+ * FONTCONFIG_FILE/FONTCONFIG_PATH in this build, and it ignores an @font-face carrying
+ * the font as a data URI (both checked). The only thing it honours is a font installed
+ * where fontconfig already looks -- so the fonts are copied there once, on first render.
+ *
+ * Idempotent and non-fatal: a read-only home directory means the cards fall back down the
+ * stack in svg-card.mjs rather than the whole render failing.
+ */
+let fontsReady = null;
+export async function ensureFontsInstalled() {
+  if (fontsReady) return fontsReady;
+  fontsReady = (async () => {
+    const dest = process.platform === "darwin"
+      ? path.join(homedir(), "Library", "Fonts")
+      : path.join(homedir(), ".local", "share", "fonts");
+    try {
+      await mkdir(dest, { recursive: true });
+      const files = (await readdir(FONT_DIR)).filter((f) => f.endsWith(".ttf"));
+      let copied = 0;
+      for (const f of files) {
+        const target = path.join(dest, f);
+        try {
+          await access(target);
+        } catch {
+          await copyFile(path.join(FONT_DIR, f), target);
+          copied++;
+        }
+      }
+      // fontconfig on Linux serves from a cache; a font dropped in after the cache was
+      // built is invisible until it is refreshed.
+      if (copied && process.platform !== "darwin") {
+        await execFileAsync("fc-cache", ["-f", dest]).catch(() => {});
+      }
+      return { dest, copied, total: files.length };
+    } catch (err) {
+      return { dest, copied: 0, error: err.message };
+    }
+  })();
+  return fontsReady;
+}
 
 export async function ensureDirs() {
   await mkdir(OUTPUT_DIR, { recursive: true });
   await mkdir(TEMP_DIR, { recursive: true });
+  await ensureFontsInstalled();
 }
 
 export async function ffmpeg(args, { timeoutMs = 300_000 } = {}) {

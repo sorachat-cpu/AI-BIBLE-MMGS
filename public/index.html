@@ -371,6 +371,29 @@
     border:1px solid var(--accent);border-radius:10px;padding:14px 16px;background:var(--accent-soft)}
   .wf-auto b{font-size:14.5px}
   .wf-auto button{flex-shrink:0}
+
+  /* Nearby-places picker popup -- src/lib/places.mjs already computes real distance
+     (haversine against the geocoded point); this just lets the operator choose which
+     of those places become on-screen selling points (svg-card.mjs caps display at 5). */
+  .modal-backdrop{position:fixed;inset:0;background:rgba(10,18,26,.55);display:flex;
+    align-items:center;justify-content:center;z-index:100;padding:20px}
+  .modal-backdrop[hidden]{display:none}
+  .modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;
+    box-shadow:var(--shadow);max-width:560px;width:100%;max-height:82vh;
+    display:flex;flex-direction:column}
+  .modal-head{padding:16px 20px;border-bottom:1px solid var(--border);
+    display:flex;align-items:center;gap:10px}
+  .modal-head h3{margin:0;font-size:15px;flex:1}
+  .modal-body{padding:6px 20px 14px;overflow-y:auto}
+  .modal-foot{padding:14px 20px;border-top:1px solid var(--border);
+    display:flex;justify-content:flex-end;gap:10px}
+  .poi-pick-group{margin-top:14px}
+  .poi-pick-row{display:flex;align-items:center;gap:9px;padding:5px 0;font-size:12.5px;
+    border-top:1px solid var(--border)}
+  .poi-pick-row:first-of-type{border-top:none}
+  .poi-pick-row label{flex:1;display:flex;align-items:center;gap:8px;cursor:pointer;min-width:0}
+  .poi-pick-row label .poi-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .poi-pick-row input[type="checkbox"]{flex-shrink:0;width:16px;height:16px;accent-color:var(--accent)}
 </style>
   <script src="/nav.js" defer></script>
 </head>
@@ -444,6 +467,9 @@
             <input id="wf-id" value="PROP-TH-01029">
           </div>
         </div>
+        <div class="field">
+          <button type="button" class="ghost" id="wf-nearby-btn">📍 ดูสถานที่ใกล้เคียง — เลือกจุดเด่นขึ้นจอ</button>
+        </div>
         <div class="pair">
           <div class="field">
             <label for="wf-title">หัวเรื่อง</label>
@@ -463,6 +489,16 @@
             <label for="wf-location">ทำเล</label>
             <input id="wf-location" value="ต.หนองน้ำแดง อ.ปากช่อง จ.นครราชสีมา">
           </div>
+        </div>
+        <div class="field">
+          <label for="wf-style">สไตล์บ้าน <span class="small">— กำหนดหน้าตาบ้านที่ WF2 จะสร้างให้ตรงกับทรัพย์นี้จริงๆ</span></label>
+          <select id="wf-style">
+            <option value="CONTEMPORARY" selected>Contemporary — หินผสมไม้ หลังคาเพิงหมาแหงน</option>
+            <option value="MODERN_NORDIC">Modern Nordic — ขาวสะอาด ไม้อ่อน กระจกใหญ่</option>
+            <option value="MINIMALIST">Minimalist — เรียบเกลี้ยง หลังคาแบน กระจกเรียบ</option>
+            <option value="LUXURY_CLASSIC">Luxury Classic — สองชั้น เสาหน้าบ้าน หินอ่อน</option>
+            <option value="LOFT">Loft — อิฐโชว์แนว เหล็กดำ กระจกบานใหญ่</option>
+          </select>
         </div>
         <div class="field">
           <label for="wf-features">จุดเด่น 3–5 ข้อ <span class="small">— คั่นด้วยจุลภาค</span></label>
@@ -906,6 +942,7 @@
         // Saved with the job so step 2 needs nothing but the property id.
         title: val("wf-title") || undefined,
         price_thb: priceRaw ? Number(priceRaw) : undefined,
+        style_tag: val("wf-style") || undefined,
         size_text: val("wf-size") || undefined,
         location: val("wf-location") || undefined,
         contact: val("wf-contact") || undefined,
@@ -958,8 +995,12 @@
       "start = ภาพดาวเทียม · end = รูปที่ดินจริง");
     h += promptBlock("WF2 ขั้นที่ 1 — prompt สร้างภาพบ้านตอนค่ำ", d.prompts.wf2_image,
       "ใส่รูปที่ดินเป็น reference · เซฟเป็น " + d.expects.wf2_end_image);
-    h += promptBlock("WF2 ขั้นที่ 2 — prompt วิดีโอ timelapse", d.prompts.wf2_video,
-      "start = รูปที่ดิน · end = ภาพบ้านตอนค่ำจากขั้นที่ 1");
+    const plan = d.creative_plan;
+    const planNote = plan
+      ? (plan.source === "director" ? "AI Director เลือกให้ตามสไตล์ " : "ค่าเริ่มต้นของสไตล์ ") +
+        esc(plan.style_tag) + (plan.degraded ? " (fallback: " + esc(plan.degraded) + ")" : "")
+      : "start = รูปที่ดิน · end = ภาพบ้านตอนค่ำจากขั้นที่ 1";
+    h += promptBlock("WF2 ขั้นที่ 2 — prompt วิดีโอ timelapse", d.prompts.wf2_video, planNote);
 
     h += '<p class="small" style="margin-top:14px">เซฟคลิปที่ได้เป็น <code>' +
       esc(d.expects.wf1_clip) + "</code> และ <code>" + esc(d.expects.wf2_clip) + "</code> แล้วไปขั้นที่ 2</p>";
@@ -1087,6 +1128,109 @@
       })
     );
   }
+
+  /* ============ 3-WF: nearby-places popup -- pick which real POIs show on screen ============
+     Reuses the existing /api/google-engine call (same one the Google Engine tab uses) purely
+     to look up what's around the address; findNearbyPlaces() (src/lib/places.mjs) already
+     returns a real haversine distance per place, not an estimate, so distance_text here is
+     the same number the final on-screen card would carry. Checked items are merged into the
+     wf-features field, which is exactly what feeds the WF3 ad card (renderWf3AdCard, capped
+     at 5 selling points on screen) -- so ticking a box here is choosing what appears on the
+     video, not just previewing it. */
+  const nearbyModal = document.getElementById("nearby-modal");
+  const nearbyModalBody = document.getElementById("nearby-modal-body");
+
+  function nearbyItemLabel(g, p) {
+    return g.label + " " + p.name + " (" + p.distance_text + ")";
+  }
+
+  function renderNearbyPicker(nearby) {
+    if (!nearby || !nearby.groups?.length) {
+      nearbyModalBody.innerHTML = '<p class="small" style="padding:10px 0">' +
+        esc(nearby?.errors?.length ? nearby.errors[0].message : "ไม่พบสถานที่ใกล้เคียงในรัศมีที่กำหนด") +
+        "</p>";
+      return;
+    }
+    const existing = new Set((val("wf-features") || "").split(",").map((x) => x.trim()).filter(Boolean));
+    let h = "";
+    for (const g of nearby.groups) {
+      h += '<div class="poi-pick-group"><div class="poi-head"><span class="poi-icon">' + esc(g.icon || "📍") +
+        "</span><b>" + esc(g.label) + "</b></div>";
+      for (const p of g.places) {
+        const text = nearbyItemLabel(g, p);
+        const id = "np_" + Math.random().toString(36).slice(2, 9);
+        h += '<div class="poi-pick-row"><label for="' + id + '">' +
+          '<input type="checkbox" id="' + id + '" data-text="' + esc(text) + '"' +
+          (existing.has(text) ? " checked" : "") + ">" +
+          '<span class="poi-name">' + esc(p.name) + "</span></label>" +
+          (p.rating ? '<span class="poi-rate">★ ' + esc(p.rating) + "</span>" : "") +
+          '<span class="poi-dist">' + esc(p.distance_text) + "</span></div>";
+      }
+      h += "</div>";
+    }
+    nearbyModalBody.innerHTML = h;
+  }
+
+  document.getElementById("wf-nearby-btn").addEventListener("click", async () => {
+    const out = document.getElementById("out-wf-prepare");
+    const address = val("wf-address");
+    if (!address) return show(out, "err", "ยังไปต่อไม่ได้", "กรอกที่อยู่ก่อนถึงจะค้นสถานที่ใกล้เคียงได้");
+
+    const btn = document.getElementById("wf-nearby-btn");
+    const original = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = "กำลังค้นหา…";
+    try {
+      const body = await postJson("/api/google-engine", {
+        property_id: val("wf-id") || "PROP-TH-01029",
+        raw_address: address,
+        nearby_radius_m: 5000,
+      });
+      if (!body.ok) return show(out, "err", "รหัสข้อผิดพลาด " + body.code, body.message);
+      renderNearbyPicker(body.data.nearby);
+      nearbyModal.hidden = false;
+    } catch (err) {
+      show(out, "err", "ทำงานไม่สำเร็จ", err.message || String(err));
+    } finally {
+      btn.disabled = false;
+      btn.textContent = original;
+    }
+  });
+
+  function closeNearbyModal() { nearbyModal.hidden = true; }
+  document.getElementById("nearby-modal-close").addEventListener("click", closeNearbyModal);
+  document.getElementById("nearby-modal-cancel").addEventListener("click", closeNearbyModal);
+  nearbyModal.addEventListener("click", (e) => { if (e.target === nearbyModal) closeNearbyModal(); });
+
+  document.getElementById("nearby-modal-apply").addEventListener("click", () => {
+    const checked = [...nearbyModalBody.querySelectorAll("input[type=checkbox]:checked")]
+      .map((c) => c.dataset.text);
+    const existing = (val("wf-features") || "").split(",").map((x) => x.trim()).filter(Boolean);
+    const merged = existing.slice();
+    for (const t of checked) if (!merged.includes(t)) merged.push(t);
+    document.getElementById("wf-features").value = merged.join(", ");
+    if (merged.length > 5) {
+      show(document.getElementById("out-wf-prepare"), "err", "เกิน 5 จุดเด่น",
+        "การ์ดบนจอโชว์ได้สูงสุด 5 จุด (ตอนนี้มี " + merged.length + ") ระบบจะใช้แค่ 5 อันแรกในช่องจุดเด่น " +
+        "— เรียงลำดับในช่องใหม่เองได้ถ้าอยากเลือกว่าอันไหนติด 5 อันแรก");
+    }
+    closeNearbyModal();
+  });
 </script>
+
+<div class="modal-backdrop" id="nearby-modal" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="nearby-modal-title">
+    <div class="modal-head">
+      <h3 id="nearby-modal-title">สถานที่ใกล้เคียง — เลือกจุดที่จะให้ขึ้นจอ</h3>
+      <button type="button" class="ghost" id="nearby-modal-close">ปิด</button>
+    </div>
+    <div class="modal-body" id="nearby-modal-body"></div>
+    <div class="modal-foot">
+      <span class="small" style="margin-right:auto;align-self:center">ระยะห่างคำนวณจริงจากพิกัดที่ปักไว้</span>
+      <button type="button" class="ghost" id="nearby-modal-cancel">ยกเลิก</button>
+      <button type="button" id="nearby-modal-apply">เพิ่มลงจุดเด่น</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
